@@ -17,9 +17,13 @@ if (!defined("WIKINI_VERSION"))
 
 $dir = getcwd();
 $url = str_replace('/wakka.php?wiki=', '', $this->config['base_url']);
-$dlFilename = str_replace(array('http://', 'https://', 'www.','/'), array('', '', '', '-'), $url).'-'.$this->GetPageTag().".pdf";
+$dlFilename = str_replace(
+    array('http://', 'https://', 'www.', '/', '?'),
+    array('', '', '', '-', ''),
+    $url
+).'-'.$this->GetPageTag().".pdf";
 $fullFilename = $dir."/cache/".$dlFilename;
-$sourceurl = $this->href('iframe', $this->GetPageTag(), 'share=0&edit=0', FALSE);
+$sourceurl = $this->href('iframe', $this->GetPageTag(), 'share=0&edit=0', false);
 
 if (!file_exists($fullFilename) || (file_exists($fullFilename) && isset($_GET['refresh']) && $_GET['refresh']==1)) {
     $command = $this->config['wkhtmltopdf_path']." '".$sourceurl."' ".$fullFilename;

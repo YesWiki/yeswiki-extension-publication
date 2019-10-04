@@ -26,6 +26,7 @@ if (!empty($this->config['wkhtmltopdf_apikey']) and !empty($_GET['url']) and !em
     $sourceurl = $_GET['url'];
     $_GET['refresh']=1;
     $fullFilename = '/tmp/page.pdf';
+    $dlFilename  = 'page.pdf';
 } else {
     $sourceurl = $this->href('iframe', $this->GetPageTag(), 'share=0&edit=0', false);
 }

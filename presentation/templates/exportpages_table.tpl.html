@@ -154,17 +154,6 @@
 				</div>
 				<?php endif; ?>
 
-				<?php if (!empty($default['bibauthor'])): ?>
-					<input type="hidden" required id="ebook-biblio-author" name="ebook-biblio-author" value="<?php echo (isset($metadatas['ebook-biblio-author'])) ? $metadatas['ebook-biblio-author'] : $default['bibauthor']; ?>" />
-				<?php else : ?>
-				<div class="form-group">
-					<label for="ebook-biblio-author" class="control-label"><?php echo _t('TAGS_EBOOK_BIBLIO_AUTHOR'); ?></label>
-					<div class="controls">
-						<input class="control-group form-control" type="text" required="required" placeholder="<?php echo _t('TAGS_EXAMPLE_BIBLIO_AUTHOR'); ?>" id="ebook-biblio-author" name="ebook-biblio-author" value="<?php echo (isset($metadatas['ebook-biblio-author'])) ? $metadatas['ebook-biblio-author'] : ''; ?>" />
-					</div>
-				</div>
-				<?php endif; ?>
-
 				<?php if (!empty($default['coverimage'])): ?>
 					<input type="hidden" required id="ebook-cover-image" name="ebook-cover-image" value="<?php echo (isset($metadatas['ebook-cover-image'])) ? $metadatas['ebook-cover-image'] : $default['coverimage']; ?>" />
 				<?php else : ?>

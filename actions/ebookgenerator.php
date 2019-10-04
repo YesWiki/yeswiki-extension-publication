@@ -65,9 +65,6 @@ $default['desc'] = $this->getParameter('desc');
 // default ebook author
 $default['author'] = $this->getParameter('author');
 
-// default ebook author alt.
-$default['bibauthor'] = $this->getParameter('bibauthor');
-
 // default added pages that can be used to separate content
 $chapterpages = $this->getParameter('chapterpages');
 if (!$chapterpages) {
@@ -201,32 +198,28 @@ if (isset($_POST["page"])) {
         if (isset($_POST["ebook-title"]) && $_POST["ebook-title"] != '') {
             if (isset($_POST["ebook-description"]) && $_POST["ebook-description"] != '') {
                 if (isset($_POST["ebook-author"]) && $_POST["ebook-author"] != '') {
-                    if (isset($_POST["ebook-biblio-author"]) && $_POST["ebook-biblio-author"] != '') {
-                        if (isset($_POST["ebook-cover-image"]) && $_POST["ebook-biblio-author"] != '') {
-                            if (preg_match("/.(jpe?g)$/i", $_POST["ebook-cover-image"]) == 1) {
-                                if (isset($ebookpagename) && !empty($ebookpagename)) {
-                                    $pagename = $ebookpagename;
-                                } else {
-                                    $pagename = generatePageName($ebookpagenamestart . ' ' . $_POST["ebook-title"]);
-                                }
-                                foreach ($_POST["page"] as $page) {
-                                    $output .= '{{include page="' . $page . '" class=""}}' . "\n";
-                                }
-                                $output .= '//' . _t('TAGS_CONTENT_VISIBLE_ONLINE_FROM_PAGE') . ' : ' . $this->href('', $pagename) . ' // {{button link="' . $this->href('pdf', $pagename) . '" text="' . _t('TAGS_DOWNLOAD_PDF') . '" class="btn-primary pull-right" icon="book"}}' . "\n";
-
-                                unset($_POST['page']);
-                                unset($_POST['antispam']);
-                                $this->SaveMetaDatas($pagename, $_POST);
-                                $this->SavePage($pagename, $output);
-                                $output = $this->Format('""<div class="alert alert-success">' . _t('TAGS_EBOOK_PAGE_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $pagename . '" text="' . _t('TAGS_GOTO_EBOOK_PAGE') . ' ' . $pagename . '"}}""</div>""' . "\n");
+                    if (isset($_POST["ebook-cover-image"]) && $_POST["ebook-cover-image"] != '') {
+                        if (preg_match("/.(jpe?g)$/i", $_POST["ebook-cover-image"]) == 1) {
+                            if (isset($ebookpagename) && !empty($ebookpagename)) {
+                                $pagename = $ebookpagename;
                             } else {
-                                $output = '<div class="alert alert-danger">' . _t('TAGS_NOT_IMAGE_FILE') . '</div>' . "\n";
+                                $pagename = generatePageName($ebookpagenamestart . ' ' . $_POST["ebook-title"]);
                             }
+                            foreach ($_POST["page"] as $page) {
+                                $output .= '{{include page="' . $page . '" class=""}}' . "\n";
+                            }
+                            $output .= '//' . _t('TAGS_CONTENT_VISIBLE_ONLINE_FROM_PAGE') . ' : ' . $this->href('', $pagename) . ' // {{button link="' . $this->href('pdf', $pagename) . '" text="' . _t('TAGS_DOWNLOAD_PDF') . '" class="btn-primary pull-right" icon="book"}}' . "\n";
+
+                            unset($_POST['page']);
+                            unset($_POST['antispam']);
+                            $this->SaveMetaDatas($pagename, $_POST);
+                            $this->SavePage($pagename, $output);
+                            $output = $this->Format('""<div class="alert alert-success">' . _t('TAGS_EBOOK_PAGE_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $pagename . '" text="' . _t('TAGS_GOTO_EBOOK_PAGE') . ' ' . $pagename . '"}}""</div>""' . "\n");
                         } else {
-                            $output = '<div class="alert alert-danger">' . _t('TAGS_NO_IMAGE_FOUND') . '</div>' . "\n";
+                            $output = '<div class="alert alert-danger">' . _t('TAGS_NOT_IMAGE_FILE') . '</div>' . "\n";
                         }
                     } else {
-                        $output = '<div class="alert alert-danger">' . _t('TAGS_NO_BIBLIO_AUTHOR_FOUND') . '</div>' . "\n";
+                        $output = '<div class="alert alert-danger">' . _t('TAGS_NO_IMAGE_FOUND') . '</div>' . "\n";
                     }
                 } else {
                     $output = '<div class="alert alert-danger">' . _t('TAGS_NO_AUTHOR_FOUND') . '</div>' . "\n";

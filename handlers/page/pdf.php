@@ -22,7 +22,7 @@ $dlFilename = str_replace(
     $url
 ).'-'.$this->GetPageTag().".pdf";
 $fullFilename = $dir."/cache/".$dlFilename;
-if (!empty($this->config['wkhtmltopdf_apikey']) and !empty($_GET['url']) and !empty($_GET['key']) and $this->config['wkhtmltopdf_apikey'] == $_GET['key']) {
+if (!empty($this->config['htmltopdf_apikey']) and !empty($_GET['url']) and !empty($_GET['key']) and $this->config['htmltopdf_apikey'] == $_GET['key']) {
     $sourceurl = $_GET['url'];
     $_GET['refresh']=1;
     $fullFilename = '/tmp/page.pdf';
@@ -40,8 +40,8 @@ if (!file_exists($fullFilename)
   || (file_exists($fullFilename) && isset($_GET['refresh']) && $_GET['refresh']==1)
   || (file_exists($fullFilename) && (time() - $filemtime >= $cache_life))
 ) {
-    if (!empty($this->config['wkhtmltopdf_url']) and !empty($this->config['wkhtmltopdf_key'])) {
-        $url = $this->config['wkhtmltopdf_url'].'&url='.urlencode($sourceurl).'&key='.urlencode($this->config['wkhtmltopdf_key']);
+    if (!empty($this->config['htmltopdf_url']) and !empty($this->config['htmltopdf_key'])) {
+        $url = $this->config['htmltopdf_url'].'&url='.urlencode($sourceurl).'&key='.urlencode($this->config['htmltopdf_key']);
         header('Location: '.$url);
         exit;
     } else {

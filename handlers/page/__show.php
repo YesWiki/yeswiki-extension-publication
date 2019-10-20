@@ -1,3 +1,4 @@
 <?php
 global $wiki;
-$wiki->AddCSSFile('tools/ebook/presentation/styles/ebook.css');
+
+$wiki->AddCSSFile('tools/wkebook/presentation/styles/ebook.css');

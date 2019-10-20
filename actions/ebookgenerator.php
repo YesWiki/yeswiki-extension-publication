@@ -271,8 +271,8 @@ if (isset($_POST["page"])) {
     }
 
     include_once 'includes/squelettephp.class.php';
-    $template_export = new SquelettePhp($template, 'ebook');
-    
+    $template_export = new SquelettePhp($template, 'wkebook');
+
     $output .= $template_export->render(
         array(
             'entries' => $results,

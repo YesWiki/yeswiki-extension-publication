@@ -45,7 +45,7 @@ if (!file_exists($fullFilename)
         header('Location: '.$url);
         exit;
     } else {
-        $command = $this->config['wkhtmltopdf_path']." '".$sourceurl."' ".$fullFilename;
+        $command = $this->config['wkhtmltopdf_path'].' '.$this->config['wkhtmltopdf_options']." '".$sourceurl."' ".$fullFilename;
         exec($command, $output);
     }
 }

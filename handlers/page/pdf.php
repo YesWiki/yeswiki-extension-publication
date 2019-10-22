@@ -28,7 +28,7 @@ if (!empty($this->config['htmltopdf_apikey']) and !empty($_GET['url']) and !empt
     $fullFilename = '/tmp/page.pdf';
     $dlFilename  = 'page.pdf';
 } else {
-    $sourceurl = $this->href('iframe', $this->GetPageTag(), 'share=0&edit=0', false);
+    $sourceurl = $this->href('preview', $this->GetPageTag(), 'pdf=1', false);
 }
 
 $cache_life = '600'; //caching time, in seconds
@@ -45,8 +45,18 @@ if (!file_exists($fullFilename)
         header('Location: '.$url);
         exit;
     } else {
-        $command = $this->config['wkhtmltopdf_path'].' '.$this->config['wkhtmltopdf_options']." '".$sourceurl."' ".$fullFilename;
-        exec($command, $output);
+        $browserFactory = new HeadlessChromium\BrowserFactory($this->config['htmltopdf_path']);
+        $browser = $browserFactory->createBrowser($this->config['htmltopdf_options']);
+        $page = $browser->createPage();
+
+        // convert to paginated content
+        $script = file_get_contents(__DIR__ . '/../../libs/vendor/pagedjs/paged.polyfill.js');
+        $page->addPreScript($script);
+        $page->navigate($sourceurl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
+
+        // now generate PDF
+        $page->pdf()->saveToFile($fullFilename);
+        $browser->close();
     }
 }
 

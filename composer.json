@@ -11,5 +11,10 @@
         "chrome-php/chrome": "^0.7.0"
     },
     "require-dev": {
+    },
+    "config": {
+        "platform": {
+            "php": "7.1"
+        }
     }
 }

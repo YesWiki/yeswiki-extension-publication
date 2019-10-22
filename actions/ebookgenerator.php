@@ -103,7 +103,7 @@ if (!empty($id)) {
     $id = explode(',', $id);
     $id = array_map('trim', $id);
     $results = $queries = [];
-    
+
     foreach ($matches[1] as $i => $formid) {
         // bazar entries
         if ($formid != 'pages') {
@@ -271,7 +271,7 @@ if (isset($_POST["page"])) {
     }
 
     include_once 'includes/squelettephp.class.php';
-    $template_export = new SquelettePhp($template, 'wkebook');
+    $template_export = new SquelettePhp($template, 'ebook');
 
     $output .= $template_export->render(
         array(

@@ -4,6 +4,42 @@ Crée un pdf à partir d'une sélection de page YesWiki.
 La mise en page est rendue possible grâce à [Paged.js](https://gitlab.pagedmedia.org/tools/pagedjs)
 ([fonctionnement](https://www.pagedmedia.org/paged-js/)).
 
+
+<table>
+  <tr>
+    <td>
+      <img src="screenshot-edit.png" alt="">
+    </td>
+    <td>
+      <img src="screenshot-preview.png" alt="">
+    </td>
+  </tr>
+  <tr>
+    <th scope="col">Assemblage des pages wiki pour constituer un ouvrage</th>
+    <th scope="col">Prévisualisaton avant téléchargement</th>
+  </tr>
+</table>
+
+
+## Marqueurs YesWiki
+
+Ces marqueurs s'ajoutent dans un contenu de page.
+
+
+| Marqueur            | Utilité                                       |
+| ---                 | ---                                           |
+| `{{ebookgenerator}}`| Interface de création de document imprimable  |
+| `{{ebooklist}}`     | Liste des documents imprimables               |
+
+## Suffixes de page
+
+Ces suffixes sont ajoutés à chaque page.
+
+| Suffixe       | Utilité                        |
+| ---           | ---                            |
+| `/pdf`        | Télécharge un document en PDF  |
+| `/preview`    | Prévisualisation d'un document |
+
 ## Pré-requis
 
 Avoir installé [Chromium/Google Chrome](https://chrome.google.com/) sur
@@ -12,8 +48,8 @@ le serveur et connaitre le chemin d'acces vers l'exécutable.
 Pour installer Chrome sous Ubuntu/Debian :
 
 ```bash
-$ curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb > google-chrome-stable_current_amd64.deb
-$ apt install -y --no-install-recommends ./google-chrome-stable_current_amd64.deb
+$ curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb
+$ apt install -y --no-install-recommends ./google-chrome.deb
 ```
 
 ## Configuration

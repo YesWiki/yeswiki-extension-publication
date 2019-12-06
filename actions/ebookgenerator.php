@@ -39,11 +39,23 @@ if (!defined("WIKINI_VERSION")) {
 
 include_once 'tools/tags/libs/tags.functions.php';
 
+// Format of the output. Either you want to generate an ebbok or a newsletter
+// Default value is ebook
+$outputformat = $this->getParameter('outputformat');
+if (empty($outputformat) || $outputformat != 'newsletter') {
+    $name = _t('EBOOK_EBOOK');
+    $outputformat = 'Ebook';
+} else {
+  $name = _t('EBOOK_NEWSLETTER');
+}
+
+
 // Pages used for intro and outro
 $ebookstart = $this->getParameter('ebookstart');
 $ebookend = $this->getParameter('ebookend');
 
 // prefix for created pages
+// Only used when outputformat="ebook"
 $ebookpagenamestart = $this->getParameter('ebookpagenamestart');
 if (empty($ebookpagenamestart)) {
     $ebookpagenamestart = 'Ebook';
@@ -103,7 +115,7 @@ if (!empty($id)) {
     $id = explode(',', $id);
     $id = array_map('trim', $id);
     $results = $queries = [];
-    
+
     foreach ($matches[1] as $i => $formid) {
         // bazar entries
         if ($formid != 'pages') {
@@ -193,6 +205,8 @@ if (!empty($id)) {
 
 $output = '';
 
+// Handling of data submitted by the form
+// Page creation
 if (isset($_POST["page"])) {
     if (isset($_POST['antispam']) && $_POST['antispam'] == 1) {
         if (isset($_POST["ebook-title"]) && $_POST["ebook-title"] != '') {
@@ -235,18 +249,21 @@ if (isset($_POST["page"])) {
     }
 } else {
     // recuperation des pages creees a l'installation
-    $d = dir("setup/doc/");
-    while ($doc = $d->read()) {
-        if ($doc == '.' || $doc == '..' || is_dir($doc) || substr($doc, -4) != '.txt') {
-            continue;
-        }
+    $installpagename = [];
+    if (!empty($addinstalledpage)) {
+      $d = dir("setup/doc/");
+      while ($doc = $d->read()) {
+          if ($doc == '.' || $doc == '..' || is_dir($doc) || substr($doc, -4) != '.txt') {
+              continue;
+          }
 
-        if ($doc == '_root_page.txt') {
-            $installpagename[$this->GetConfigValue("root_page")] = $this->GetConfigValue("root_page");
-        } else {
-            $pagename = substr($doc, 0, strpos($doc, '.txt'));
-            $installpagename[$pagename] = $pagename;
-        }
+          if ($doc == '_root_page.txt') {
+              $installpagename[$this->GetConfigValue("root_page")] = $this->GetConfigValue("root_page");
+          } else {
+              $pagename = substr($doc, 0, strpos($doc, '.txt'));
+              $installpagename[$pagename] = $pagename;
+          }
+      }
     }
 
     if (isset($this->page["metadatas"]["ebook-title"])) {
@@ -272,7 +289,7 @@ if (isset($_POST["page"])) {
 
     include_once 'includes/squelettephp.class.php';
     $template_export = new SquelettePhp($template, 'ebook');
-    
+
     $output .= $template_export->render(
         array(
             'entries' => $results,
@@ -285,7 +302,8 @@ if (isset($_POST["page"])) {
             'metadatas' => $this->page["metadatas"],
             'selectedpages' => $selectedpages,
             'chapterpages' => $chapterpages,
-            'url' => $this->href('', $this->GetPageTag())
+            'url' => $this->href('', $this->GetPageTag()),
+            'name' => $name
         )
     );
 }

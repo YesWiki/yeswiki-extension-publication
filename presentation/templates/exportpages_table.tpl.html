@@ -55,9 +55,6 @@
 			<?php endforeach; ?>
 		</ul>
 	<?php endforeach; ?>
-	<a class="pull-right btn btn-default btn-xs page-break" title="Insérer un saut de page" href="#">
-		<i class="glyphicon glyphicon-plus"></i> Insérer un saut de page
-	</a>
 	<?php endif; ?>
 	</div><!-- /.col-lg-6.export-table-container -->
 
@@ -67,6 +64,9 @@
 			<?php echo _t('TAGS_ORDER_PAGES_INFO'); ?>
 		</div>
 		<div class="well">
+			<a class="pull-right btn btn-default btn-xs page-break" title="Insérer un saut de page" href="#">
+				<i class="glyphicon glyphicon-plus"></i> Insérer un saut de page
+			</a>
 			<form class="export-table-form" method="post" action="<?php echo $url;?>">
 			<?php if (!empty($ebookstart)) : ?>
 				<ul class="list-group">
@@ -167,7 +167,7 @@
 
 				<?php if(!empty($ebookpagename)) echo '<input name="ebookpagename" value="'.$ebookpagename.'">'; ?>
 				<br />
-				<input type="submit" value="<?php echo _t('TAGS_GENERATE_EBOOK'); ?>" class="btn btn-block btn-lg btn-primary" />
+				<input type="submit" value="<?php echo _t('EBOOK_GENERATE').$name; ?>" class="btn btn-block btn-lg btn-primary" />
 			</form>
 		</div>
 	</div> <!-- /.col-lg-6. ebook-selection-container -->

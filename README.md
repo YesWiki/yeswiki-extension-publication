@@ -23,8 +23,8 @@ array(
 Créer le formulaire bazar suivant:
 ```
 texte***bf_titre***Titre***60***255*** *** *** ***1***0***
-texte***bf_description***Description***60***255*** *** *** ***1***0***
-texte***bf_author***Auteur***60***255*** *** *** ***1***0***
+texte***bf_description***Description***60***255*** *** *** ***0***0***
+texte***bf_author***Auteur***60***255*** *** *** ***0***0***
 textelong***bf_content***Contenu de la newsletter***20***20*** *** ***html***1***0***
 ```
 

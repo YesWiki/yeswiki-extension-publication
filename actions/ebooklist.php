@@ -60,16 +60,16 @@ if (count($pages) > 0) {
 			<img src="'.$metas['ebook-cover-image'].'" alt="cover" class="media-object" width="128" />
 		</a>
 		<div class="media-body">'."\n";
-		if ($this->UserIsAdmin()) $output .= '<a class="btn btn-danger btn-error pull-right" href="'.$this->href('deletepage',$page['resource']).'"><i class="glyphicon glyphicon-trash glyphicon glyphicon-white"></i>&nbsp;'._t('TAGS_DELETE').'</a>';
+		if ($this->UserIsAdmin()) $output .= '<a class="btn btn-danger btn-error pull-right" href="'.$this->href('deletepage',$page['resource']).'"><i class="glyphicon glyphicon-trash glyphicon glyphicon-white"></i>&nbsp;'._t('EBOOK_DELETE').'</a>';
 		$output .= '<h4 class="media-heading"><a href="'.$this->href('',$page['resource']).'">'.$metas['ebook-title'].'</a></h4>
 			<strong>'.$metas['ebook-author'].'</strong><br />'.$metas['ebook-description'].'<br /><br />';
-		$output .= '<strong><i class="glyphicon glyphicon-download"></i>&nbsp;'._t('TAGS_DOWNLOAD').' </strong><a class="btn btn-primary" href="'.$this->href('pdf',$page['resource']).'"><i class="glyphicon glyphicon-book glyphicon glyphicon-white"></i>&nbsp;'._t('TAGS_DOWNLOAD_PDF').'</a> <!-- epub download link for '.$page['resource'].' -->
+		$output .= '<strong><i class="glyphicon glyphicon-download"></i>&nbsp;'._t('EBOOK_DOWNLOAD').' </strong><a class="btn btn-primary" href="'.$this->href('pdf',$page['resource']).'"><i class="glyphicon glyphicon-book glyphicon glyphicon-white"></i>&nbsp;'._t('EBOOK_DOWNLOAD_PDF').'</a> <!-- epub download link for '.$page['resource'].' -->
 			<br /><br />
 		</div>
 		</li>'."\n";
 	}
 	$output .= '</ul>'."\n";
 }
-else $output .= '<div class="alert alert-info">'._t('TAGS_NO_EBOOK_FOUND').'</div>';
+else $output .= '<div class="alert alert-info">'._t('EBOOK_NO_EBOOK_FOUND').'</div>';
 
 echo $output."\n";

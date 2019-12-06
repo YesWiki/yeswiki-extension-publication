@@ -48,7 +48,7 @@ if (empty($outputformat) || $outputformat != 'newsletter') {
 } else {
 	$formId = $this->getParameter('formid'); // Bazar form due to store the newsletter
 	if (empty($formId)) {
-		exit (_t('EBOOK_MISSING_NEWSLETTER_FORM');
+		exit (_t('EBOOK_MISSING_NEWSLETTER_FORM'));
 	} else {
 		$name = _t('EBOOK_NEWSLETTER');
 	}

@@ -154,7 +154,7 @@
 				</div>
 				<?php endif; ?>
 
-				<?php if ($outputformat='ebook' : ?>
+				<?php if ($outputformat == 'ebook') : ?>
 					<?php if (!empty($default['coverimage'])): ?>
 					<input type="hidden" required id="ebook-cover-image" name="ebook-cover-image" value="<?php echo (isset($metadatas['ebook-cover-image'])) ? $metadatas['ebook-cover-image'] : $default['coverimage']; ?>" />
 				<?php else : ?>

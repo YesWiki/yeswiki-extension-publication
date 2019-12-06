@@ -46,7 +46,12 @@ if (empty($outputformat) || $outputformat != 'newsletter') {
     $name = _t('EBOOK_EBOOK');
     $outputformat = 'Ebook';
 } else {
-  $name = _t('EBOOK_NEWSLETTER');
+	$formId = $this->getParameter('formid'); // Bazar form due to store the newsletter
+	if (empty($formId)) {
+		exit (_t('EBOOK_MISSING_NEWSLETTER_FORM');
+	} else {
+		$name = _t('EBOOK_NEWSLETTER');
+	}
 }
 
 
@@ -116,11 +121,11 @@ if (!empty($id)) {
     $id = array_map('trim', $id);
     $results = $queries = [];
 
-    foreach ($matches[1] as $i => $formid) {
+    foreach ($matches[1] as $i => $formId) {
         // bazar entries
-        if ($formid != 'pages') {
+        if ($formId != 'pages') {
             $results[$i]['type'] = 'bazar';
-            $formValues = baz_valeurs_formulaire($formid);
+            $formValues = baz_valeurs_formulaire($formId);
             if (!empty($titles[$i])) {
                 $results[$i]['name'] = $titles[$i];
             } else {
@@ -138,7 +143,7 @@ if (!empty($id)) {
                     }
                 }
             }
-            $results[$i]['entries'] = baz_requete_recherche_fiches($tabquery, 'alphabetique', $formid, '', 1, '', '', true, '');
+            $results[$i]['entries'] = baz_requete_recherche_fiches($tabquery, 'alphabetique', $formId, '', 1, '', '', true, '');
             $results[$i]['entries'] = searchResultstoArray($results[$i]['entries'], array(), $formValues);
             // tri des fiches
             $GLOBALS['ordre'] = 'asc';
@@ -214,21 +219,35 @@ if (isset($_POST["page"])) {
                 if (isset($_POST["ebook-author"]) && $_POST["ebook-author"] != '') {
                     if (isset($_POST["ebook-cover-image"]) && $_POST["ebook-cover-image"] != '') {
                         if (preg_match("/.(jpe?g)$/i", $_POST["ebook-cover-image"]) == 1) {
-                            if (isset($ebookpagename) && !empty($ebookpagename)) {
+                            if ($_POST['outputformat'] == 'ebook') {
+                              if (isset($ebookpagename) && !empty($ebookpagename)) {
                                 $pagename = $ebookpagename;
-                            } else {
+                              } else {
                                 $pagename = generatePageName($ebookpagenamestart . ' ' . $_POST["ebook-title"]);
-                            }
-                            foreach ($_POST["page"] as $page) {
+                              }
+                              foreach ($_POST["page"] as $page) {
                                 $output .= '{{include page="' . $page . '" class=""}}' . "\n";
-                            }
-                            $output .= '//' . _t('TAGS_CONTENT_VISIBLE_ONLINE_FROM_PAGE') . ' : ' . $this->href('', $pagename) . ' // {{button link="' . $this->href('pdf', $pagename) . '" text="' . _t('TAGS_DOWNLOAD_PDF') . '" class="btn-primary pull-right" icon="book"}}' . "\n";
+                              }
+                              $output .= '//' . _t('TAGS_CONTENT_VISIBLE_ONLINE_FROM_PAGE') . ' : ' . $this->href('', $pagename) . ' // {{button link="' . $this->href('pdf', $pagename) . '" text="' . _t('TAGS_DOWNLOAD_PDF') . '" class="btn-primary pull-right" icon="book"}}' . "\n";
 
-                            unset($_POST['page']);
-                            unset($_POST['antispam']);
-                            $this->SaveMetaDatas($pagename, $_POST);
-                            $this->SavePage($pagename, $output);
-                            $output = $this->Format('""<div class="alert alert-success">' . _t('TAGS_EBOOK_PAGE_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $pagename . '" text="' . _t('TAGS_GOTO_EBOOK_PAGE') . ' ' . $pagename . '"}}""</div>""' . "\n");
+                              unset($_POST['page']);
+                              unset($_POST['antispam']);
+                              $this->SaveMetaDatas($pagename, $_POST);
+                              $this->SavePage($pagename, $output);
+                              $output = $this->Format('""<div class="alert alert-success">' . _t('TAGS_EBOOK_PAGE_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $pagename . '" text="' . _t('TAGS_GOTO_EBOOK_PAGE') . ' ' . $pagename . '"}}""</div>""' . "\n");
+                            } elseif ($outputformat == 'newsletter') {
+                              $fiche['id_typeannonce'] = $formId;
+                              $fiche['bf_titre'] = $_POST["ebook-title"];
+                              $fiche['bf_description'] = $_POST["ebook-description"];
+                              $fiche['bf_author'] = $_POST["ebook-author"];
+                              $fiche['bf_content'] = '';
+                              foreach ($_POST["page"] as $page) {
+                                $fiche['bf_content'] .= $this->Format('{{include page="' . $page . '" class=""}}' . "\n");
+                              }
+                              $fiche = baz_insertion_fiche($fiche);
+                              $output = $this->Format('""<div class="alert alert-success">' . _t('EBOOK_NEWSLETTER_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $fiche['id_fiche'] . '" text="' . _t('EBOOK_SEE_NEWSLETTER') . ' ' . $fiche['bf_titre'] . '"}}""</div>""' . "\n");
+
+                            }
                         } else {
                             $output = '<div class="alert alert-danger">' . _t('TAGS_NOT_IMAGE_FILE') . '</div>' . "\n";
                         }
@@ -303,7 +322,8 @@ if (isset($_POST["page"])) {
             'selectedpages' => $selectedpages,
             'chapterpages' => $chapterpages,
             'url' => $this->href('', $this->GetPageTag()),
-            'name' => $name
+            'name' => $name,
+            'outputformat' => $outputformat,
         )
     );
 }

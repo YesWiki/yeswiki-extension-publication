@@ -17,5 +17,8 @@ $GLOBALS['translations'] = array_merge(
 		    'EBOOK_EBOOK' => 'Ebook',
 	  	  'EBOOK_NEWSLETTER' => 'Newsletter',
 	  	  'EBOOK_GENERATE' => 'Générer',
+  		  'EBOOK_YOUR' => 'Votre',
+  		  'EBOOK_SEE_NEWSLETTER' => 'Voir la newsletter',
+  		  'EBOOK_NEWSLETTER_CREATED' => 'La newsletter a bien été créée',
      )
 );

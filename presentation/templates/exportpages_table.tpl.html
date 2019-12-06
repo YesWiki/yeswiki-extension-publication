@@ -59,14 +59,14 @@
 	</div><!-- /.col-lg-6.export-table-container -->
 
 	<div class="col-lg-6">
-		<h3><?php echo _t('TAGS_YOUR_EBOOK'); ?></h3>
+		<h3><?php echo _t('EBOOK_YOUR').' '.strtolower($name); ?></h3>
 		<div class="alert alert-info">
 			<?php echo _t('TAGS_ORDER_PAGES_INFO'); ?>
 		</div>
+		<a class="pull-right btn btn-default btn-xs page-break" title="Insérer un saut de page" href="#">
+			<i class="glyphicon glyphicon-plus"></i> Insérer un saut de page
+		</a>
 		<div class="well">
-			<a class="pull-right btn btn-default btn-xs page-break" title="Insérer un saut de page" href="#">
-				<i class="glyphicon glyphicon-plus"></i> Insérer un saut de page
-			</a>
 			<form class="export-table-form" method="post" action="<?php echo $url;?>">
 			<?php if (!empty($ebookstart)) : ?>
 				<ul class="list-group">
@@ -167,7 +167,8 @@
 
 				<?php if(!empty($ebookpagename)) echo '<input name="ebookpagename" value="'.$ebookpagename.'">'; ?>
 				<br />
-				<input type="submit" value="<?php echo _t('EBOOK_GENERATE').$name; ?>" class="btn btn-block btn-lg btn-primary" />
+				<input type="hidden" value="<?php echo $outputformat; ?>" name="outputformat">
+				<input type="submit" value="<?php echo _t('EBOOK_GENERATE').' '.$name; ?>" class="btn btn-block btn-lg btn-primary" />
 			</form>
 		</div>
 	</div> <!-- /.col-lg-6. ebook-selection-container -->

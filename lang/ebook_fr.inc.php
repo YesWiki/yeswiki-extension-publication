@@ -20,5 +20,6 @@ $GLOBALS['translations'] = array_merge(
   		  'EBOOK_YOUR' => 'Votre',
   		  'EBOOK_SEE_NEWSLETTER' => 'Voir la newsletter',
   		  'EBOOK_NEWSLETTER_CREATED' => 'La newsletter a bien été créée',
+		  'EBOOK_MISSING_NEWSLETTER_FORM' => 'Vous devez préciser un id de formulaire pour produire une newsletter (reportez-vous au fichier readme.md).'
      )
 );

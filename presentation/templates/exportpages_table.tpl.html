@@ -154,7 +154,8 @@
 				</div>
 				<?php endif; ?>
 
-				<?php if (!empty($default['coverimage'])): ?>
+				<?php if ($outputformat='ebook' : ?>
+					<?php if (!empty($default['coverimage'])): ?>
 					<input type="hidden" required id="ebook-cover-image" name="ebook-cover-image" value="<?php echo (isset($metadatas['ebook-cover-image'])) ? $metadatas['ebook-cover-image'] : $default['coverimage']; ?>" />
 				<?php else : ?>
 				<div class="form-group">
@@ -163,7 +164,8 @@
 						<input class="control-group form-control" type="url" required="required" placeholder="http://" id="ebook-cover-image" name="ebook-cover-image" value="<?php if (isset($metadatas['ebook-cover-image'])) { echo $metadatas['ebook-cover-image']; } elseif(!empty($coverimageurl)) {echo $coverimageurl; } ?>" />
 					</div>
 				</div>
-				<?php endif; ?>
+			<?php endif; ?>
+		<?php endif; ?>
 
 				<?php if(!empty($ebookpagename)) echo '<input name="ebookpagename" value="'.$ebookpagename.'">'; ?>
 				<br />

@@ -121,7 +121,7 @@ if (!empty($id)) {
     $id = array_map('trim', $id);
     $results = $queries = [];
 
-    foreach ($matches[1] as $i => $formId) {
+    foreach ($matches[1] as $i => $formid) {
         // bazar entries
         if ($formId != 'pages') {
             $results[$i]['type'] = 'bazar';

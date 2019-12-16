@@ -60,10 +60,10 @@ if (count($pages) > 0) {
 			<img src="'.$metas['ebook-cover-image'].'" alt="cover" class="media-object" width="128" />
 		</a>
 		<div class="media-body">'."\n";
-		if ($this->UserIsAdmin()) $output .= '<a class="btn btn-danger btn-error pull-right" href="'.$this->href('deletepage',$page['resource']).'"><i class="glyphicon glyphicon-trash glyphicon glyphicon-white"></i>&nbsp;'._t('EBOOK_DELETE').'</a>';
+		if ($this->UserIsAdmin()) $output .= '<a class="btn btn-danger btn-error pull-right" href="'.$this->href('deletepage',$page['resource']).'"><i class="fas fa-trash"></i>&nbsp;'._t('EBOOK_DELETE').'</a>';
 		$output .= '<h4 class="media-heading"><a href="'.$this->href('',$page['resource']).'">'.$metas['ebook-title'].'</a></h4>
 			<strong>'.$metas['ebook-author'].'</strong><br />'.$metas['ebook-description'].'<br /><br />';
-		$output .= '<a class="btn btn-default" href="'.$this->href('preview',$page['resource']).'"><i class="glyphicon glyphicon-book"></i>&nbsp;'._t('PREVIEW').'</a> <a class="btn btn-primary" href="'.$this->href('pdf',$page['resource']).'"><i class="glyphicon glyphicon-download glyphicon glyphicon-white"></i>&nbsp;'._t('TAGS_DOWNLOAD_PDF').'</a> <!-- epub download link for '.$page['resource'].' -->
+		$output .= '<a class="btn btn-info" href="'.$this->href('preview',$page['resource']).'"><i class="fas fa-book-reader"></i>&nbsp;'._t('PREVIEW').'</a> <a class="space-left btn btn-primary" href="'.$this->href('pdf',$page['resource']).'"><i class="fas fa-book"></i>&nbsp;'._t('TAGS_DOWNLOAD_PDF').'</a> <!-- pdf download link for '.$page['resource'].' -->
 			<br /><br />
 		</div>
 		</li>'."\n";

@@ -31,7 +31,7 @@ if (!empty($this->config['htmltopdf_apikey']) and !empty($_GET['url']) and !empt
     $sourceurl = $this->href('preview', $this->GetPageTag(), 'pdf=1', false);
 }
 
-$cache_life = '600'; //caching time, in seconds
+$cache_life = '300'; //caching time, in seconds
 $filemtime = @filemtime($fullFilename);  // returns FALSE if file does not exist
 $command = '';
 $output = array();

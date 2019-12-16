@@ -39,7 +39,7 @@ if (!defined("WIKINI_VERSION")) {
 
 include_once 'tools/tags/libs/tags.functions.php';
 
-// Format of the output. Either you want to generate an ebbok or a newsletter
+// Format of the output. Either you want to generate an ebook or a newsletter
 // Default value is ebook
 $outputformat = $this->getParameter('outputformat');
 if (empty($outputformat) || $outputformat != 'newsletter') {
@@ -120,8 +120,7 @@ if (!empty($id)) {
     $id = explode(',', $id);
     $id = array_map('trim', $id);
     $results = $queries = [];
-
-    foreach ($matches[1] as $i => $formid) {
+    foreach ($matches[1] as $i => $formId) {
         // bazar entries
         if ($formId != 'pages') {
             $results[$i]['type'] = 'bazar';
@@ -215,20 +214,20 @@ $output = '';
 if (isset($_POST["page"])) {
 	if (isset($_POST['antispam']) && $_POST['antispam'] == 1) {
 		if (isset($_POST["ebook-title"]) && $_POST["ebook-title"] != '') {
-			if ($_POST['outputformat'] == 'ebook') {
+			if (strtolower($_POST['outputformat'])== 'ebook') {
 				 if (isset($_POST["ebook-description"]) && $_POST["ebook-description"] != '') {
 					 if (isset($_POST["ebook-author"]) && $_POST["ebook-author"] != '') {
 						 if (isset($_POST["ebook-cover-image"]) && $_POST["ebook-cover-image"] != '') {
-							 if (preg_match("/.(jpe?g)$/i", $_POST["ebook-cover-image"]) == 1) {
+							if (preg_match("/.(jpe?g)$/i", $_POST["ebook-cover-image"]) == 1) {
 								if (isset($ebookpagename) && !empty($ebookpagename)) {
 									$pagename = $ebookpagename;
 								} else {
 									$pagename = generatePageName($ebookpagenamestart . ' ' . $_POST["ebook-title"]);
 								}
 								foreach ($_POST["page"] as $page) {
-									$output .= '{{include page="' . $page . '" class=""}}' . "\n";
+									$output .= '{{include page="' . $page . '" class="'.strtolower($_POST['outputformat']).'"}}' . "\n";
 								}
-								$output .= '//' . _t('EBOOK_CONTENT_VISIBLE_ONLINE_FROM_PAGE') . ' : ' . $this->href('', $pagename) . ' // {{button link="' . $this->href('pdf', $pagename) . '" text="' . _t('EBOOK_DOWNLOAD_PDF') . '" class="btn-primary pull-right" icon="book"}}' . "\n";
+								
 								unset($_POST['page']);
 								unset($_POST['antispam']);
 								$this->SaveMetaDatas($pagename, $_POST);

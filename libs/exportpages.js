@@ -41,7 +41,7 @@ $(document).ready(function () {
     });
     
     $('.page-break').on('click', function() {
-        $("#ebook-selection-container").append('<li class="list-group-item"><a class="pull-right btn btn-xs btn-danger remove-page-break" title="Enlever le saut de page" href="#" ><i class="glyphicon glyphicon-minus"></i></a><span class="pull-left movable"><i class="glyphicon glyphicon-resize-vertical"></i></span><input type="hidden" name="page[]" value="{{pagebreak}}">-------------- Saut de page --------------</li>');
+        $("#ebook-selection-container").append('<li class="list-group-item"><a class="pull-right btn btn-xs btn-danger remove-page-break" title="Enlever le saut de page" href="#" ><i class="fas fa-minus"></i></a><span class="pull-left movable"><i class="fas fa-arrows-alt-v"></i></span><input type="hidden" name="page[]" value="{{pagebreak}}">-------------- Saut de page --------------</li>');
         return false;
     });
     

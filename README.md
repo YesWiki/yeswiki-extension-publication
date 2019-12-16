@@ -43,13 +43,13 @@ Ces suffixes sont ajoutés à chaque page.
 ## Pré-requis
 
 Avoir installé [Chromium/Google Chrome](https://chrome.google.com/) sur
-le serveur et connaitre le chemin d'acces vers l'exécutable.
+le serveur et connaitre le chemin d'accès vers l'exécutable.
 
 Pour installer Chrome sous Ubuntu/Debian :
 
 ```bash
-$ curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb
-$ apt install -y --no-install-recommends ./google-chrome.deb
+curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb
+apt install -y --no-install-recommends ./google-chrome.deb
 ```
 
 ## Configuration

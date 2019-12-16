@@ -51,6 +51,7 @@ $GLOBALS['translations'] = array_merge(
 		'EBOOK_START_PAGE' => 'Page d\'introduction',
 		'EBOOK_YOUR' => 'Votre',
 		'EXPORT_PAGE_TO_PDF' => 'Exporter la page au format pdf',
-		'NO_GENERATED_PDF_FILE_FOUND' => 'Le fichier pdf g&eacute;n&eacute;r&eacute; n\'a pas &eacute;t&eacute; trouv&eacute;.<br />V&eacute;rifier les permissions en &eacute;criture sur le dossier "cache" ou les permissions en droit d\'&eacute;x&eacute;cution du programme wkhtmltopdf.',
+		'NO_GENERATED_PDF_FILE_FOUND' => 'Le fichier pdf g&eacute;n&eacute;r&eacute; n\'a pas &eacute;t&eacute; trouv&eacute;.<br />V&eacute;rifier les permissions en &eacute;criture sur le dossier "cache" ou les permissions en droit d\'&eacute;x&eacute;cution du programme chromium.',
+        'PREVIEW' => 'Aperçu',        
      )
 );

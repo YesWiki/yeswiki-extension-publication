@@ -3,10 +3,14 @@ if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
 }
 
-$wakkaConfig['wkhtmltopdf_path'] = isset($wakkaConfig['wkhtmltopdf_path']) ?
-    $wakkaConfig['wkhtmltopdf_path']
-    : '/usr/local/bin/wkhtmltopdf';
+require __DIR__ . '/vendor/autoload.php';
 
-$wakkaConfig['wkhtmltopdf_options'] = isset($wakkaConfig['wkhtmltopdf_options']) ?
-    $wakkaConfig['wkhtmltopdf_options']
-    : '-d 300'; // dpi to 300 cf. https://wkhtmltopdf.org/usage/wkhtmltopdf.txt
+$wakkaConfig = array_merge(array(
+  'htmltopdf_key' =>        NULL,
+  'htmltopdf_url' =>        NULL,
+  'htmltopdf_path' =>       '/usr/bin/google-chrome', // on MacOs /Applications/Chromium.app/Contents/MacOS/Chromium
+  'htmltopdf_options' => array(
+    'windowSize' =>   ['1440', '780'],
+    'noSandbox' =>    true,
+    // 'debugLogger' =>  'php://stdout',
+  )), $wakkaConfig);

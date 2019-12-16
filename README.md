@@ -42,14 +42,13 @@ Ces suffixes sont ajoutés à chaque page.
 
 ## Pré-requis
 
-Avoir installé [Chromium/Google Chrome](https://chrome.google.com/) sur
+Avoir installé [Chromium](https://www.chromium.org/Home) sur
 le serveur et connaitre le chemin d'accès vers l'exécutable.
 
 Pour installer Chrome sous Ubuntu/Debian :
 
 ```bash
-curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb
-apt install -y --no-install-recommends ./google-chrome.deb
+sudo apt install -y --no-install-recommends chromium
 ```
 
 ## Configuration
@@ -59,7 +58,7 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 
 | Clé de configuration | Valeur par défaut                  | Utilité
 | ---                  | ---                                | ---
-| `htmltopdf_path`     | `/usr/bin/google-chrome`           | Indique l'emplacement du programme chargé
+| `htmltopdf_path`     | `/usr/bin/chromium`           | Indique l'emplacement du programme chargé
 | `htmltopdf_options`  | ['windowSize' => ['1440', '780']]  | Options par défaut passées au navigateur embarqué
 | `htmltopdf_url`      |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
 | `htmltopdf_key`      |                                    | Clé du serveur qui autorise ce wiki à générer des pdf
@@ -70,7 +69,7 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 ```php
 array(
     ...
-    'htmltopdf_path' => '/usr/local/bin/chrome',
+    'htmltopdf_path' => '/usr/bin/chromium',
     'htmltopdf_options' => ['windowSize' => ['1440', '780'], 'noSandbox' => true],
     ...
 );

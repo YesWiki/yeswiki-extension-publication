@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin name="wkebook" version="0.1" active="1">
   <author>Florian Schmitt</author>
-  <label>Generateur Ebook et PDF</label>
-  <desc>Générateur d'ebook aux formats epub et pdf à partir des pages wikis ou fiche bazar.</desc>
+  <label>Generateur de publications et PDF</label>
+  <desc>Générateur de publications aux formats epub et pdf à partir des pages wikis ou fiches bazar. Les publications peuvent être au format eboon, newsletter, et, un jour, meta cartes</desc>
 </plugin>

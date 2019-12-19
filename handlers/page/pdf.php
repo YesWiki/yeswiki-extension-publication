@@ -23,29 +23,29 @@ $dlFilename = str_replace(
 ).'-'.$this->GetPageTag().".pdf";
 $fullFilename = $dir."/cache/".$dlFilename;
 if (!empty($this->config['wkhtmltopdf_apikey']) and !empty($_GET['url']) and !empty($_GET['key']) and $this->config['wkhtmltopdf_apikey'] == $_GET['key']) {
-    $sourceurl = $_GET['url'];
+    $sourceUrl = $_GET['url'];
     $_GET['refresh']=1;
     $fullFilename = '/tmp/page.pdf';
     $dlFilename  = 'page.pdf';
 } else {
-    $sourceurl = $this->href('iframe', $this->GetPageTag(), 'share=0&edit=0', false);
+    $sourceUrl = $this->href('iframe', $this->GetPageTag(), 'share=0&edit=0', false);
 }
 
 $cache_life = '600'; //caching time, in seconds
-$filemtime = @filemtime($fullFilename);  // returns FALSE if file does not exist
+$fileLastModifiedTime = @filemtime($fullFilename);  // returns FALSE if file does not exist
 $command = '';
 $output = array();
 
 if (!file_exists($fullFilename)
   || (file_exists($fullFilename) && isset($_GET['refresh']) && $_GET['refresh']==1)
-  || (file_exists($fullFilename) && (time() - $filemtime >= $cache_life))
+  || (file_exists($fullFilename) && (time() - $fileLastModifiedTime >= $cache_life))
 ) {
     if (!empty($this->config['wkhtmltopdf_url']) and !empty($this->config['wkhtmltopdf_key'])) {
-        $url = $this->config['wkhtmltopdf_url'].'&url='.urlencode($sourceurl).'&key='.urlencode($this->config['wkhtmltopdf_key']);
+        $url = $this->config['wkhtmltopdf_url'].'&url='.urlencode($sourceUrl).'&key='.urlencode($this->config['wkhtmltopdf_key']);
         header('Location: '.$url);
         exit;
     } else {
-        $command = $this->config['wkhtmltopdf_path'].' '.$this->config['wkhtmltopdf_options']." '".$sourceurl."' ".$fullFilename;
+        $command = $this->config['wkhtmltopdf_path'].' '.$this->config['wkhtmltopdf_options']." '".$sourceUrl."' ".$fullFilename;
         exec($command, $output);
     }
 }
@@ -69,7 +69,7 @@ if (file_exists($fullFilename)) {
     readfile($fullFilename);
 } else {
     echo $this->Header()."\n";
-    echo '<div class="alert alert-danger alert-error">'._t('NO_GENERATED_PDF_FILE_FOUND').'</div>'."\n";
+    echo '<div class="alert alert-danger alert-error">'._t('PUBLICATION_NO_GENERATED_PDF_FILE_FOUND').'</div>'."\n";
     if (!empty($command)) {
         echo $command.'<br>';
     }

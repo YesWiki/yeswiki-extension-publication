@@ -1,3 +1,3 @@
 <?php
 global $wiki;
-$wiki->AddCSSFile('tools/ebook/presentation/styles/ebook.css');
+$wiki->AddCSSFile('tools/publication/presentation/styles/publication.css');

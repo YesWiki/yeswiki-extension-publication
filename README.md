@@ -1,4 +1,4 @@
-# yeswiki-extension-ebook
+# yeswiki-extension-publication
 Crée un pdf à partir d'une sélection de page YesWiki.
 
 ## Pré-requis
@@ -29,4 +29,4 @@ textelong***bf_content***Contenu de la newsletter***20***20*** *** ***html***1**
 ```
 
 Trouver son id et utiliser l'action suivante
-`{{ebookgenerator outputformat="newsletter" formid="<id du formulaire>"}}`
+`{{publicationgenerator outputformat="newsletter" formid="<id du formulaire>"}}`

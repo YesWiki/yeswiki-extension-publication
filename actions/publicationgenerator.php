@@ -322,18 +322,18 @@ if (isset($_POST["page"])) {
     $output .= $exportTemplate->render(
         array(
             'entries' => $results,
-            'publicationstart' => $publicationStart,
-            'publicationend' => $publicationEnd,
-            'addinstalledpage' => $addInstalledPages,
-            'installedpages' => $installedPageNames,
+            'publicationStart' => $publicationStart,
+            'publicationEnd' => $publicationEnd,
+            'addInstalledPages' => $addInstalledPages,
+            'installedPageNames' => $installedPageNames,
             'default' => $default,
-            'ebookpagename' => $ebookPageName,
-            'metadatas' => $this->page["metadatas"],
-            'selectedpages' => $selectedPages,
-            'chapterpages' => $chapterCoverPages,
+            'ebookPageName' => $ebookPageName,
+            'metaDatas' => $this->page["metadatas"],
+            'selectedPages' => $selectedPages,
+            'chapterCoverPages' => $chapterCoverPages,
             'url' => $this->href('', $this->GetPageTag()),
             'name' => $name,
-            'outputformat' => $outputFormat,
+            'outputFormat' => $outputFormat,
         )
     );
 }

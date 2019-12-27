@@ -39,7 +39,7 @@ if (!defined("WIKINI_VERSION")) {
 
 include_once 'tools/tags/libs/tags.functions.php';
 
-// Format of the output. Either you want to generate an ebbok or a newsletter
+// Format of the output. Either you want to generate an ebook or a newsletter
 // Default value is ebook
 $outputFormat = $this->getParameter('outputformat');
 if (empty($outputFormat) || $outputFormat != 'newsletter') {
@@ -61,9 +61,9 @@ $publicationEnd = $this->getParameter('publicationend');
 
 // prefix for created pages
 // Only used when outputformat="ebook"
-$publicationPageNamePrefix = $this->getParameter('publicationpagenameprefix');
-if (empty($publicationPageNamePrefix)) {
-    $publicationPageNamePrefix = 'Ebook';
+$ebookPageNamePrefix = $this->getParameter('ebookpagenameprefix');
+if (empty($ebookPageNamePrefix)) {
+    $ebookPageNamePrefix = 'Ebook';
 }
 
 // include default pages in page listing ?
@@ -248,7 +248,7 @@ if (isset($_POST["page"])) {
 				if (isset($ebookPageName) && !empty($ebookPageName)) {
 					$pageName = $ebookPageName;
 				} else {
-					$pageName = generatePageName($publicationPageNamePrefix . ' ' . $_POST["publication-title"]);
+					$pageName = generatePageName($ebookPageNamePrefix . ' ' . $_POST["publication-title"]);
 				}
 				foreach ($_POST["page"] as $page) {
 					$output .= '{{include page="' . $page . '" class=""}}' . "\n";

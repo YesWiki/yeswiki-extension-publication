@@ -38,8 +38,8 @@ if (!defined("WIKINI_VERSION")) {
 }
 
 
-$publicationPageNamePrefix = $this->getParameter('publicationpagenameprefix');
-if (empty($publicationPageNamePrefix)) $publicationPageNamePrefix = 'Ebook';
+$ebookPageNamePrefix = $this->getParameter('ebookpagenameprefix');
+if (empty($ebookPageNamePrefix)) $ebookPageNamePrefix = 'Ebook';
 
 $output = '';
 
@@ -47,7 +47,7 @@ $output = '';
 $sql = 'SELECT DISTINCT resource FROM '.$this->GetConfigValue('table_prefix').'triples';
 $sql .= ' WHERE property="http://outils-reseaux.org/_vocabulary/metadata"
 			AND value LIKE "%publication-title%"
-			AND resource LIKE "'.$publicationPageNamePrefix.'%" ';
+			AND resource LIKE "'.$ebookPageNamePrefix.'%" ';
 $sql .= ' ORDER BY resource ASC';
 
 $pages = $this->LoadAll($sql);

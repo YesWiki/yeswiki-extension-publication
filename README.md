@@ -165,7 +165,9 @@ Exemple – pour générer un ebook avec le préfixe "MesEDoc", il faut donc éc
 #### **addinstalledpage**
 
 Certaines pages de YesWiki ont un statut un peu particulier. Il s'agit des pages créées par défaut lor de l'installation du wiki. Parmi ces pages on trouve, les pages de menu, les entêtes, pieds de pages, mais également PagePincipale.
+
 Si ce paramètre n'est pas présent, ou s'il est vide, ou s'il est égal à 0, lors de la sélection, on ne propose pas ces pages.
+
 Toute autre valeur de ce paramètre, fera apparaître ces pages.
 
 Exemple – pour faire apparaître les pages créées lors del 'installation du wiki, il peut écrire :
@@ -282,9 +284,9 @@ Dans la liste,
   pour une page YesWiki, on peut préciser, entre parenthèses et après "pages",
   - une liste de mots clefs associés à ces pages,
   - les critères doivent être séparés par des "|" ;
-- un formulaire bazar est identifié par son numéro identifiant (exemple : "1") ;
+- un formulaire bazar est identifié par son numéro identifiant (exemple : "1"),
   pour un formulaire, on peut préciser, entre parenthèses et après son numéro,
-  - une liste de critères de sélection dans ce formulaire ,
+  - une liste de critères de sélection dans ce formulaire,
   - les critères doivent être séparés par des "|".
 
 Exemple – Pour organiser les éléments proposés dans quatre groupes,
@@ -306,7 +308,7 @@ Cette action liste les ebook générés.
 
 #### **ebookpagenameprefix**
 
-Le paramètre `ebookpagenameprefix` permet de préciser le préfixe par lequel commencent les noms de pages correspondant à des ebook.
+Le paramètre `ebookpagenameprefix` permet de préciser le préfixe par lequel commencent les noms de pages correspondant à des ebooks.
 
 S'il n'est pas précisé, ce paramètre vaut "Ebook".
 

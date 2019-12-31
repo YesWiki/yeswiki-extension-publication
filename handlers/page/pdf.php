@@ -23,40 +23,40 @@ $dlFilename = str_replace(
 ).'-'.$this->GetPageTag().".pdf";
 $fullFilename = $dir."/cache/".$dlFilename;
 if (!empty($this->config['htmltopdf_apikey']) and !empty($_GET['url']) and !empty($_GET['key']) and $this->config['htmltopdf_apikey'] == $_GET['key']) {
-    $sourceurl = $_GET['url'];
+    $sourceUrl = $_GET['url'];
     $_GET['refresh']=1;
     $fullFilename = '/tmp/page.pdf';
     $dlFilename  = 'page.pdf';
 } else {
-    $sourceurl = $this->href('preview', $this->GetPageTag(), 'pdf=1', false);
+    $sourceUrl = $this->href('preview', $this->GetPageTag(), 'pdf=1', false);
 }
 
 $cache_life = '300'; //caching time, in seconds
-$filemtime = @filemtime($fullFilename);  // returns FALSE if file does not exist
+$fileLastModifiedTime = @filemtime($fullFilename);  // returns FALSE if file does not exist
 $command = '';
 $output = array();
 
 if (!file_exists($fullFilename)
   || (file_exists($fullFilename) && isset($_GET['refresh']) && $_GET['refresh']==1)
-  || (file_exists($fullFilename) && (time() - $filemtime >= $cache_life))
+  || (file_exists($fullFilename) && (time() - $fileLastModifiedTime >= $cache_life))
 ) {
     if (!empty($this->config['htmltopdf_url']) and !empty($this->config['htmltopdf_key'])) {
-        $url = $this->config['htmltopdf_url'].'&url='.urlencode($sourceurl).'&key='.urlencode($this->config['htmltopdf_key']);
+        $url = $this->config['htmltopdf_url'].'&url='.urlencode($sourceUrl).'&key='.urlencode($this->config['htmltopdf_key']);
         header('Location: '.$url);
         exit;
     } else {
-        $browserFactory = new HeadlessChromium\BrowserFactory($this->config['htmltopdf_path']);
-        $browser = $browserFactory->createBrowser($this->config['htmltopdf_options']);
-        $page = $browser->createPage();
+		 $browserFactory = new HeadlessChromium\BrowserFactory($this->config['htmltopdf_path']);
+		 $browser = $browserFactory->createBrowser($this->config['htmltopdf_options']);
+		 $page = $browser->createPage();
 
-        // convert to paginated content
-        $script = file_get_contents(__DIR__ . '/../../libs/vendor/pagedjs/paged.polyfill.js');
-        $page->addPreScript($script);
-        $page->navigate($sourceurl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
+		 // convert to paginated content
+		 $script = file_get_contents(__DIR__ . '/../../libs/vendor/pagedjs/paged.polyfill.js');
+		 $page->addPreScript($script);
+		 $page->navigate($sourceurl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
 
-        // now generate PDF
-        $page->pdf()->saveToFile($fullFilename);
-        $browser->close();
+		 // now generate PDF
+		 $page->pdf()->saveToFile($fullFilename);
+		 $browser->close();
     }
 }
 
@@ -79,7 +79,7 @@ if (file_exists($fullFilename)) {
     readfile($fullFilename);
 } else {
     echo $this->Header()."\n";
-    echo '<div class="alert alert-danger alert-error">'._t('NO_GENERATED_PDF_FILE_FOUND').'</div>'."\n";
+    echo '<div class="alert alert-danger alert-error">'._t('PUBLICATION_NO_GENERATED_PDF_FILE_FOUND').'</div>'."\n";
     if (!empty($command)) {
         echo $command.'<br>';
     }

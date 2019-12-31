@@ -25,7 +25,7 @@
 * Liste de toutes les pages Ebook
 *
 *
-*@package tags
+*@package publication
 *
 *@author        Florian Schmitt <florian@outils-reseaux.org>
 *
@@ -38,38 +38,38 @@ if (!defined("WIKINI_VERSION")) {
 }
 
 
-$ebookpagenamestart = $this->getParameter('ebookpagenamestart');
-if (empty($ebookpagenamestart)) $ebookpagenamestart = 'Ebook';
+$ebookPageNamePrefix = $this->getParameter('ebookpagenameprefix');
+if (empty($ebookPageNamePrefix)) $ebookPageNamePrefix = 'Ebook';
 
 $output = '';
 
 // recuperation des pages wikis
 $sql = 'SELECT DISTINCT resource FROM '.$this->GetConfigValue('table_prefix').'triples';
 $sql .= ' WHERE property="http://outils-reseaux.org/_vocabulary/metadata"
-			AND value LIKE "%ebook-title%"
-			AND resource LIKE "'.$ebookpagenamestart.'%" ';
+			AND value LIKE "%publication-title%"
+			AND resource LIKE "'.$ebookPageNamePrefix.'%" ';
 $sql .= ' ORDER BY resource ASC';
 
 $pages = $this->LoadAll($sql);
 if (count($pages) > 0) {
 	$output .= '<ul class="media-list">'."\n";
-	foreach($pages as $page) {
+	foreach ($pages as $page) {
 		$metas = $this->GetMetadatas($page['resource']);
 		$output .= '<li class="media">
 		<a href="'.$this->href('',$page['resource']).'" class="pull-left">
-			<img src="'.$metas['ebook-cover-image'].'" alt="cover" class="media-object" width="128" />
+			<img src="'.$metas['publication-cover-image'].'" alt="cover" class="media-object" width="128" />
 		</a>
 		<div class="media-body">'."\n";
-		if ($this->UserIsAdmin()) $output .= '<a class="btn btn-danger btn-error pull-right" href="'.$this->href('deletepage',$page['resource']).'"><i class="fas fa-trash"></i>&nbsp;'._t('EBOOK_DELETE').'</a>';
-		$output .= '<h4 class="media-heading"><a href="'.$this->href('',$page['resource']).'">'.$metas['ebook-title'].'</a></h4>
-			<strong>'.$metas['ebook-author'].'</strong><br />'.$metas['ebook-description'].'<br /><br />';
-		$output .= '<a class="btn btn-info" href="'.$this->href('preview',$page['resource']).'"><i class="fas fa-book-reader"></i>&nbsp;'._t('PREVIEW').'</a> <a class="space-left btn btn-primary" href="'.$this->href('pdf',$page['resource']).'"><i class="fas fa-book"></i>&nbsp;'._t('TAGS_DOWNLOAD_PDF').'</a> <!-- pdf download link for '.$page['resource'].' -->
-			<br /><br />
+		if ($this->UserIsAdmin()) $output .= '<a class="btn btn-danger btn-error pull-right" href="'.$this->href('deletepage',$page['resource']).'"><i class="fas fa-trash"></i>&nbsp;'._t('PUBLICATION_DELETE').'</a>';
+		$output .= '<h4 class="media-heading"><a href="'.$this->href('',$page['resource']).'">'.$metas['publication-title'].'</a></h4>
+			<strong>'.$metas['publication-author'].'</strong><br />'.$metas['publication-description'].'<br /><br />';
+		$output .= '<a class="btn btn-info" href="'.$this->href('preview',$page['resource']).'"><i class="fas fa-book-reader"></i>&nbsp;'._t('PUBLICATION_PREVIEW').'</a> <a class="space-left btn btn-primary" href="'.$this->href('pdf',$page['resource']).'"><i class="fas fa-book"></i>&nbsp;'._t('PUBLICATION_DOWNLOAD_PDF').'</a> <!-- pdf download link for '.$page['resource'].' -->
+		<br /><br />
 		</div>
 		</li>'."\n";
 	}
 	$output .= '</ul>'."\n";
 }
-else $output .= '<div class="alert alert-info">'._t('EBOOK_NO_EBOOK_FOUND').'</div>';
+else $output .= '<div class="alert alert-info">'._t('PUBLICATION_NO_EBOOK_FOUND').'</div>';
 
 echo $output."\n";

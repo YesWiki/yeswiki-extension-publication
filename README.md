@@ -2,7 +2,7 @@
 
 > Attention — Ceci est une extension de YesWiki. Elle ne fait pas partie du cœur officiellement maintenu de YesWiki.
 
-Cette extension permet de générer des publications aux formats epub et PDF à partir d'une sélection de fiches bazar ou de pages YesWiki.
+Cette extension permet de générer des publications au format PDF à partir d'une sélection de fiches bazar ou de pages YesWiki.
 
 Les publications générées peuvent être de type :
 
@@ -45,7 +45,7 @@ La génération d'une publication se fait en plusieurs étapes.
 1. Sélection des éléments constitutifs de la publication.
 2. Organisation des éléments constitutifs au sein de la publication.
 3. Génération et enregistrement de la publication.
-4. Production du PDF ou de l'ePub.
+4. Production du PDF.
 
 L'action `{{publicationgenerator}}` prend en charge les étapes 1, 2 et 3.
 
@@ -59,7 +59,7 @@ Chaque ebook généré sera enregistré sous la forme d'une page sur le wiki. Le
 
 On pourra utilement consulter la section "Action `{{publicationgenerator}}`" ci-après.
 
-## Pour générer des newsletters
+### Pour générer des newsletters
 
 Avant de pouvoir générer des newsletters, il faut créer un formulaire bazar suivant avec la structure suivante :
 
@@ -326,6 +326,8 @@ L'extension publication ajoute deux handlers aux pages de votre wiki.
 | ---           | ---                            |
 | `/pdf`        | Télécharge un document en PDF  |
 | `/preview`    | Prévisualise un document |
+
+Ces fonctions sont accessibles depuis le sous-menu "partager" du bas de page.
 
 ## Configuration
 

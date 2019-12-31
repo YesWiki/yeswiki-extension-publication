@@ -299,7 +299,7 @@ Exemple – Pour organiser les éléments proposés dans quatre groupes,
 on écrira :
 
 ```
-{{publicationgenerator titles="pages wiki, important, recettes de cuisine, livres" id="pages, pages(important), 1, 2(bf_auteur=Rabelais|bf_taille=long)"}}
+{{publicationgenerator titles="pages wiki, important, recettes de cuisine, livres" groupselector="pages, pages(important), 1, 2(bf_auteur=Rabelais|bf_taille=long)"}}
 ```
 
 ### Action `{{ebooklist}}`

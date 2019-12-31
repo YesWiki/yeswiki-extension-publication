@@ -53,7 +53,7 @@ $sql .= ' ORDER BY resource ASC';
 $pages = $this->LoadAll($sql);
 if (count($pages) > 0) {
 	$output .= '<ul class="media-list">'."\n";
-	foreach($pages as $page) {
+	foreach ($pages as $page) {
 		$metas = $this->GetMetadatas($page['resource']);
 		$output .= '<li class="media">
 		<a href="'.$this->href('',$page['resource']).'" class="pull-left">
@@ -67,10 +67,6 @@ if (count($pages) > 0) {
 		<br /><br />
 		</div>
 		</li>'."\n";
-		// $output .= '<strong><i class="glyphicon glyphicon-download"></i>&nbsp;'._t('PUBLICATION_DOWNLOAD').' </strong><a class="btn btn-primary" href="'.$this->href('pdf',$page['resource']).'"><i class="glyphicon glyphicon-book glyphicon glyphicon-white"></i>&nbsp;'._t('PUBLICATION_DOWNLOAD_PDF').'</a> <!-- epub download link for '.$page['resource'].' -->
-		// <br /><br />
-		// </div>
-		// </li>'."\n";
 	}
 	$output .= '</ul>'."\n";
 }

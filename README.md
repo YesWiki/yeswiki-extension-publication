@@ -164,17 +164,25 @@ Exemple – pour générer un ebook avec le préfixe "MesEDoc", il faut donc éc
 
 #### **addinstalledpage**
 
-Si ce paramètre n'est pas présent, lors de la sélection, on ne propose pas les pages créées par défaut lors de l'installation de YesWiki.
->**ATTENTION — Le `code` ne me semble pas clair du tout sur ce paramètre**
+Certaines pages de YesWiki ont un statut un peu particulier. Il s'agit des pages créées par défaut lor de l'installation du wiki. Parmi ces pages on trouve, les pages de menu, les entêtes, pieds de pages, mais également PagePincipale.
+Si ce paramètre n'est pas présent, ou s'il est vide, ou s'il est égal à 0, lors de la sélection, on ne propose pas ces pages.
+Toute autre valeur de ce paramètre, fera apparaître ces pages.
 
+Exemple – pour faire apparaître les pages créées lors del 'installation du wiki, il peut écrire :
+
+```
+{{publicationgenerator addinstalledpage="1"}}
+```
 
 #### **coverimage**
 
 *Paramètre utilisé uniquement dans le cas d'un ebook.*
 
-Image de couverture utilisée par défaut en 1re page de couverture des ebooks générés.
+Ce paramètre contient l'adressse de l'image de couverture utilisée en 1re page de couverture des ebooks générés.
 
-Cette image sera proposée par défaut lors de la sélection. Elle peut alors être remplacée par une différente pour chaque publication.
+Si ce paramètre est renseigné, l'utilisateur ne se verra pas proposer de choix lors de la sélection.
+
+Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection en vue d'un ebook, choisir une image de couverture.
 
 Exemple  :
 
@@ -184,9 +192,11 @@ Exemple  :
 
 #### **title**
 
-Titre par défaut des publications à générer.
+Titre des publications à générer.
 
-Ce titre sera proposé par défaut lors de la sélection. Il peut alors être remplacé par un différent pour chaque publication.
+Si ce paramètre est renseigné, le titre de la publication sera celui qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
+
+Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir un titre.
 
 Exemple  :
 
@@ -196,9 +206,11 @@ Exemple  :
 
 #### **desc**
 
-Description par défaut des publications générées.
+Description des publications générées.
 
-Cette description sera proposée par défaut lors de la sélection. Elle peut alors être remplacée par une différente pour chaque publication.
+Si ce paramètre est renseigné, la description de la publication sera celle qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
+
+Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir une description.
 
 Exemple  :
 
@@ -208,9 +220,11 @@ Exemple  :
 
 #### **author**
 
-Auteur par défaut des publications à générer.
+Auteur des publications à générer.
 
-Cet auteur sera proposé par défaut lors de la sélection. Il peut alors être remplacé par un différent pour chaque publication.
+Si ce paramètre est renseigné, l'auteur de la publication sera celui qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
+
+Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir un·e aut·eur·rice.
 
 Exemple  :
 
@@ -220,11 +234,13 @@ Exemple  :
 
 #### **chapterpages**
 
-Liste des noms des pages YesWiki à utiliser par défaut au début de chaque chapitre des publications à générer.
+Liste des noms des pages YesWiki à utiliser au début de chaque chapitre des publications à générer.
 
 Dans la liste, les noms doivent être séparés par des virgules.
 
-Ces pages seront proposées par défaut lors de la sélection. Elles pourront alors être remplacées.
+Si ce paramètre est renseigné, les pages ainsi désignées seront proposées par défaut dans la publication lors de la sélection.
+
+Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur devra, lors de la sélection, choisir les pages qu'il souhaite mettre en tête de chaque chapitre.
 
 Exemple  :
 
@@ -247,13 +263,13 @@ Exemple  :
 
 #### **titles**
 
-*S'il est utilisé, ce paramètre doit l'être conjointement au paramètre `id`.*
+*S'il est utilisé, ce paramètre doit l'être conjointement au paramètre `groupselector`.*
 
 Liste des noms des groupes dans lesquels seront proposés les éléments (fiches bazar ou pages) lors de la sélection.
 
 Dans la liste, les noms doivent être séparés par des virgules.
 
-#### **id**
+#### **groupselector**
 
 *S'il est utilisé, ce paramètre doit l'être conjointement au paramètre `titles`.*
 
@@ -263,21 +279,25 @@ Dans la liste,
 
 - les groupes doivent être séparés par des virgules ;
 - les pages YesWiki seront identifiées par le mot "pages" ;
+  pour une page YesWiki, on peut préciser, entre parenthèses et après "pages",
+  - une liste de mots clefs associés à ces pages,
+  - les critères doivent être séparés par des "|" ;
 - un formulaire bazar est identifié par son numéro identifiant (exemple : "1") ;
   pour un formulaire, on peut préciser, entre parenthèses et après son numéro,
   - une liste de critères de sélection dans ce formulaire ,
   - les critères doivent être séparés par des "|".
 
-Exemple – Pour organiser les éléments proposés dans trois groupes,
+Exemple – Pour organiser les éléments proposés dans quatre groupes,
 
 - un groupe, nommé "pages wiki", reprenant les pages du wiki ;
+- un groupe, nommé "important", reprenant les pages du wiki catégorisées (au moyen d'un mot-clef) comme importantes ;
 - un groupe, nommé "recettes de cuisine", reprenant les fiches du formulaire 1 ;
 - un groupe, nommé "livres", reprenant les fiches du formulaire 2 dont l'auteur est "Rabelais" ou dont la taille est "long" ;
 
 on écrira :
 
 ```
-{{publicationgenerator titles="pages wiki, recettes de cuisine, livres" id="pages, 1, 2(bf_auteur=Rabelais|bf_taille=long)"}}
+{{publicationgenerator titles="pages wiki, important, recettes de cuisine, livres" id="pages, pages(important), 1, 2(bf_auteur=Rabelais|bf_taille=long)"}}
 ```
 
 ### Action `{{ebooklist}}`

@@ -112,12 +112,12 @@ if (!empty($titles)) {
 }
 
 // groups of pages or bazar entries
-$id = $this->getParameter('id');
-if (!empty($id)) {
+$groupselector = $this->getParameter('groupselector');
+if (!empty($groupselector)) {
     $matches = [];
-    preg_match_all('/(\d+|pages)(\(([^\(\)]*)\))?/m', $id, $matches);
-    $id = explode(',', $id);
-    $id = array_map('trim', $id);
+    preg_match_all('/(\d+|pages)(\(([^\(\)]*)\))?/m', $groupselector, $matches);
+    $groupselector = explode(',', $groupselector);
+    $v = array_map('trim', $groupselector);
     $results = $queries = [];
     foreach ($matches[1] as $i => $formId) {
         // bazar entries

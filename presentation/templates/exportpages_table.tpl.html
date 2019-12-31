@@ -21,7 +21,7 @@
 	</h4>
 		<ul class="list-entries-to-export group-<?php echo $nb; ?> list-group">
 			<?php foreach($form['entries'] as $page) : ?>
-			<?php if ($form['type'] == 'pages' && !$addInstalledPages && !(array_key_exists($page['tag'], $installedPageNames))) : ?>
+			<?php if ($form['type'] == 'pages') : ?>
 			<li class="list-group-item">
 				<a class="pull-right btn btn-xs btn-success select-page-item" title="<?php echo _t('PUBLICATION_SELECT_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FOR_THE_EBOOK'); ?>" href="#">
 					<i class="fas fa-plus"></i>
@@ -191,6 +191,6 @@
 	</div> <!-- /.col-lg-8. publication-selection-container -->
 </div> <!-- /.row -->
 <?php
-  	$GLOBALS['wiki']->AddJavascriptFile('tools/publication/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
-  	$GLOBALS['wiki']->AddJavascriptFile('tools/publication/libs/exportpages.js');
+  	$GLOBALS['wiki']->AddJavascriptFile($toolPath.'/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
+  	$GLOBALS['wiki']->AddJavascriptFile($toolPath.'/libs/exportpages.js');
 ?>

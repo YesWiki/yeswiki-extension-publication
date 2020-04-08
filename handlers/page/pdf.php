@@ -52,7 +52,7 @@ if (!file_exists($fullFilename)
 		 // convert to paginated content
 		 $script = file_get_contents(__DIR__ . '/../../libs/vendor/pagedjs/paged.polyfill.js');
 		 $page->addPreScript($script);
-		 $page->navigate($sourceurl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
+		 $page->navigate($sourceUrl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
 
 		 // now generate PDF
 		 $page->pdf()->saveToFile($fullFilename);

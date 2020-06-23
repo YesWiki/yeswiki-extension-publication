@@ -5,3 +5,6 @@
 .space-left {
     margin-left:1em;
 }
+.btn-xs.btn-danger {
+    border: 1px solid #d9534f;
+}

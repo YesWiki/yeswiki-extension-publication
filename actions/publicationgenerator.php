@@ -18,6 +18,8 @@ if (!defined("WIKINI_VERSION")) {
 
 include_once 'tools/tags/libs/tags.functions.php';
 
+$this->addCssFile('tools/publication/presentation/styles/publication.css');
+
 // Format of the output. Either you want to generate an ebook or a newsletter
 // Default value is ebook
 $outputFormat = $this->getParameter('outputformat');
@@ -204,9 +206,10 @@ if (isset($_POST["page"])) {
 			// There is no publication-title
 			$output = '<div class="alert alert-danger">' . _t('PUBLICATION_NO_TITLE_FOUND') . '</div>' . "\n";
 			break; // Stops the current do-while loop
-		}
+        }
+
 		// So far everything is OK
-		if ($_POST['outputformat'] == 'ebook') {  // We want to produce an ebook (default behaviour)
+		if ($_POST['outputformat'] == 'Ebook') {  // We want to produce an ebook (default behaviour)
 			do { // use of a do-while loop in order to allow for breaks (in case of errors specific to ebooks)
 				if (!isset($_POST["publication-description"]) || $_POST["publication-description"] == '') {
 					// There is no publication-description

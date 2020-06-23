@@ -334,13 +334,13 @@ Ces fonctions sont accessibles depuis le sous-menu "partager" du bas de page.
 Le fichier de configuration [`wakka.config.php`][wakka-config] accepte
 plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informatique.
 
-| Clé de configuration | Valeur par défaut                  | Utilité
-| ---                  | ---                                | ---
-| `htmltopdf_path`     | `/usr/bin/chromium`                | Indique l'emplacement du programme chargé
-| `htmltopdf_options`  | ['windowSize' => ['1440', '780']]  | Options par défaut passées au navigateur embarqué
-| `htmltopdf_url`      |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
-| `htmltopdf_key`      |                                    | Clé du serveur qui autorise ce wiki à générer des pdf
-| `htmltopdf_apikey`   |                                    | A METTRE SUR UN SERVEUR QUI PARTAGE LES FONCTIONS DE GENERATEUR DE PDF défini le mot de passe pour la clé pour les autres wikis
+| Clé de configuration                   | Valeur par défaut                  | Utilité
+| ---                                    | ---                                | ---
+| `htmltopdf_path`                       | `/usr/bin/chromium`                | Indique l'emplacement du programme chargé
+| `htmltopdf_options`                    | ['windowSize' => ['1440', '780'], 'noSandbox' => true]  | Options par défaut passées au navigateur embarqué
+| `htmltopdf_service_url`                |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
+| `htmltopdf_service_authorized_domains` |                                    | Si votre serveur partage les fonction de générateur de pdf, il faut lui indique les nom de domaines autorisés
+| `htmltopdf_cache_life`                 |        300                         | Durée en secondes avant reconstruction du fichier cache pdf
 
 ### … avec Chrome/Firefox sur votre serveur
 
@@ -353,13 +353,24 @@ array(
 );
 ```
 
-### Vous avez un YesWiki paramétré avec le module `yeswiki-extension-publication`
+### Vous avez un YesWiki qui est autorisé à utiliser le service pdf de https://example.org/yeswiki
 
 ```php
 array(
     ...
-    'htmltopdf_url' => 'https://example.org/yeswiki/?PagePrincipale/pdf',
-    'htmltopdf_key' => 'motdepasseConfiguré',
+    'htmltopdf_service_url' => 'https://example.org/yeswiki/?PagePrincipale/pdf',
+    ...
+);
+```
+
+### Vous avez un YesWiki qui est un service pdf pour d'autres wikis
+
+Vous devez indiquer les noms de domaine que vous autorisez :
+
+```php
+array(
+    ...
+    'htmltopdf_service_authorized_domains' => ['example.org', 'youpi.com', 'toto.fr'],
     ...
 );
 ```

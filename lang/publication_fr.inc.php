@@ -52,6 +52,8 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_START_PAGE' => 'Page d\'introduction',
 		'PUBLICATION_YOUR' => 'Votre',
 		'PUBLICATION_EXPORT_PAGE_TO_PDF' => 'Exporter la page au format pdf',
-		'PUBLICATION_NO_GENERATED_PDF_FILE_FOUND' => 'Le fichier pdf g&eacute;n&eacute;r&eacute; n\'a pas &eacute;t&eacute; trouv&eacute;.<br />V&eacute;rifier les permissions en &eacute;criture sur le dossier "cache" ou les permissions en droit d\'&eacute;x&eacute;cution du programme wkhtmltopdf.',
+		'PUBLICATION_NO_GENERATED_PDF_FILE_FOUND' => 'Le fichier pdf g&eacute;n&eacute;r&eacute; n\'a pas &eacute;t&eacute; trouv&eacute;.<br />V&eacute;rifier les permissions en &eacute;criture sur le dossier "cache" ou les permissions en droit d\'&eacute;x&eacute;cution du programme chromium.',
+		'PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH' => 'Pas de fichier exécutable trouvé pour',
+		'PUBLICATION_DID_YOU_INSTALL_CHROMIUM_OR_SET_UP_PATH' => 'Avez vous installé Chromium sur votre serveur, ou configuré le chemin vers le programme ou le service (paramètres "htmltopdf_path" ou "htmltopdf_service_url" dans le fichier de configuration) ?',
      )
 );

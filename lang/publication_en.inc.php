@@ -53,5 +53,7 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_YOUR' => 'Your',
 		'PUBLICATION_EXPORT_PAGE_TO_PDF' => 'Export page to pdf',
 		'PUBLICATION_NO_GENERATED_PDF_FILE_FOUND' => 'No pdf file was found.<br />Please check access rights on the "cache" folder.',
+		'PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH' => 'No executable file found on path',
+		'PUBLICATION_DID_YOU_INSTALL_CHROMIUM_OR_SET_UP_PATH' => 'Did you install Chromium on this server, or setup path to the program or url service (parameters "htmltopdf_path" or "htmltopdf_service_url" in the configuration file) ?',
      )
 );

@@ -8,3 +8,12 @@
 .btn-xs.btn-danger {
     border: 1px solid #d9534f;
 }
+
+#publication-selection-container.ui-sortable > * {
+    cursor: move;
+}
+    #publication-selection-container.ui-sortable > *:hover,
+    #publication-selection-container.ui-sortable > *:focus {
+        background-color: var(--neutral-light-color);
+        border-color: var(--primary-color);
+    }

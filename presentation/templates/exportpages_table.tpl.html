@@ -126,7 +126,7 @@
 					<input type="hidden" required id="publication-title" name="publication-title" value="<?php echo (isset($metadatas['publication-title'])) ? $metadatas['publication-title'] : $default['title']; ?>" />
 				<?php else : ?>
 				<div class="form-group">
-					<label for="publication-title" class="control-label"><?php echo _t('PUBLICATION_EBOOK_TITLE'); ?></label>
+					<label for="publication-title" class="control-label"><?php echo _t('PUBLICATION_EBOOK_TITLE'); ?><span aria-label="<?php echo _t('PUBLICATION_MANDATORY_FIELD'); ?>">*</span></label>
 					<div class="controls">
 						<input class="control-group form-control" type="text" required="required" placeholder="<?php echo _t('PUBLICATION_EBOOK_TITLE'); ?>" id="publication-title" name="publication-title" value="<?php echo (isset($metadatas['publication-title'])) ? $metadatas['publication-title'] : ''; ?>" />
 					</div>
@@ -135,36 +135,22 @@
 
 				<?php if (!empty($default['desc'])): ?>
 					<input type="hidden" required id="publication-description" name="publication-description" value="<?php echo (isset($metadatas['publication-description'])) ? $metadatas['publication-description'] : $default['desc']; ?>" />
-				<?php elseif ($outputFormat == 'newsletter') : ?>
+				<?php else : ?>
 					<div class="form-group">
 						<label for="publication-description" class="control-label"><?php echo _t('PUBLICATION_EBOOK_DESC'); ?></label>
 						<div class="controls">
 							<textarea class="control-group form-control" placeholder="<?php echo _t('PUBLICATION_EBOOK_DESC'); ?>" id="publication-description" name="publication-description"><?php echo (isset($metadatas['publication-description'])) ? $metadatas['publication-description'] : ''; ?></textarea>
 						</div>
 					</div>
-				<?php else : ?>
-					<div class="form-group">
-						<label for="publication-description" class="control-label"><?php echo _t('PUBLICATION_EBOOK_DESC'); ?></label>
-						<div class="controls">
-							<textarea class="control-group form-control" required="required" placeholder="<?php echo _t('PUBLICATION_EBOOK_DESC'); ?>" id="publication-description" name="publication-description"><?php echo (isset($metadatas['publication-description'])) ? $metadatas['publication-description'] : ''; ?></textarea>
-						</div>
-					</div>
 				<?php endif; ?>
 
 				<?php if (!empty($default['author'])): ?>
 					<input type="hidden" required id="publication-author" name="publication-author" value="<?php echo (isset($metadatas['publication-author'])) ? $metadatas['publication-author'] : $default['author']; ?>" />
-				<?php elseif ($outputFormat == 'newsletter') : ?>
-					<div class="form-group">
-						<label for="publication-author" class="control-label"><?php echo _t('PUBLICATION_EBOOK_AUTHOR'); ?></label>
-						<div class="controls">
-							<input class="control-group form-control" type="text" placeholder="<?php echo _t('PUBLICATION_EXAMPLE_AUTHOR'); ?>" id="publication-author" name="publication-author" value="<?php echo (isset($metadatas['publication-author'])) ? $metadatas['publication-author'] : ''; ?>" />
-						</div>
-					</div>
 				<?php else : ?>
 					<div class="form-group">
 						<label for="publication-author" class="control-label"><?php echo _t('PUBLICATION_EBOOK_AUTHOR'); ?></label>
 						<div class="controls">
-							<input class="control-group form-control" type="text" required="required" placeholder="<?php echo _t('PUBLICATION_EXAMPLE_AUTHOR'); ?>" id="publication-author" name="publication-author" value="<?php echo (isset($metadatas['publication-author'])) ? $metadatas['publication-author'] : ''; ?>" />
+							<input class="control-group form-control" type="text" placeholder="<?php echo _t('PUBLICATION_EXAMPLE_AUTHOR'); ?>" id="publication-author" name="publication-author" value="<?php echo (isset($metadatas['publication-author'])) ? $metadatas['publication-author'] : ''; ?>" />
 						</div>
 					</div>
 				<?php endif; ?>
@@ -176,7 +162,7 @@
 				<div class="form-group">
 					<label for="publication-cover-image" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_IMAGE'); ?></label>
 					<div class="controls">
-						<input class="control-group form-control" type="url" required="required" placeholder="http://" id="publication-cover-image" name="publication-cover-image" value="<?php if (isset($metadatas['publication-cover-image'])) { echo $metadatas['publication-cover-image']; } elseif(!empty($coverImageUrl)) {echo $coverImageUrl; } ?>" />
+						<input class="control-group form-control" type="url" placeholder="http://" id="publication-cover-image" name="publication-cover-image" value="<?php if (isset($metadatas['publication-cover-image'])) { echo $metadatas['publication-cover-image']; } elseif(!empty($coverImageUrl)) {echo $coverImageUrl; } ?>" />
 					</div>
 				</div>
 			<?php endif; // !empty($default['coverimage']) ?>

@@ -34,6 +34,7 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_GENERATE' => 'Generate',
 		'PUBLICATION_GOTO_EBOOK_PAGE' => 'Go to page: ',
 		'PUBLICATION_INSERT_PAGE_BREAK' => 'Insert page break',
+		'PUBLICATION_MANDATORY_FIELD' => 'Mandatory field',
 		'PUBLICATION_MISSING_NEWSLETTER_FORM' => 'In order to produce a newsletter, you must indicate a form id (See readme.md file).',
 		'PUBLICATION_NEWSLETTER' => 'Newsletter',
 		'PUBLICATION_NEWSLETTER_CREATED' => 'The newsletter record has successfully been created',

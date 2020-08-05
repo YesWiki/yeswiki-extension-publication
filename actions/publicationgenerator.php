@@ -211,24 +211,10 @@ if (isset($_POST["page"])) {
 		// So far everything is OK
 		if ($_POST['outputformat'] == 'Ebook') {  // We want to produce an ebook (default behaviour)
 			do { // use of a do-while loop in order to allow for breaks (in case of errors specific to ebooks)
-				if (!isset($_POST["publication-description"]) || $_POST["publication-description"] == '') {
-					// There is no publication-description
-					$output = '<div class="alert alert-danger">' . _t('PUBLICATION_NO_DESC_FOUND') . '</div>' . "\n";
-					break; // Stops the current do-while loop
-		 		}
-				if (!isset($_POST["publication-author"]) || $_POST["publication-author"] == '') {
-					// there is no publication-author
-					$output = '<div class="alert alert-danger">' . _t('PUBLICATION_NO_AUTHOR_FOUND') . '</div>' . "\n";
-					break; // Stops the current do-while loop
-			  }
-			  if (!isset($_POST["publication-cover-image"]) || $_POST["publication-cover-image"] == '') {
+			  if (isset($_POST["publication-cover-image"]) && $_POST["publication-cover-image"] !== '' && preg_match("/.(jpe?g|png|svg)$/i", $_POST["publication-cover-image"]) != 1) {
 					// there is no publication-cover-image
-					$output = '<div class="alert alert-danger">' . _t('PUBLICATION_NO_IMAGE_FOUND') . '</div>' . "\n";
-					break; // Stops the current do-while loop
-				}
-				if (preg_match("/.(jpe?g)$/i", $_POST["publication-cover-image"]) != 1) {
-					// publication-cover-image is not correct
 					$output = '<div class="alert alert-danger">' . _t('PUBLICATION_NOT_IMAGE_FILE') . '</div>' . "\n";
+					break; // Stops the current do-while loop
 				}
 				// So far everything is OK (regarding ebooks)
 				if (isset($ebookPageName) && !empty($ebookPageName)) {

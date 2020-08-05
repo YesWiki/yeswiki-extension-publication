@@ -1,6 +1,6 @@
 {
     "name": "yeswiki/extension-ebook",
-    "description": "Crée un pdf à partir d'une sélection de page YesWiki.",
+    "description": "Crée un pdf à partir d'une sélection de pages YesWiki.",
     "type": "yeswiki-plugin",
     "license": "GPL-3.0",
     "minimum-stability": "beta",
@@ -8,7 +8,7 @@
       "test": "phpunit"
     },
     "require": {
-        "chrome-php/chrome": "^0.7.0"
+        "chrome-php/chrome": "^0.8.1"
     },
     "require-dev": {
     },

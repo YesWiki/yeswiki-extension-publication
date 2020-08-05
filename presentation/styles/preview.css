@@ -8,15 +8,20 @@
 #controls {
   display: none;
 }
+
+body {
+  overflow: auto !important;
+}
+
 @media screen {
   body {
-    background-color: whitesmoke;
+    background-color: whitesmoke !important;
   }
   .pagedjs_page {
-    background-color: #fdfdfd;
+    background-color: #fdfdfd !important;
     margin: calc(var(--margin) * 4) var(--margin);
     flex: none;
-    box-shadow: 0 0 0 1px var(--color-mbox);
+    box-shadow: 0 0 0 1px var(--color-mbox) !important;
   }
   .pagedjs_pages {
     width: calc((var(--pagedjs-width) * 2) + (var(--margin) * 4));

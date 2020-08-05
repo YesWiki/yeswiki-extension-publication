@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title><?php echo $siteTitle ?> : <?php echo $title ?></title>
+  <?php echo $styles ?>
+
+  <link rel="stylesheet" href="<?php echo $baseUrl ?>/tools/publication/presentation/styles/preview.css">
+  <link rel="stylesheet" href="<?php echo $baseUrl ?>/tools/publication/presentation/styles/base.css">
+
+  <!-- Paged.js handles the printing layout -->
+  <script type="module" src="<?php echo $baseUrl ?>/tools/publication/libs/print.js"></script>
+</head>
+
+<body class="<?php echo join(" ", $stylesModifiers) ?>">
+  <?php echo $content ?>
+</body>
+</html>

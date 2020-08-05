@@ -1,17 +1,21 @@
 <?php
 
-echo <<<EOF
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>YesWiki Publication</title>
-    <link rel="stylesheet" href="tools/publication/presentation/styles/print.css">
-    <link rel="stylesheet" href="tools/publication/presentation/styles/preview.css">
-    <script defer src="tools/publication/libs/vendor/pagedjs/paged.polyfill.js"></script>
-  </head>
+global $wiki;
 
-  <body>
-    {$this->format($this->page["body"])}
-  </body>
-</html>
-EOF;
+if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-title'])) {
+    include_once 'includes/squelettephp.class.php';
+    $exportTemplate = new SquelettePhp('print-preview.tpl.html', 'publication');
+
+    echo $exportTemplate->render(array(
+        "baseUrl" => $wiki->getBaseUrl(),
+        "content" => $wiki->Format($wiki->page["body"]),
+        "siteTitle" => $wiki->GetConfigValue('wakka_name'),
+        "title" => $wiki->page['metadatas']['publication-title'],
+        "styles" => $wiki->Format("{{linkstyle}}"),
+        "stylesModifiers" => array(
+            "print",
+            "page-format--A4",
+            "page-orientation--portrait"
+        ),
+    ));
+}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="<?php echo join(" ", $stylesModifiers) ?>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
@@ -8,12 +8,14 @@
 
   <link rel="stylesheet" href="<?php echo $baseUrl ?>/tools/publication/presentation/styles/preview.css">
   <link rel="stylesheet" href="<?php echo $baseUrl ?>/tools/publication/presentation/styles/base.css">
+  <?php if ($themeCustomCSS) { ?><link rel="stylesheet" href="<?php echo $baseUrl ?>/<?php echo $themeCustomCSS ?>">
+  <?php } ?>
 
   <!-- Paged.js handles the printing layout -->
   <script type="module" src="<?php echo $baseUrl ?>/tools/publication/libs/print.js"></script>
 </head>
 
-<body class="<?php echo join(" ", $stylesModifiers) ?>">
+<body>
   <?php echo $content ?>
 </body>
 </html>

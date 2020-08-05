@@ -1,3 +1,17 @@
 .print .pager {
   display: none;
 }
+
+.print [class*="col-"],
+.print .left,
+.print .right {
+  float: none;
+}
+
+.print [class*="col-"] {
+  width: auto !important;
+}
+
+.print.hide-links-from-print a[href]::after{
+  content: "";
+}

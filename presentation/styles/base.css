@@ -1,6 +1,24 @@
-.print .pager {
+.print .include {
+  break-after: page;
+}
+
+/* We hide a .well if it closes a page */
+.print .include .well:last-child {
   display: none;
 }
+
+/* Unfold panels and other collapsed content */
+.print .collapse {
+  display: block;
+}
+
+/* Wells content is partially lost if a page break happens inside it */
+.print .well,
+.print .panel {
+  page-break-inside: avoid;
+}
+
+/* We cancel bootstrap column system on print */
 
 .print [class*="col-"],
 .print .left,
@@ -12,6 +30,7 @@
   width: auto !important;
 }
 
+/* OPTION We remove link URLs from the print */
 .print.hide-links-from-print a[href]::after{
   content: "";
 }

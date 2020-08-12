@@ -1,6 +1,115 @@
-.print .include {
-  break-after: page;
+.book-cover {
+  page: cover;
 }
+
+div.include {
+  break-before: always;
+  page: section;
+}
+  div.include .include {
+    break-before: auto;
+    page: unset;
+  }
+
+.page-break {
+  break-before: always;
+  page: pagebreak;
+}
+
+.print .book-cover {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@page {
+  margin: 30mm 30mm;
+
+  @footnote {
+    margin: 0.6em 0 0 0;
+    padding: 0.3em 0 0 0;
+    max-height: 10em;
+  }
+}
+
+@page :left {
+  margin-left: 30mm;
+  margin-right: 20mm;
+
+  @bottom-left-corner {
+    content: counter(page);
+    font-family: monospace;
+    font-weight: bold;
+  }
+
+  @top-center {
+    content: string(booktitle);
+    color: var(--neutral-soft-color);
+    font-size: .8em;
+    letter-spacing: 0.8;
+    text-transform: uppercase;
+  }
+}
+
+@page :right {
+  margin-left: 20mm;
+  margin-right: 30mm;
+
+  @bottom-right-corner {
+    content: counter(page);
+    font-family: monospace;
+    font-weight: bold;
+  }
+
+  @top-center {
+    content: string(sectiontitle);
+    color: var(--neutral-soft-color);
+    font-size: .8em;
+    letter-spacing: 0.8;
+    text-transform: uppercase;
+  }
+}
+
+
+@page cover {
+  break-after: always;
+
+  @top-center {
+    content: none;
+  }
+
+  @bottom-right-corner {
+    content: none;
+  }
+}
+
+@page section {
+  orphans: 6;
+}
+
+.print .book-cover h1 {
+  string-set: booktitle content(text);
+}
+
+.print .include h1:first-child {
+  string-set: sectiontitle content(text);
+}
+
+/* Cover page styling */
+.print .pagedjs_named_page.pagedjs_cover_page {
+  background-color: var(--header-title-color) !important;
+  color: var(--header-bg-color);
+}
+  .print .pagedjs_named_page.pagedjs_cover_page * {
+    color: inherit;
+  }
+
+  .print .pagedjs_named_page.pagedjs_cover_page .pagedjs_page_content > div {
+    height: 100%;
+  }
+
+/* Content page styling */
 
 /* We hide a .well if it closes a page */
 .print .include .well:last-child {
@@ -14,12 +123,31 @@
 
 /* Wells content is partially lost if a page break happens inside it */
 .print .well,
+.print .panel-heading,
+.print h1,
+.print h2,
+.print h3,
+.print h4,
+.print h5,
+.print h6 {
+  page-break-inside: avoid;
+}
+
 .print .panel {
   page-break-inside: avoid;
 }
 
-/* We cancel bootstrap column system on print */
+.print .well,
+.print .panel {
+  margin-top: 1em;
+  orphans: 6;
+}
 
+.print .panel-heading[data-toggle="collapse"]::after {
+  display: none;
+}
+
+/* We cancel bootstrap column system on print */
 .print [class*="col-"],
 .print .left,
 .print .right {
@@ -31,6 +159,6 @@
 }
 
 /* OPTION We remove link URLs from the print */
-.print.hide-links-from-print a[href]::after{
+.print.hide-links-url a[href]::after{
   content: "";
 }

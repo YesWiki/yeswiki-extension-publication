@@ -1,0 +1,6 @@
+@media print {
+  @page {
+    bleed: 6mm;
+    marks: crop cross;
+  }
+}

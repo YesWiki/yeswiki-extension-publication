@@ -6,10 +6,11 @@
   <title><?php echo $siteTitle ?> : <?php echo $title ?></title>
   <?php echo $styles ?>
 
-  <link rel="stylesheet" href="<?php echo $baseUrl ?>/tools/publication/presentation/styles/preview.css">
-  <link rel="stylesheet" href="<?php echo $baseUrl ?>/tools/publication/presentation/styles/base.css">
-  <?php if ($themeCustomCSS) { ?><link rel="stylesheet" href="<?php echo $baseUrl ?>/<?php echo $themeCustomCSS ?>">
-  <?php } ?>
+  <style type="text/css">
+    <?php foreach($stylesheets as $sheet ) { ?>@import url(<?php echo $baseUrl ?>/<?php echo $sheet ?>);
+    <?php } ?>
+
+  </style>
 
   <!-- Paged.js handles the printing layout -->
   <script type="module" src="<?php echo $baseUrl ?>/tools/publication/libs/print.js"></script>

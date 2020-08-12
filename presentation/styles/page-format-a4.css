@@ -1,0 +1,22 @@
+@media print{
+    @page {
+        size: A4;
+        margin: 10mm 15mm;
+        bleed: 6mm;
+        marks: crop cross;
+    }
+    @page:left {
+        margin-left: 35mm;
+        margin-right: 15mm;
+    }
+    @page:right {
+        margin-left: 15mm;
+        margin-right: 35mm;
+    }
+}
+
+@media print {
+  @page {
+    size: A4;
+  }
+}

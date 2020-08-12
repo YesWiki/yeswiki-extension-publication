@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="<?php echo join(" ", $stylesModifiers) ?>">
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
@@ -7,10 +7,18 @@
   <?php echo $styles ?>
 
   <style type="text/css">
-    <?php foreach($stylesheets as $sheet ) { ?>@import url(<?php echo $baseUrl ?>/<?php echo $sheet ?>);
-    <?php } ?>
-
-  </style>
+  @media print {
+    @page {
+      size: <?php echo $options['page-format'] ?> <?php $options['page-orientation'] ?>;
+      <?php if ($options['show-print-marks']) { ?>
+      bleed: 6mm;
+      marks: crop cross;
+      <?php } ?>
+    }
+  }</style>
+  <?php foreach($stylesheets as $sheet ) { ?>
+  <link rel="stylesheet" href="<?php echo $baseUrl ?>/<?php echo $sheet ?>">
+  <?php } ?>
 
   <!-- Paged.js handles the printing layout -->
   <script type="module" src="<?php echo $baseUrl ?>/tools/publication/libs/print.js"></script>

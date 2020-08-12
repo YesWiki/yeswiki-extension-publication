@@ -14,11 +14,16 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
         '',
         $wiki->Format($wiki->page["body"])
     );
+    $content = preg_replace('#(<br />\n){2,}#sU', "\n$1", $content);
+    $content = preg_replace('#<br />\n(<h\d)#sU', "\n$1", $content);
 
     // user  options
     $options = array(
-        "page-format" => 'a4',
-        "page-orientation" => 'portrait'
+        "book-cover" => true,
+        "hide-links-url" => true,
+        "page-format" => 'A4',
+        "page-orientation" => 'portrait',
+        "show-print-marks" => false
     );
 
     // build the preview/printing page
@@ -26,14 +31,12 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
         "baseUrl" => $wiki->getBaseUrl(),
         "content" => $content,
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
+        "options" => $options,
         "title" => $wiki->page['metadatas']['publication-title'],
         "styles" => $wiki->Format("{{linkstyle}}"),
         "stylesheets" => array_filter(array(
             'tools/publication/presentation/styles/preview.css',
             'tools/publication/presentation/styles/base.css',
-            'tools/publication/presentation/styles/page-format-'. $options['page-format'] .'.css',
-            // 'tools/publication/presentation/styles/page-orientation-'. $options['page-orientation'] .'.css',
-            $options['show-marks'] ? 'tools/publication/presentation/styles/page-marks.css' : '',
             file_exists($themeCustomCSS) ? $themeCustomCSS : ''
         )),
         "stylesModifiers" => array(
@@ -42,10 +45,12 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
             "page-format--" . $options['page-format'],
             // could be chosen when creating an eBook
             "page-orientation--" . $options['page-orientation'],
+            // OPTION book-cover
+            $options['book-cover'] ? "book-cover" : '',
             // OPTION show-print-marks
-            "show-print-marks",
+            $options['show-print-marks'] ? "show-print-marks" : '',
             // OPTION hide-links-from-print
-            "hide-links-from-print",
+            $options['hide-links-url'] ? "hide-links-url" : '',
         ),
     ));
 }

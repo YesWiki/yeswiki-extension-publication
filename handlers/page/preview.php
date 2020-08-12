@@ -8,6 +8,13 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
 
     $themeCustomCSS = 'themes/' . $wiki->config['favorite_theme'] . '/styles/publication.override.css';
 
+    // we remove the pager from the display
+    $content = preg_replace(
+        '#(<br />\n)?<ul class="pager">.+</ul>#sU',
+        '',
+        $wiki->Format($wiki->page["body"])
+    );
+
     // user  options
     $options = array(
         "page-format" => 'a4',
@@ -17,7 +24,7 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
     // build the preview/printing page
     echo $exportTemplate->render(array(
         "baseUrl" => $wiki->getBaseUrl(),
-        "content" => $wiki->Format($wiki->page["body"]),
+        "content" => $content,
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
         "title" => $wiki->page['metadatas']['publication-title'],
         "styles" => $wiki->Format("{{linkstyle}}"),

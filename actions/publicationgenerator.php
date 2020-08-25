@@ -155,11 +155,11 @@ if (!empty($groupselector)) {
             if (!empty($tagList)) {
                 $sql .= ' AND tags.value IN (' . $tagList . ') AND tags.property = "http://outils-reseaux.org/_vocabulary/tag" AND tags.resource = tag';
             }
-            
+
             if ($addInstalledPages) {
                 var_dump(implode(',', $installedPageNames));
             }
-            
+
             $sql .= ' ORDER BY tag ASC';
             $results[$i]['entries'] = $this->LoadAll($sql);
         }
@@ -227,10 +227,16 @@ if (isset($_POST["page"])) {
 				}
 				$output .= '//' . _t('PUBLICATION_CONTENT_VISIBLE_ONLINE_FROM_PAGE') . ' : ' . $this->href('', $pageName) . ' // {{button link="' . $this->href('pdf', $pageName) . '" text="' . _t('PUBLICATION_DOWNLOAD_PDF') . '" class="btn-primary pull-right" icon="book"}}' . "\n";
 				unset($_POST['page']);
-				unset($_POST['antispam']);
-				$this->SaveMetaDatas($pageName, $_POST);
-				$this->SavePage($pageName, $output);
-				$output = $this->Format('""<div class="alert alert-success">' . _t('PUBLICATION_EBOOK_PAGE_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $pageName . '" text="' . _t('PUBLICATION_GOTO_EBOOK_PAGE') . ' ' . $pageName . '"}}""</div>""' . "\n");
+        unset($_POST['antispam']);
+
+        if ($this->SavePage($pageName, $output) === 0) {
+          $this->SaveMetaDatas($pageName, $_POST);
+          $output = $this->Format('""<div class="alert alert-success">' . _t('PUBLICATION_EBOOK_PAGE_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $pageName . '" text="' . _t('PUBLICATION_GOTO_EBOOK_PAGE') . ' ' . $pageName . '"}}""</div>""' . "\n");
+        }
+        else {
+          $output = $this->Format('""<div class="alert alert-danger alert-error">' . _t('PUBLICATION_EBOOK_PAGE_CREATION_FAILED') . '.""' . "\n" . '{{button class="btn-primary" link="' . $this->GetPageTag() . '" text="' . _t('PUBLICATION_GOTO_EBOOK_CREATION_PAGE') . ' ' . $this->GetPageTag() . '"}}""</div>""' . "\n");
+        }
+
 			} while (FALSE); // end of ebook specific loop
 		} elseif ($outputFormat == 'newsletter') { // We want to produce a newsletter
 			$fiche['id_typeannonce'] = $formId;

@@ -21,9 +21,16 @@ function intersects (referenceArray, matchingArray, compFn = (a, b) => b === a) 
  * media@print CSS styles leak to media@screen when Paged rewrites CSS rules
  */
 registerHandlers(class removeBootstrapStarRule extends Handler {
-  done = false
+  get yeswikiCercoRules () {
+    return [
+      {
+        type: 'TypeSelector',
+        name: '*'
+      }
+    ]
+  }
 
-  get rules () {
+  get bootstrapRules () {
     return [
       {
         type: 'TypeSelector',
@@ -45,15 +52,18 @@ registerHandlers(class removeBootstrapStarRule extends Handler {
   }
 
   onRule ({ prelude, block }) {
-    if (!this.done && prelude.type === 'SelectorList') {
+    if (prelude.type === 'SelectorList') {
       const selectors = prelude.children.toArray().map(s => s.children.first())
 
-      if (intersects(this.rules, selectors, this.compFn)) {
+      // we target '* { ...: ...!important; }' type of rules
+      // they tend to defeat style inheritance for print
+      if (
+        intersects(this.yeswikiCercoRules, selectors, this.compFn) ||
+        intersects(this.bootstrapRules, selectors, this.compFn)
+      ) {
         block.children.forEach((declaration, index) => {
           block.children.remove(index)
         })
-
-        this.done = true
       }
     }
   }

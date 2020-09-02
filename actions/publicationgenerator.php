@@ -221,10 +221,25 @@ if (isset($_POST["page"])) {
 					$pageName = $ebookPageName;
 				} else {
 					$pageName = generatePageName($ebookPageNamePrefix . ' ' . $_POST["publication-title"]);
-				}
-				foreach ($_POST["page"] as $page) {
-					$output .= '{{include page="' . $page . '" class=""}}' . "\n";
-				}
+        }
+
+
+        // Generate the content of the page body
+        // @todo refactor it to share its logic with newsletter
+        foreach ($_POST["page"] as $page) {
+          // we turn some actions into explicit content
+          // for now, {{pagebreak}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
+          if (preg_match('#{{\s*pagebreak\s*}}#U', $page)) {
+            $output .= $page . "\n";
+          }
+          // we assume it is a page tag otherwise
+          // maybe we should also explicitly check it is a valid page tag instead?
+          else {
+            $output .= '{{include page="' . $page . '" class=""}}' . "\n";
+          }
+        }
+
+
 				$output .= '//' . _t('PUBLICATION_CONTENT_VISIBLE_ONLINE_FROM_PAGE') . ' : ' . $this->href('', $pageName) . ' // {{button link="' . $this->href('pdf', $pageName) . '" text="' . _t('PUBLICATION_DOWNLOAD_PDF') . '" class="btn-primary pull-right" icon="book"}}' . "\n";
 				unset($_POST['page']);
         unset($_POST['antispam']);
@@ -243,10 +258,23 @@ if (isset($_POST["page"])) {
 			$fiche['bf_titre'] = $_POST["publication-title"];
 			$fiche['bf_description'] = $_POST["publication-description"];
 			$fiche['bf_author'] = $_POST["publication-author"];
-			$fiche['bf_content'] = '';
+      $fiche['bf_content'] = '';
+
+      // Generate the content of the page body
+      // @todo Refactor this as a function to share it with Ebook logic
 			foreach ($_POST["page"] as $page) {
-				$fiche['bf_content'] .= $this->Format('{{include page="' . $page . '" class=""}}' . "\n");
-			}
+        // we turn some actions into explicit content
+        // for now, {{pagebreak}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
+        if (preg_match('#{{\s*pagebreak\s*}}#U', $page)) {
+          $fiche['bf_content'] .= $this->Format($page . "\n");
+        }
+        // we assume it is a page tag otherwise
+        // maybe we should also explicitly check it is a valid page tag instead?
+        else {
+  				$fiche['bf_content'] .= $this->Format('{{include page="' . $page . '" class=""}}' . "\n");
+        }
+      }
+
 			$acceptedTags = '<h1><h2><h3><h4><h5><h6><hr><hr/><br><br/><span><blockquote><i><u><b><strong><ol><ul><li><small><div><p><a><table><tr><th><td><img><figure><caption><iframe>';
 			$fiche['bf_content'] = strip_tags($fiche['bf_content'], $acceptedTags);
 			$fiche = baz_insertion_fiche($fiche);

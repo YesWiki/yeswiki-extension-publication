@@ -63,9 +63,9 @@
 		<div class="alert alert-info">
 			<?php echo _t('PUBLICATION_ORDER_PAGES_INFO'); ?>
 		</div>
-		<a class="pull-right btn btn-default btn-xs page-break" title="<?php echo _t('PUBLICATION_INSERT_PAGE_BREAK'); ?>" href="#">
+		<button class="pull-right btn btn-default btn-outline-secondary btn-xs page-break" title="<?php echo _t('PUBLICATION_INSERT_PAGE_BREAK'); ?>" href="#">
 			<i class="fas fa-plus"></i> <?php echo _t('PUBLICATION_INSERT_PAGE_BREAK'); ?>
-		</a>
+		</button>
 		<div class="clearfix"></div>
 		<div class="well">
 			<form class="export-table-form" method="post" action="<?php echo $url;?>">
@@ -160,13 +160,49 @@
 					<input type="hidden" required id="publication-cover-image" name="publication-cover-image" value="<?php echo (isset($metadatas['publication-cover-image'])) ? $metadatas['publication-cover-image'] : $default['coverimage']; ?>" />
 				<?php else : ?>
 				<div class="form-group">
-					<label for="publication-cover-image" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_IMAGE'); ?></label>
+					<label for="publication-cover-page" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_IMAGE'); ?></label>
 					<div class="controls">
 						<input class="control-group form-control" type="url" placeholder="http://" id="publication-cover-image" name="publication-cover-image" value="<?php if (isset($metadatas['publication-cover-image'])) { echo $metadatas['publication-cover-image']; } elseif(!empty($coverImageUrl)) {echo $coverImageUrl; } ?>" />
 					</div>
 				</div>
 			<?php endif; // !empty($default['coverimage']) ?>
-		<?php endif; // $outputFormat == 'ebook' ?>
+    <?php endif; // $outputFormat == 'ebook' ?>
+        <details>
+          <summary><?php echo _t('PUBLICATION_MORE_OPTIONS'); ?></summary>
+
+          <div class="form-row">
+            <div class="form-group form-check col-md-12">
+              <input type="checkbox" class="form-check-input" name="publication-cover-page" value="1" checked id="publication-cover-page">
+              <label for="publication-cover-page" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_PAGE'); ?></label>
+              <small class="form-text text-muted"><?php echo _t('PUBLICATION_EBOOK_COVER_PAGE_HELP') ?></small>
+            </div>
+
+            <!-- <div class="form-group col-md-12">
+              <label for="publication-cover-background-color" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_BACKGROUND_COLOR'); ?></label>
+              <input type="color" class="form-control" value="#987654" name="publication-cover-background-color" id="publication-cover-background-color">
+            </div> -->
+          </div>
+
+
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="publication-page-format" class="control-label"><?php echo _t('PUBLICATION_EBOOK_FORMAT'); ?></label>
+              <select class="form-control" name="publication-page-format" id="publication-page-format">
+                <option value="A3">A3</option>
+                <option value="A4" selected>A4</option>
+                <option value="A5">A5</option>
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="publication-page-orientation" class="control-label"><?php echo _t('PUBLICATION_EBOOK_ORIENTATION'); ?></label>
+              <select class="form-control" name="publication-page-orientation">
+                <option value="portrait" selected><?php echo _t('PUBLICATION_EBOOK_ORIENTATION_PORTRAIT'); ?></option>
+                <option value="landscape"><?php echo _t('PUBLICATION_EBOOK_ORIENTATION_LANDSCAPE'); ?></option>
+              </select>
+            </div>
+          </div>
+        </details>
 
 				<?php if(!empty($ebookPageName)) echo '<input name="ebookpagename" value="'.$ebookPageName.'">'; ?>
 				<br />

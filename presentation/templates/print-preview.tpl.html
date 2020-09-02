@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title><?php echo $siteTitle ?> : <?php echo $title ?></title>
+  <title><?php echo $metadatas['publication-title'] ?> • <?php echo $siteTitle ?></title>
   <?php echo $styles ?>
 
   <style type="text/css">
@@ -26,8 +26,11 @@
 
 <body class="<?php echo join(" ", $stylesModifiers) ?>">
   <?php if ($options['book-cover']) { ?>
-  <section class="book-cover">
-    <h1><?php echo $title ?></h1>
+  <section class="publication-cover <?php echo !$metadatas['publication-cover-image'] ?: 'has-background-image'?>"<?php echo $metadatas['publication-cover-image'] ? ' style="background-image: url('. $metadatas['publication-cover-image'] .')"' : '' ?>>
+    <h1 class="publication-title"><?php echo $metadatas['publication-title'] ?></h1>
+
+    <p class="publication-description"><?php echo $metadatas['publication-title'] ?></p>
+    <p class="publication-author"><?php echo $metadatas['publication-author'] ?></p>
   </section>
   <div class="page-break blank-page"></div>
   <?php } ?>

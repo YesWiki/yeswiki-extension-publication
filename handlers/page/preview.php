@@ -32,7 +32,7 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
         "content" => $content,
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
         "options" => $options,
-        "title" => $wiki->page['metadatas']['publication-title'],
+        "metadatas" => $wiki->page['metadatas'],
         "styles" => $wiki->Format("{{linkstyle}}"),
         "stylesheets" => array_filter(array(
             'tools/publication/presentation/styles/preview.css',

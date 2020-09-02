@@ -40,7 +40,28 @@ body {
   .pagedjs_first_page {
     margin-left: calc(50% + var(--margin));
   }
+
+  .pagedjs_pagebreak_page {
+    position: relative;
+  }
+
+    .pagedjs_pagebreak_page .pagedjs_page_content {
+      border: 4px dotted currentColor;
+      opacity: 0.5;
+    }
+
+    .pagedjs_pagebreak_page .pagedjs_page_content:before {
+      content: "Saut de page";
+      font-size: 4em;
+      font-weight: bold;
+      position: absolute;
+      text-align: center;
+      top: 50%;
+      transform: rotate(-0.15turn);
+      width: 100%;
+    }
 }
+
 @media screen {
   .debug .pagedjs_margin-top .pagedjs_margin-top-left-corner,
   .debug .pagedjs_margin-top .pagedjs_margin-top-right-corner {

@@ -69,6 +69,36 @@ registerHandlers(class removeBootstrapStarRule extends Handler {
   }
 })
 
+/**
+ * Moves background image to cover the entire page
+ */
+registerHandlers(class backgroundImageCover extends Handler {
+  getParent (rootNode, condition) {
+    let node = rootNode
+
+    while (node) {
+      if (condition(node)) {
+        return node
+      }
+
+      node = node.parentElement
+    }
+
+    return null
+  }
+
+  renderNode (node) {
+    if (node.classList && node.classList.contains('has-background-image')) {
+      const page = this.getParent(node, (n) => n.classList.contains('pagedjs_page'))
+
+      // we swap style attributes
+      page.classList.add('has-background-image')
+      page.style.backgroundImage = node.style.backgroundImage
+      node.style.backgroundImage = null
+    }
+  }
+})
+
 window.addEventListener('load', () => {
   new Previewer().preview()
 })

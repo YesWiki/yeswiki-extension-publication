@@ -1,10 +1,10 @@
-.book-cover {
-  page: cover;
+.publication-cover {
+  page: publication-cover;
 }
 
 div.include {
   break-before: always;
-  page: section;
+  page: publication-section;
 }
   div.include .include {
     break-before: auto;
@@ -16,7 +16,7 @@ div.include {
   page: pagebreak;
 }
 
-.print .book-cover {
+.print .publication-cover {
   display: flex;
   height: 100%;
   flex-direction: column;
@@ -71,8 +71,13 @@ div.include {
   }
 }
 
-
-@page cover {
+/**
+ * Publication Cover
+ */
+@page publication-cover {
+  background-color: var(--header-title-color) !important;
+  background-size: cover;
+  color: var(--header-bg-color);
   break-after: always;
 
   @top-center {
@@ -84,32 +89,46 @@ div.include {
   }
 }
 
-@page section {
-  orphans: 6;
-}
-
-.print .book-cover h1 {
-  string-set: booktitle content(text);
-}
-
-.print .include h1:first-child {
-  string-set: sectiontitle content(text);
-}
-
-/* Cover page styling */
-.print .pagedjs_named_page.pagedjs_cover_page {
-  background-color: var(--header-title-color) !important;
-  color: var(--header-bg-color);
-}
-  .print .pagedjs_named_page.pagedjs_cover_page * {
+  .print .pagedjs_named_page.pagedjs_publication-cover_page * {
     color: inherit;
   }
 
-  .print .pagedjs_named_page.pagedjs_cover_page .pagedjs_page_content > div {
+  .print .pagedjs_publication-cover_page.has-background-image .publication-title,
+  .print .pagedjs_publication-cover_page.has-background-image .publication-description,
+  .print .pagedjs_publication-cover_page.has-background-image .publication-author {
+    background-color: var(--header-title-color);
+    padding: .5em 20px;
+    align-self: flex-start;
+  }
+
+  .print .publication-author {
+    margin-top: auto;
+  }
+
+  /* empty element are hidden */
+  .print .pagedjs_publication-cover_page.has-background-image *:empty {
+    display: none;
+  }
+
+  .print .pagedjs_named_page.pagedjs_publication-cover_page .pagedjs_page_content > div {
     height: 100%;
   }
 
-/* Content page styling */
+  .print .publication-cover h1 {
+    string-set: booktitle content(text);
+  }
+
+/**
+ * Publication Section
+ */
+@page publication-section {
+  orphans: 6;
+}
+
+  .print .include h1:first-child {
+    string-set: sectiontitle content(text);
+  }
+
 
 /* We hide a .well if it closes a page */
 .print .include .well:last-child {

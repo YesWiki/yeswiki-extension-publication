@@ -152,10 +152,6 @@ div.include {
   page-break-inside: avoid;
 }
 
-.print .panel {
-  page-break-inside: avoid;
-}
-
 .print .well,
 .print .panel {
   margin-top: 1em;

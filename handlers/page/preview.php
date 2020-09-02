@@ -19,20 +19,21 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
 
     // user  options
     $options = array(
-        "book-cover" => true,
-        "hide-links-url" => true,
-        "page-format" => 'A4',
-        "page-orientation" => 'portrait',
-        "show-print-marks" => false
+        "publication-hide-links-url" => '1',
+        "publication-cover-page" => '1',
+        "publication-page-format" => 'A4',
+        "publication-page-orientation" => 'portrait',
+        "publication-print-marks" => '0'
     );
+
+    $metadatas = array_merge($options, $wiki->page['metadatas']);
 
     // build the preview/printing page
     echo $exportTemplate->render(array(
         "baseUrl" => $wiki->getBaseUrl(),
         "content" => $content,
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
-        "options" => $options,
-        "metadatas" => $wiki->page['metadatas'],
+        "metadatas" => $metadatas,
         "styles" => $wiki->Format("{{linkstyle}}"),
         "stylesheets" => array_filter(array(
             'tools/publication/presentation/styles/preview.css',
@@ -42,15 +43,15 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
         "stylesModifiers" => array(
             "print",
             // could be chosen, when creating an eBook
-            "page-format--" . $options['page-format'],
+            "page-format--" . $metadatas['publication-page-format'],
             // could be chosen when creating an eBook
-            "page-orientation--" . $options['page-orientation'],
+            "page-orientation--" . $metadatas['publication-page-orientation'],
             // OPTION book-cover
-            $options['book-cover'] ? "book-cover" : '',
+            $metadatas['publication-cover-page'] === '1' ? "book-cover" : '',
             // OPTION show-print-marks
-            $options['show-print-marks'] ? "show-print-marks" : '',
+            $metadatas['publication-print-marks'] === '1' ? "show-print-marks" : '',
             // OPTION hide-links-from-print
-            $options['hide-links-url'] ? "hide-links-url" : '',
+            $metadatas['publication-hide-links-url'] === '1' ? "hide-links-url" : '',
         ),
     ));
 }

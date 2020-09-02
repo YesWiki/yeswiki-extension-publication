@@ -9,8 +9,8 @@
   <style type="text/css">
   @media print {
     @page {
-      size: <?php echo $options['page-format'] ?> <?php $options['page-orientation'] ?>;
-      <?php if ($options['show-print-marks']) { ?>
+      size: <?php echo $metadatas['publication-page-format'] ?> <?php echo $metadatas['publication-page-orientation'] ?>;
+      <?php if ($metadatas['publication-print-marks'] === '1') { ?>
       bleed: 6mm;
       marks: crop cross;
       <?php } ?>
@@ -25,7 +25,7 @@
 </head>
 
 <body class="<?php echo join(" ", $stylesModifiers) ?>">
-  <?php if ($options['book-cover']) { ?>
+  <?php if ($metadatas['publication-cover-page'] === '1') { ?>
   <section class="publication-cover <?php echo !$metadatas['publication-cover-image'] ?: 'has-background-image'?>"<?php echo $metadatas['publication-cover-image'] ? ' style="background-image: url('. $metadatas['publication-cover-image'] .')"' : '' ?>>
     <h1 class="publication-title"><?php echo $metadatas['publication-title'] ?></h1>
 

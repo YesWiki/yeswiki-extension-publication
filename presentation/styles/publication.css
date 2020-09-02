@@ -9,6 +9,12 @@
     border: 1px solid #d9534f;
 }
 
+.export-table-form details > summary {
+  cursor: pointer;
+  display: revert;  /* this is somewhat unset by Bootstrap, which we don't want in this case */
+  font-weight: bold;
+}
+
 #publication-selection-container.ui-sortable > * {
     cursor: move;
 }

@@ -152,6 +152,13 @@ div.include {
   page-break-inside: avoid;
 }
 
+.print iframe,
+.print video,
+.print audio {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
 .print .well,
 .print .panel {
   margin-top: 1em;

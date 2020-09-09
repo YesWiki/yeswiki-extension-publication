@@ -1,8 +1,27 @@
-.publication-cover {
+/**
+ * Writing helpers
+ */
+.yeswiki-publication .hide-print,
+.yeswiki-publication .hide-from-print,
+.yeswiki-publication .no-print,
+.yeswiki-publication .d-print-none {
+  display: none;
+}
+
+.yeswiki-publication .print-only,
+.yeswiki-publication .d-none.d-print-block {
+  display: block;
+  visibility: unset;
+}
+
+/**
+ * Page section definition
+ */
+/* .yeswiki-publication  */.publication-cover {
   page: publication-cover;
 }
 
-div.include {
+/* .yeswiki-publication  */div.include {
   break-before: always;
   page: publication-section;
 }

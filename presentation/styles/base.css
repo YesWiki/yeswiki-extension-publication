@@ -74,7 +74,7 @@
 
 @page:left {
   @bottom-center {
-    /* content: counter(page); */
+    content: counter(page);
     font-family: monospace;
   }
 
@@ -89,7 +89,7 @@
 
 @page:right {
   @bottom-center {
-    /* content: counter(page); */
+    content: counter(page);
     font-family: monospace;
   }
 
@@ -100,6 +100,28 @@
     letter-spacing: 0.8;
     text-transform: uppercase;
   }
+}
+
+/**
+ * Page number position
+ */
+.page-number-position--none .pagedjs_margin-bottom-center {
+  visibility: hidden;
+}
+
+.page-number-position--bottom-center .pagedjs_margin-bottom-center {
+  text-align: center;
+}
+
+.page-number-position--bottom-left .pagedjs_left_page .pagedjs_margin-bottom-center,
+.page-number-position--bottom-right .pagedjs_left_page .pagedjs_margin-bottom-center,
+.page-number-position--bottom-sides .pagedjs_left_page .pagedjs_margin-bottom-center {
+  text-align: left;
+}
+.page-number-position--bottom-left .pagedjs_right_page .pagedjs_margin-bottom-center,
+.page-number-position--bottom-right .pagedjs_right_page .pagedjs_margin-bottom-center,
+.page-number-position--bottom-sides .pagedjs_right_page .pagedjs_margin-bottom-center {
+  text-align: right;
 }
 
 /**

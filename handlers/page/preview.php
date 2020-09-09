@@ -23,6 +23,7 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
         "publication-cover-page" => '1',
         "publication-page-format" => 'A4',
         "publication-page-orientation" => 'portrait',
+        "publication-pagination" => "bottom-center",
         "publication-print-marks" => '0'
     );
 
@@ -52,6 +53,8 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
             $metadatas['publication-cover-page'] === '1' ? "book-cover" : '',
             // OPTION show-print-marks
             $metadatas['publication-print-marks'] === '1' ? "show-print-marks" : '',
+            // OPTION show-print-marks
+            "page-number-position--" . $metadatas['publication-pagination'],
             // OPTION hide-links-from-print
             $metadatas['publication-hide-links-url'] === '1' ? "hide-links-url" : '',
         ),

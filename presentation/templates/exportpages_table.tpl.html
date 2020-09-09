@@ -173,21 +173,19 @@
           <summary><?php echo _t('PUBLICATION_MORE_OPTIONS'); ?></summary>
 
           <div class="form-row">
-            <div class="form-group form-check col-md-12">
+            <div class="form-group">
               <input type="checkbox" class="form-check-input" name="publication-cover-page" value="1" checked id="publication-cover-page">
               <label for="publication-cover-page" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_PAGE'); ?></label>
               <small class="form-text text-muted"><?php echo _t('PUBLICATION_EBOOK_COVER_PAGE_HELP') ?></small>
             </div>
-
-            <!-- <div class="form-group col-md-12">
-              <label for="publication-cover-background-color" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_BACKGROUND_COLOR'); ?></label>
-              <input type="color" class="form-control" value="#987654" name="publication-cover-background-color" id="publication-cover-background-color">
-            </div> -->
+            <div class="form-group">
+              <input type="checkbox" class="form-check-input" name="publication-print-marks" value="1" id="publication-print-marks">
+              <label for="publication-print-marks" class="control-label"><?php echo _t('PUBLICATION_EBOOK_DISPLAY_PRINT_MARKS'); ?></label>
+              <small class="form-text text-muted"><?php echo _t('PUBLICATION_EBOOK_DISPLAY_PRINT_MARKS_HELP') ?></small>
+            </div>
           </div>
 
-
-
-          <div class="form-row">
+          <div class="form-row clearfix">
             <div class="form-group col-md-6">
               <label for="publication-page-format" class="control-label"><?php echo _t('PUBLICATION_EBOOK_FORMAT'); ?></label>
               <select class="form-control" name="publication-page-format" id="publication-page-format">
@@ -197,12 +195,30 @@
               </select>
             </div>
             <div class="form-group col-md-6">
-              <label for="publication-page-orientation" class="control-label"><?php echo _t('PUBLICATION_EBOOK_ORIENTATION'); ?></label>
+              <label for="publication-page-orientation"
+                class="control-label"><?php echo _t('PUBLICATION_EBOOK_ORIENTATION'); ?></label>
               <select class="form-control" name="publication-page-orientation">
                 <option value="portrait" selected><?php echo _t('PUBLICATION_EBOOK_ORIENTATION_PORTRAIT'); ?></option>
                 <option value="landscape"><?php echo _t('PUBLICATION_EBOOK_ORIENTATION_LANDSCAPE'); ?></option>
               </select>
             </div>
+          </div>
+
+          <div class="form-row">
+            <label class="d-block" for="publication-pagination--bottom-center"><?php echo _t('PUBLICATION_PAGINATION_POSITION'); ?></label>
+
+            <label class="radio-inline">
+              <input type="radio" id="publication-pagination--none" name="publication-pagination" value="none">
+              <?php echo _t('PUBLICATION_PAGINATION_NONE'); ?>
+            </label>
+            <label class="radio-inline">
+              <input type="radio" id="publication-pagination--bottom-center" name="publication-pagination" value="bottom-center" checked>
+              <?php echo _t('PUBLICATION_PAGINATION_BOTTOM_CENTER'); ?>
+            </label>
+            <label class="radio-inline">
+              <input type="radio" id="publication-pagination--bottom-sides" name="publication-pagination" value="bottom-sides">
+              <?php echo _t('PUBLICATION_PAGINATION_BOTTOM_SIDES'); ?>
+            </label>
           </div>
         </details>
 

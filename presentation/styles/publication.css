@@ -15,6 +15,23 @@
   font-weight: bold;
 }
 
+.export-table-form .d-block {
+  display: block;
+}
+
+.export-table-form .form-row {
+  margin-bottom: 1em;
+}
+
+/* we reduce spacing for rows without .col-* elements inside */
+.export-table-form .form-row.clearfix .form-group {
+  margin-top: 10px;
+}
+
+.export-table-form .form-row:not(.clearfix) .form-group {
+  margin-top: 0;
+}
+
 #publication-selection-container.ui-sortable .blank-page .page-label:before,
 #publication-selection-container.ui-sortable .blank-page .page-label:after {
   color: #aaa;

@@ -41,7 +41,8 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
             file_exists($themeCustomCSS) ? $themeCustomCSS : ''
         )),
         "stylesModifiers" => array(
-            "print",
+            "yeswiki-publication",
+            $wiki->config['debug'] === 'yes' ? 'debug' : '',
             // could be chosen, when creating an eBook
             "page-format--" . $metadatas['publication-page-format'],
             // could be chosen when creating an eBook

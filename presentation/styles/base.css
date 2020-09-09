@@ -25,25 +25,33 @@
   break-before: always;
   page: publication-section;
 }
-  div.include .include {
+  /* .yeswiki-publication  */div.include .include {
     break-before: auto;
     page: unset;
   }
 
-.page-break {
+/* .yeswiki-publication  */.blank-page {
   break-before: always;
-  page: pagebreak;
+  page: blank-page;
 }
 
-.print .publication-cover {
+.blank-page {
+  break-after: page;
+}
+
+.yeswiki-publication .publication-cover {
   display: flex;
   height: 100%;
   flex-direction: column;
   justify-content: center;
 }
 
+/**
+ * Page formats definition
+ */
+
 @page {
-  margin: 30mm 30mm;
+  margin: 20mm 20mm;
 
   @footnote {
     margin: 0.6em 0 0 0;
@@ -52,14 +60,10 @@
   }
 }
 
-@page :left {
-  margin-left: 30mm;
-  margin-right: 20mm;
-
-  @bottom-left-corner {
-    content: counter(page);
+@page:left {
+  @bottom-center {
+    /* content: counter(page); */
     font-family: monospace;
-    font-weight: bold;
   }
 
   @top-center {
@@ -71,14 +75,10 @@
   }
 }
 
-@page :right {
-  margin-left: 20mm;
-  margin-right: 30mm;
-
-  @bottom-right-corner {
-    content: counter(page);
+@page:right {
+  @bottom-center {
+    /* content: counter(page); */
     font-family: monospace;
-    font-weight: bold;
   }
 
   @top-center {
@@ -108,32 +108,32 @@
   }
 }
 
-  .print .pagedjs_named_page.pagedjs_publication-cover_page * {
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page * {
     color: inherit;
   }
 
-  .print .pagedjs_publication-cover_page.has-background-image .publication-title,
-  .print .pagedjs_publication-cover_page.has-background-image .publication-description,
-  .print .pagedjs_publication-cover_page.has-background-image .publication-author {
+  .yeswiki-publication .pagedjs_publication-cover_page.has-background-image .publication-title,
+  .yeswiki-publication .pagedjs_publication-cover_page.has-background-image .publication-description,
+  .yeswiki-publication .pagedjs_publication-cover_page.has-background-image .publication-author {
     background-color: var(--header-title-color);
     padding: .5em 20px;
     align-self: flex-start;
   }
 
-  .print .publication-author {
+  .yeswiki-publication .publication-author {
     margin-top: auto;
   }
 
   /* empty element are hidden */
-  .print .pagedjs_publication-cover_page.has-background-image *:empty {
+  .yeswiki-publication .pagedjs_publication-cover_page.has-background-image *:empty {
     display: none;
   }
 
-  .print .pagedjs_named_page.pagedjs_publication-cover_page .pagedjs_page_content > div {
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page .pagedjs_page_content > div {
     height: 100%;
   }
 
-  .print .publication-cover h1 {
+  .yeswiki-publication .publication-cover h1 {
     string-set: booktitle content(text);
   }
 
@@ -144,62 +144,62 @@
   orphans: 6;
 }
 
-  .print .include h1:first-child {
+  .yeswiki-publication .include h1:first-child {
     string-set: sectiontitle content(text);
   }
 
 
 /* We hide a .well if it closes a page */
-.print .include .well:last-child {
+.yeswiki-publication .include .well:last-child {
   display: none;
 }
 
 /* Unfold panels and other collapsed content */
-.print .collapse {
+.yeswiki-publication .collapse {
   display: block;
 }
 
 /* Wells content is partially lost if a page break happens inside it */
-.print .well,
-.print .panel-heading,
-.print h1,
-.print h2,
-.print h3,
-.print h4,
-.print h5,
-.print h6 {
+.yeswiki-publication .well,
+.yeswiki-publication .panel-heading,
+.yeswiki-publication h1,
+.yeswiki-publication h2,
+.yeswiki-publication h3,
+.yeswiki-publication h4,
+.yeswiki-publication h5,
+.yeswiki-publication h6 {
   page-break-inside: avoid;
 }
 
-.print iframe,
-.print video,
-.print audio {
+.yeswiki-publication iframe,
+.yeswiki-publication video,
+.yeswiki-publication audio {
   break-inside: avoid;
   page-break-inside: avoid;
 }
 
-.print .well,
-.print .panel {
+.yeswiki-publication .well,
+.yeswiki-publication .panel {
   margin-top: 1em;
   orphans: 6;
 }
 
-.print .panel-heading[data-toggle="collapse"]::after {
+.yeswiki-publication .panel-heading[data-toggle="collapse"]::after {
   display: none;
 }
 
 /* We cancel bootstrap column system on print */
-.print [class*="col-"],
-.print .left,
-.print .right {
+.yeswiki-publication [class*="col-"],
+.yeswiki-publication .left,
+.yeswiki-publication .right {
   float: none;
 }
 
-.print [class*="col-"] {
+.yeswiki-publication [class*="col-"] {
   width: auto !important;
 }
 
 /* OPTION We remove link URLs from the print */
-.print.hide-links-url a[href]::after{
+.yeswiki-publication.hide-links-url a[href]::after{
   content: "";
 }

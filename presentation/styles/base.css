@@ -103,6 +103,16 @@
 }
 
 /**
+ * Book fold
+ */
+.yeswiki-publication.book-fold .pagedjs_left_page {
+  --pagedjs-padding-right: 10mm;
+}
+.yeswiki-publication.book-fold .pagedjs_right_page {
+  --pagedjs-padding-left: 10mm;
+}
+
+/**
  * Page number position
  */
 .page-number-position--none .pagedjs_margin-bottom-center {

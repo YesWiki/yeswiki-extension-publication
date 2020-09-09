@@ -162,7 +162,7 @@
 					<input type="hidden" required id="publication-cover-image" name="publication-cover-image" value="<?php echo (isset($metadatas['publication-cover-image'])) ? $metadatas['publication-cover-image'] : $default['coverimage']; ?>" />
 				<?php else : ?>
 				<div class="form-group">
-					<label for="publication-cover-page" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_IMAGE'); ?></label>
+					<label for="publication-cover-image" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_IMAGE'); ?></label>
 					<div class="controls">
 						<input class="control-group form-control" type="url" placeholder="http://" id="publication-cover-image" name="publication-cover-image" value="<?php if (isset($metadatas['publication-cover-image'])) { echo $metadatas['publication-cover-image']; } elseif(!empty($coverImageUrl)) {echo $coverImageUrl; } ?>" />
 					</div>
@@ -177,6 +177,11 @@
               <input type="checkbox" class="form-check-input" name="publication-cover-page" value="1" checked id="publication-cover-page">
               <label for="publication-cover-page" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_PAGE'); ?></label>
               <small class="form-text text-muted"><?php echo _t('PUBLICATION_EBOOK_COVER_PAGE_HELP') ?></small>
+            </div>
+            <div class="form-group">
+              <input type="checkbox" class="form-check-input" name="publication-book-fold" value="1" id="publication-book-fold">
+              <label for="publication-book-fold" class="control-label"><?php echo _t('PUBLICATION_EBOOK_FOLD'); ?></label>
+              <small class="form-text text-muted"><?php echo _t('PUBLICATION_EBOOK_FOLD_HELP') ?></small>
             </div>
             <div class="form-group">
               <input type="checkbox" class="form-check-input" name="publication-print-marks" value="1" id="publication-print-marks">

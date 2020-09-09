@@ -20,7 +20,8 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
     // user  options
     $options = array(
         "publication-hide-links-url" => '1',
-        "publication-cover-page" => '1',
+        "publication-cover-page" => '0',
+        "publication-book-fold" => '0',
         "publication-page-format" => 'A4',
         "publication-page-orientation" => 'portrait',
         "publication-pagination" => "bottom-center",
@@ -51,6 +52,8 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
             "page-orientation--" . $metadatas['publication-page-orientation'],
             // OPTION book-cover
             $metadatas['publication-cover-page'] === '1' ? "book-cover" : '',
+            // OPTION book-fold
+            $metadatas['publication-book-fold'] === '1' ? "book-fold" : '',
             // OPTION show-print-marks
             $metadatas['publication-print-marks'] === '1' ? "show-print-marks" : '',
             // OPTION show-print-marks

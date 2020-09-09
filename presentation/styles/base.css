@@ -14,6 +14,18 @@
   visibility: unset;
 }
 
+/* .yeswiki-publication  */.pagebreak,
+/* .yeswiki-publication  */.page-break {
+  break-after: page;
+}
+/* .yeswiki-publication  */hr.pagebreak,
+/* .yeswiki-publication  */hr.page-break {
+  border: none;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
 /**
  * Page section definition
  */

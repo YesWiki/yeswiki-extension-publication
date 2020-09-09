@@ -31,6 +31,7 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
     // build the preview/printing page
     echo $exportTemplate->render(array(
         "baseUrl" => $wiki->getBaseUrl(),
+        "blankpage" => $wiki->Format('{{blankpage}}'),
         "content" => $content,
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
         "metadatas" => $metadatas,

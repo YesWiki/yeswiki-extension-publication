@@ -228,8 +228,8 @@ if (isset($_POST["page"])) {
         // @todo refactor it to share its logic with newsletter
         foreach ($_POST["page"] as $page) {
           // we turn some actions into explicit content
-          // for now, {{pagebreak}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
-          if (preg_match('#{{\s*pagebreak\s*}}#U', $page)) {
+          // for now, {{blankpage}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
+          if (preg_match('#{{\s*blankpage\s*}}#U', $page)) {
             $output .= $page . "\n";
           }
           // we assume it is a page tag otherwise
@@ -264,8 +264,8 @@ if (isset($_POST["page"])) {
       // @todo Refactor this as a function to share it with Ebook logic
 			foreach ($_POST["page"] as $page) {
         // we turn some actions into explicit content
-        // for now, {{pagebreak}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
-        if (preg_match('#{{\s*pagebreak\s*}}#U', $page)) {
+        // for now, {{blankpage}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
+        if (preg_match('#{{\s*blankpage\s*}}#U', $page)) {
           $fiche['bf_content'] .= $this->Format($page . "\n");
         }
         // we assume it is a page tag otherwise

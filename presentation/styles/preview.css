@@ -41,17 +41,26 @@ body {
     margin-left: calc(50% + var(--margin));
   }
 
-  .pagedjs_pagebreak_page {
+  .pagedjs_blank-page_page {
     position: relative;
   }
+  
+    /* .yeswiki-publication  */.pagebreak:after,
+    /* .yeswiki-publication  */.page-break:after {
+      content: "⤵️⤵️⤵️⤵️";
+      display: block;
+      margin-top: 1em;
+    }
 
-    .pagedjs_pagebreak_page .pagedjs_page_content {
+    .pagedjs_blank-page_page .pagedjs_page_content,
+    /* .yeswiki-publication  */.pagebreak:after,
+    /* .yeswiki-publication  */.page-break:after  {
       border: 4px dotted currentColor;
       opacity: 0.5;
     }
 
-    .pagedjs_pagebreak_page .pagedjs_page_content:before {
-      content: "Saut de page";
+    .pagedjs_blank-page_page .blank-page:before {
+      content: attr(aria-label);
       font-size: 4em;
       font-weight: bold;
       position: absolute;

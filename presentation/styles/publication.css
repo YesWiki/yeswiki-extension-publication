@@ -15,6 +15,14 @@
   font-weight: bold;
 }
 
+#publication-selection-container.ui-sortable .blank-page .page-label:before,
+#publication-selection-container.ui-sortable .blank-page .page-label:after {
+  color: #aaa;
+  content: "-------";
+  margin-left: .5em;
+  margin-right: .5em;
+}
+
 #publication-selection-container.ui-sortable > * {
     cursor: move;
 }

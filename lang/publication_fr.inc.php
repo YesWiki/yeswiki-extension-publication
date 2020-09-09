@@ -14,6 +14,7 @@ $GLOBALS['translations'] = array_merge(
 	$GLOBALS['translations'], array(
 		'PUBLICATION_ADD_ALL' => 'Ajouter tout',
 		'PUBLICATION_AVAILABLE_PAGES' => 'Pages disponibles',
+               'PUBLICATION_BLANK_PAGE' => 'Page blanche',
 		'PUBLICATION_CONTENT_VISIBLE_ONLINE_FROM_PAGE' => 'Contenu en ligne sur la page',
 		'PUBLICATION_DELETE' => 'Supprimer',
 		'PUBLICATION_DELETE_PAGE' => 'Enlever la page',
@@ -41,7 +42,7 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_GENERATE' => 'Générer',
     'PUBLICATION_GOTO_EBOOK_PAGE' => 'Aller voir la page : ',
     'PUBLICATION_GOTO_EBOOK_CREATION_PAGE' => 'Retourner à la page de création d\'Ebook : ',
-		'PUBLICATION_INSERT_PAGE_BREAK' => 'Insérer un saut de page',
+		'PUBLICATION_INSERT_BLANK_PAGE' => 'Insérer une page blanche',
 		'PUBLICATION_MANDATORY_FIELD' => 'Champ obligatoire',
     'PUBLICATION_MISSING_NEWSLETTER_FORM' => 'Vous devez préciser un id de formulaire pour produire une newsletter (reportez-vous au fichier readme.md).',
     'PUBLICATION_MORE_OPTIONS' => 'Autres options de personnalisation',

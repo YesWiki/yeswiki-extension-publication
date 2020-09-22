@@ -9,6 +9,12 @@
     border: 1px solid #d9534f;
 }
 
+.yw-publication__show .img-cover {
+  object-fit: cover;
+  height: 250px;
+  width: 200px;
+}
+
 .export-table-form details > summary {
   cursor: pointer;
   display: revert;  /* this is somewhat unset by Bootstrap, which we don't want in this case */

@@ -1,0 +1,40 @@
+<div class="alert alert-info">
+  <p><?php echo _t('PUBLICATION_SHOW_NOTICE') ?></p>
+</div>
+
+<div class="row yw-publication__show">
+  <div class="col-sm-8">
+    <div class="thumbnail">
+      <div class="caption">
+        <?php if ($metadata['publication-cover-image']) { ?>
+          <img class="pull-right img-cover img-thumbnail" alt="" src="<?php echo $metadata['publication-cover-image'] ?>">
+        <?php } ?>
+
+        <h3><?php echo $metadata['publication-title'] ?></h3>
+
+        <p class="clearfix"><?php echo $metadata['publication-description'] ?></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-4">
+    <div class="btn-group-vertical" role="group" aria-label="">
+      <a href="<?php echo $wiki->href('pdf', '') ?>" download type="application/pdf" class="btn btn-primary">
+        <i class="fas fa-book"></i>
+        <?php echo _t('PUBLICATION_VIEW_PDF') ?>
+      </a>
+
+      <?php if ($hasWriteAccess) { ?>
+      <a href="<?php echo $wiki->href('preview', '') ?>" class="btn btn-default btn-secondary">
+        <i class="fas fa-book-reader"></i>
+        <?php echo _t('PUBLICATION_PREVIEW') ?>
+      </a>
+      <?php } ?>
+
+      <a href="<?php echo $wiki->href('share', '') ?>" class="btn btn-default btn-secondary">
+        <i class="fas fa-share-alt"></i>
+        <?php echo _t('TEMPLATE_SHARE') ?>
+      </a>
+    </div>
+  </div>
+</div>

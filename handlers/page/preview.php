@@ -29,11 +29,12 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
     );
 
     $metadatas = array_merge($options, $wiki->page['metadatas']);
+    $blankpage = $wiki->Format('{{blankpage}}');
 
     // build the preview/printing page
-    echo $exportTemplate->render(array(
+    $output = $exportTemplate->render(array(
         "baseUrl" => $wiki->getBaseUrl(),
-        "blankpage" => $wiki->Format('{{blankpage}}'),
+        "blankpage" => $blankpage,
         "content" => $content,
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
         "metadatas" => $metadatas,
@@ -62,4 +63,10 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
             $metadatas['publication-hide-links-url'] === '1' ? "hide-links-url" : '',
         ),
     ));
+
+    // Insert a blank page after a cover page
+    $output = preg_replace('#(<section class="publication-cover">.+</section>)(<div class="include)#siU', '$1' . $blankpage . '$2', $output);
+    $output = preg_replace('#(<div class="include publication-start">.+)(<div class="include)#siU', '$1' . $blankpage . '$2', $output);
+
+    echo $output;
 }

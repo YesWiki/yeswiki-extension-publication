@@ -51,24 +51,17 @@ $sql .= ' WHERE property="http://outils-reseaux.org/_vocabulary/metadata"
 $sql .= ' ORDER BY resource ASC';
 
 $pages = $this->LoadAll($sql);
+
 if (count($pages) > 0) {
-	$output .= '<ul class="media-list">'."\n";
-	foreach ($pages as $page) {
-		$metas = $this->GetMetadatas($page['resource']);
-		$output .= '<li class="media">
-		<a href="'.$this->href('',$page['resource']).'" class="pull-left">
-			<img src="'.$metas['publication-cover-image'].'" alt="cover" class="media-object" width="128" />
-		</a>
-		<div class="media-body">'."\n";
-		if ($this->UserIsAdmin()) $output .= '<a class="btn btn-danger btn-error pull-right" href="'.$this->href('deletepage',$page['resource']).'"><i class="fas fa-trash"></i>&nbsp;'._t('PUBLICATION_DELETE').'</a>';
-		$output .= '<h4 class="media-heading"><a href="'.$this->href('',$page['resource']).'">'.$metas['publication-title'].'</a></h4>
-			<strong>'.$metas['publication-author'].'</strong><br />'.$metas['publication-description'].'<br /><br />';
-		$output .= '<a class="btn btn-info" href="'.$this->href('preview',$page['resource']).'"><i class="fas fa-book-reader"></i>&nbsp;'._t('PUBLICATION_PREVIEW').'</a> <a class="space-left btn btn-primary" href="'.$this->href('pdf',$page['resource']).'"><i class="fas fa-book"></i>&nbsp;'._t('PUBLICATION_DOWNLOAD_PDF').'</a> <!-- pdf download link for '.$page['resource'].' -->
-		<br /><br />
-		</div>
-		</li>'."\n";
-	}
-	$output .= '</ul>'."\n";
+  include_once 'includes/squelettephp.class.php';
+  $template = new SquelettePhp('ebooklist.tpl.html', 'publication');
+
+  $output = $template->render(array(
+    'hasWriteAccess' => $this->HasAccess('write'),
+    'hasDeleteAccess' => $this->UserIsAdmin() || $wiki->UserIsOwner(),
+    'pages' => $pages,
+    'wiki' => $this,
+  ));
 }
 else $output .= '<div class="alert alert-info">'._t('PUBLICATION_NO_EBOOK_FOUND').'</div>';
 

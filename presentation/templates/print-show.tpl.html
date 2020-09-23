@@ -19,22 +19,29 @@
 
   <div class="col-sm-4">
     <div class="btn-group-vertical" role="group" aria-label="">
-      <a href="<?php echo $wiki->href('pdf', '') ?>" download type="application/pdf" class="btn btn-primary">
+      <a href="<?php echo $wiki->href('pdf', $page['tag']) ?>" download type="application/pdf" class="btn btn-primary">
         <i class="fas fa-book"></i>
         <?php echo _t('PUBLICATION_VIEW_PDF') ?>
       </a>
 
       <?php if ($hasWriteAccess) { ?>
-      <a href="<?php echo $wiki->href('preview', '') ?>" class="btn btn-default btn-secondary">
+      <a href="<?php echo $wiki->href('preview', $page['tag']) ?>" class="btn btn-info btn-secondary">
         <i class="fas fa-book-reader"></i>
         <?php echo _t('PUBLICATION_PREVIEW') ?>
       </a>
       <?php } ?>
 
-      <a href="<?php echo $wiki->href('share', '') ?>" class="btn btn-default btn-secondary">
+      <a href="<?php echo $wiki->href('share', $page['tag']) ?>" class="btn btn-info btn-secondary modalbox">
         <i class="fas fa-share-alt"></i>
         <?php echo _t('TEMPLATE_SHARE') ?>
       </a>
+
+      <?php if ($hasDeleteAccess) { ?>
+      <a href="<?php echo $wiki->href('deletepage', $page['tag']) ?>" class="btn btn-danger link-deletepage modalbox">
+        <i class="fas fa-trash"></i>
+        <?php echo _t('TEMPLATE_DELETE') ?>
+      </a>
+      <?php } ?>
     </div>
   </div>
 </div>

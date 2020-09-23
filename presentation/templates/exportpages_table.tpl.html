@@ -72,12 +72,12 @@
 			<?php if (!empty($publicationStart)) : ?>
 				<ul class="list-group">
 					<li class="list-group-item list-group-item-info">
-						<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo $publicationStart; ?>" href="<?php echo $GLOBALS['wiki']->href('html', $publicationStart); ?>">
+						<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo $publicationStart; ?>" href="<?php echo $GLOBALS['wiki']->href('html', $publicationStart['tag']); ?>">
 							<i class="fas fa-eye"></i>
 						</a>
-						<input type="hidden" name="page[]" value="<?php echo $publicationStart; ?>" />
-                                               <span class="page-label"><?php echo _t('PUBLICATION_START_PAGE'); ?></span>
-                                               <span class="page-label-suffix">(<?php echo $publicationStart; ?>)</span>
+						<input type="hidden" name="page[]" value="<?php echo $publicationStart['tag']; ?>?type=publication-start" />
+            <span class="page-label"><?php echo _t('PUBLICATION_START_PAGE'); ?></span>
+            <span class="page-label-suffix">(<?php echo get_title_from_body($publicationStart) ?>)</span>
 					</li>
 				</ul>
 			<?php endif; ?>
@@ -85,98 +85,104 @@
 				<?php if (empty($selectedPages)) : ?>
 					<?php foreach($chapterCoverPages as $page): ?>
 						<li class="list-group-item list-group-item-info">
+              <?php if (!$areParamsReadonly): ?>
+              <button class="pull-right btn btn-danger btn-xs btn-danger remove-page-item"
+                title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>">
+                <i class="fas fa-minus"></i>
+              </button>
+              <?php endif ?>
 							<span class="pull-left movable"><i class="fas fa-arrows-alt-v"></i></span>
 							<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">
 								<i class="fas fa-eye"></i>
 							</a>
-							<input type="hidden" name="page[]" value="<?php echo $page['tag']; ?>" />
-                                                       <span class="page-label"><?php echo get_title_from_body($page); ?></span>
+							<input type="hidden" name="page[]" value="<?php echo $page['tag']; ?>?class=publication-chapter" />
+              <span class="page-label"><?php echo get_title_from_body($page); ?></span>
 						</li>
 					<?php endforeach; ?>
 				<?php else : ?>
 				<?php foreach($selectedPages as $page): ?>
 					<li class="list-group-item">
-						<a class="hide pull-right btn btn-xs btn-success select-page-item" title="<?php echo _t('PUBLICATION_SELECT_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FOR_THE_EBOOK'); ?>" href="#">
-							<i class="fas fa-plus"></i>
-						</a>
-						<a class="pull-right btn btn-danger btn-xs btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>" href="#">
+						<button class="pull-right btn btn-danger btn-xs btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>">
 							<i class="fas fa-minus"></i>
-						</a>
+						</button>
 						<span class="pull-left movable"><i class="fas fa-arrows-alt-v"></i></span>
 						<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">
 							<i class="fas fa-eye"></i>
 						</a>
 						<input type="hidden" name="page[]" value="<?php echo $page['tag']; ?>" />
-                                               <span class="page-label"><?php echo get_title_from_body($page); ?></span>
+            <span class="page-label"><?php echo get_title_from_body($page); ?></span>
 					</li>
 				<?php endforeach; ?>
 				<?php endif; ?>
-				</ul>
+        </ul>
+
 			<?php if (!empty($publicationEnd)) : ?>
 				<ul class="list-group">
 					<li class="list-group-item list-group-item-info">
-						<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> PageEbookFin" href="<?php echo $GLOBALS['wiki']->href('html', $publicationEnd); ?>">
+						<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> PageEbookFin" href="<?php echo $GLOBALS['wiki']->href('html', $publicationEnd['tag']); ?>">
 							<i class="fas fa-eye"></i>
 						</a>
-						<input type="hidden" name="page[]" value="<?php echo $publicationEnd; ?>" />
-                                               <span class="page-label"><?php echo _t('PUBLICATION_END_PAGE'); ?></span>
-                                               <span class="page-label-suffix">(<?php echo $publicationEnd; ?>)</span>
+						<input type="hidden" name="page[]" value="<?php echo $publicationEnd['tag']; ?>?type=publication-end" />
+            <span class="page-label"><?php echo _t('PUBLICATION_END_PAGE'); ?></span>
+            <span class="page-label-suffix">(<?php echo get_title_from_body($publicationEnd) ?>)</span>
 					</li>
 				</ul>
-			<?php endif; ?>
-				<?php if (!empty($default['title'])): ?>
-					<input type="hidden" required id="publication-title" name="publication-title" value="<?php echo (isset($metadatas['publication-title'])) ? $metadatas['publication-title'] : $default['title']; ?>" />
-				<?php else : ?>
+      <?php endif; ?>
+
 				<div class="form-group">
 					<label for="publication-title" class="control-label"><?php echo _t('PUBLICATION_EBOOK_TITLE'); ?><span aria-label="<?php echo _t('PUBLICATION_MANDATORY_FIELD'); ?>">*</span></label>
 					<div class="controls">
-						<input class="control-group form-control" type="text" required="required" placeholder="<?php echo _t('PUBLICATION_EBOOK_TITLE'); ?>" id="publication-title" name="publication-title" value="<?php echo (isset($metadatas['publication-title'])) ? $metadatas['publication-title'] : ''; ?>" />
+            <?php if ($areParamsReadonly): ?>
+            <input type="hidden" required id="publication-title" name="publication-title" value="<?php echo (isset($metadatas['publication-title'])) ? $metadatas['publication-title'] : $default['title']; ?>" />
+            <?php endif ?>
+
+            <input <?php echo !$areParamsReadonly ?: 'readonly' ?> class="control-group form-control" type="text" required="required" placeholder="<?php echo _t('PUBLICATION_EBOOK_TITLE'); ?>" id="publication-title" name="publication-title" value="<?php echo (isset($metadatas['publication-title'])) ? $metadatas['publication-title'] : $default['title']; ?>" />
 					</div>
 				</div>
-				<?php endif; ?>
 
-				<?php if (!empty($default['desc'])): ?>
-					<input type="hidden" required id="publication-description" name="publication-description" value="<?php echo (isset($metadatas['publication-description'])) ? $metadatas['publication-description'] : $default['desc']; ?>" />
-				<?php else : ?>
-					<div class="form-group">
-						<label for="publication-description" class="control-label"><?php echo _t('PUBLICATION_EBOOK_DESC'); ?></label>
-						<div class="controls">
-							<textarea class="control-group form-control" placeholder="<?php echo _t('PUBLICATION_EBOOK_DESC'); ?>" id="publication-description" name="publication-description"><?php echo (isset($metadatas['publication-description'])) ? $metadatas['publication-description'] : ''; ?></textarea>
-						</div>
-					</div>
-				<?php endif; ?>
+        <div class="form-group">
+          <label for="publication-description" class="control-label"><?php echo _t('PUBLICATION_EBOOK_DESC'); ?></label>
+          <div class="controls">
+            <?php if ($areParamsReadonly): ?>
+            <input type="hidden" required id="publication-description" name="publication-description" value="<?php echo (isset($metadatas['publication-description'])) ? $metadatas['publication-description'] : $default['desc']; ?>" />
+            <?php endif ?>
 
-				<?php if (!empty($default['author'])): ?>
-					<input type="hidden" required id="publication-author" name="publication-author" value="<?php echo (isset($metadatas['publication-author'])) ? $metadatas['publication-author'] : $default['author']; ?>" />
-				<?php else : ?>
-					<div class="form-group">
-						<label for="publication-author" class="control-label"><?php echo _t('PUBLICATION_EBOOK_AUTHOR'); ?></label>
-						<div class="controls">
-							<input class="control-group form-control" type="text" placeholder="<?php echo _t('PUBLICATION_EXAMPLE_AUTHOR'); ?>" id="publication-author" name="publication-author" value="<?php echo (isset($metadatas['publication-author'])) ? $metadatas['publication-author'] : ''; ?>" />
-						</div>
-					</div>
-				<?php endif; ?>
+            <textarea <?php echo !$areParamsReadonly ?: 'readonly' ?> class="control-group form-control" placeholder="<?php echo _t('PUBLICATION_EBOOK_DESC'); ?>" id="publication-description" name="publication-description"><?php echo (isset($metadatas['publication-description'])) ? $metadatas['publication-description'] : $default['desc']; ?></textarea>
+          </div>
+        </div>
 
-				<?php if (strtolower($outputFormat) == 'ebook') : ?>
-					<?php if (!empty($default['coverimage'])): ?>
-					<input type="hidden" required id="publication-cover-image" name="publication-cover-image" value="<?php echo (isset($metadatas['publication-cover-image'])) ? $metadatas['publication-cover-image'] : $default['coverimage']; ?>" />
-				<?php else : ?>
+        <div class="form-group">
+          <label for="publication-author" class="control-label"><?php echo _t('PUBLICATION_EBOOK_AUTHOR'); ?></label>
+          <div class="controls">
+            <?php if ($areParamsReadonly): ?>
+            <input type="hidden" required id="publication-author" name="publication-author" value="<?php echo isset($metadatas['publication-author']) ? $metadatas['publication-author'] : $default['author']; ?>" />
+            <?php endif ?>
+
+            <input <?php echo !$areParamsReadonly ?: 'readonly' ?> class="control-group form-control" type="text" placeholder="<?php echo _t('PUBLICATION_EXAMPLE_AUTHOR'); ?>" id="publication-author" name="publication-author" value="<?php echo isset($metadatas['publication-author']) ? $metadatas['publication-author'] : $default['author'] ?>" />
+          </div>
+        </div>
+
+				<?php if (strtolower($outputFormat) === 'ebook' || !empty($default['coverimage'])) : ?>
 				<div class="form-group">
 					<label for="publication-cover-image" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_IMAGE'); ?></label>
 					<div class="controls">
-						<input class="control-group form-control" type="url" placeholder="http://" id="publication-cover-image" name="publication-cover-image" value="<?php if (isset($metadatas['publication-cover-image'])) { echo $metadatas['publication-cover-image']; } elseif(!empty($coverImageUrl)) {echo $coverImageUrl; } ?>" />
+            <?php if ($areParamsReadonly): ?>
+            <input type="hidden" required id="publication-cover-image" name="publication-cover-image" value="<?php echo (isset($metadatas['publication-cover-image'])) ? $metadatas['publication-cover-image'] : $default['coverimage']; ?>" />
+            <?php endif ?>
+
+            <input <?php echo !$areParamsReadonly ?: 'readonly' ?> class="control-group form-control" type="url" placeholder="http://" id="publication-cover-image" name="publication-cover-image" value="<?php echo isset($metadatas['publication-cover-image']) ? $metadatas['publication-cover-image'] : $default['coverimage'] ?>" />
 					</div>
 				</div>
-			<?php endif; // !empty($default['coverimage']) ?>
-    <?php endif; // $outputFormat == 'ebook' ?>
+        <?php endif ?>
+
         <details>
           <summary><?php echo _t('PUBLICATION_MORE_OPTIONS'); ?></summary>
 
           <div class="form-row">
             <div class="form-group">
-              <input type="checkbox" class="form-check-input" name="publication-cover-page" value="1" checked id="publication-cover-page">
+              <input type="checkbox" class="form-check-input" name="publication-cover-page" value="1" <?php echo $publicationStart ? 'disabled' : 'checked' ?> id="publication-cover-page">
               <label for="publication-cover-page" class="control-label"><?php echo _t('PUBLICATION_EBOOK_COVER_PAGE'); ?></label>
-              <small class="form-text text-muted"><?php echo _t('PUBLICATION_EBOOK_COVER_PAGE_HELP') ?></small>
+              <small class="form-text text-muted"><?php echo $publicationStart ? _t('PUBLICATION_EBOOK_COVER_PAGE_WITH_PUBLICATION_START_HELP') : _t('PUBLICATION_EBOOK_COVER_PAGE_HELP') ?></small>
             </div>
             <div class="form-group">
               <input type="checkbox" class="form-check-input" name="publication-book-fold" value="1" id="publication-book-fold">

@@ -35,10 +35,12 @@ if (empty($outputFormat) || $outputFormat != 'newsletter') {
 	}
 }
 
+// Indicates if fields and elements are "read only"
+$areParamsReadonly = $this->getParameter('fields', 'writeable') === 'readonly';
 
 // Pages used for intro and outro
-$publicationStart = $this->getParameter('publicationstart');
-$publicationEnd = $this->getParameter('publicationend');
+$publicationStart = $this->getParameter('pagestart');
+$publicationEnd = $this->getParameter('pageend');
 
 // prefix for created pages
 // Only used when outputformat="ebook"
@@ -327,8 +329,9 @@ if (isset($_POST["page"])) {
     $output .= $exportTemplate->render(
         array(
             'entries' => $results,
-            'publicationStart' => $publicationStart,
-            'publicationEnd' => $publicationEnd,
+            'areParamsReadonly' => $areParamsReadonly,
+            'publicationStart' => $this->loadPage($publicationStart),
+            'publicationEnd' => $this->loadPage($publicationEnd),
             'addInstalledPages' => $addInstalledPages,
             'installedPageNames' => $installedPageNames,
             'default' => $default,

@@ -6,11 +6,11 @@ Cette extension permet de générer des publications au format PDF à partir d'u
 
 Les publications générées peuvent être de type :
 
-- ebook
-- newsletter
+- [ebook](#pour-générer-des-ebooks)
+- [newsletter](#pour-générer-des-newsletters)
 
-La mise en page est effectuée par [Paged.js](https://gitlab.pagedmedia.org/tools/pagedjs)
-([fonctionnement](https://www.pagedmedia.org/paged-js/)).
+La mise en page est effectuée par [Paged.js](https://www.pagedjs.org/)
+([documentation](https://www.pagedjs.org/documentation/)).
 
 <table>
   <tr>
@@ -49,7 +49,7 @@ La génération d'une publication se fait en plusieurs étapes.
 
 L'action `{{publicationgenerator}}` prend en charge les étapes 1, 2 et 3.
 
-Le handler `/pdf` prend en charge la production du PDF.
+Le handler `/pdf` prend en charge l'étape 4.
 
 ### Pour générer des ebooks
 
@@ -87,8 +87,11 @@ L'extension publication ajoute deux actions à votre wiki.
 
 | Action                    | Utilité                                       |
 | ---                       | ---                                           |
-| `{{publicationgenerator}}`| Interface de sélection du contenu de la publication et de création du document imprimable  |
-| `{{ebooklist}}`           | Liste des ebooks générés et imprimables               |
+| `{{publicationgenerator}}`| Interface de sélection du contenu de la publication et de création du document imprimable (cf. [Action `{{publicationgenerator}}`](#action-publicationgenerator)) |
+| `{{ebooklist}}`           | Liste des ebooks générés et imprimables (cf. [Action `{{ebooklist}}`](#action-ebooklist)) |
+| `{{blankpage}}`           | Insère une page vide à l'impression. |
+| `{{pagebreak}}`           | Crée un saut de page à l'impression. |
+
 Ces actions s'ajoutent, comme toute action YesWiki, dans un contenu de page.
 
 ### Action `{{publicationgenerator}}`
@@ -127,24 +130,24 @@ Exemple – pour générer une newsletter avec le formulaire bazar "2", il faut 
 {{publicationgenerator outputformat="newsletter" formid="2"}}
 ```
 
-#### **publicationstart**
+#### **pagestart**
 
 Nom de la page à utiliser comme page d'introduction de la publication.
 
 Exemple :
 
 ```
-{{publicationgenerator publicationstart="MaPageWiki"}}
+{{publicationgenerator pagestart="MaPageWiki"}}
 ```
 
-#### **publicationend**
+#### **pageend**
 
 Nom de la page à utiliser comme page de fin de la publication.
 
 Exemple :
 
 ```
-{{publicationgenerator publicationend="MaPageWiki"}}
+{{publicationgenerator pageend="MaPageWiki"}}
 ```
 
 #### **ebookpagenameprefix**
@@ -182,8 +185,6 @@ Exemple – pour faire apparaître les pages créées lors del 'installation du 
 
 Ce paramètre contient l'adressse de l'image de couverture utilisée en 1re page de couverture des ebooks générés.
 
-Si ce paramètre est renseigné, l'utilisateur ne se verra pas proposer de choix lors de la sélection.
-
 Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection en vue d'un ebook, choisir une image de couverture.
 
 Exemple  :
@@ -194,11 +195,7 @@ Exemple  :
 
 #### **title**
 
-Titre des publications à générer.
-
-Si ce paramètre est renseigné, le titre de la publication sera celui qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
-
-Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir un titre.
+Titre par défaut des publications à générer.
 
 Exemple  :
 
@@ -208,11 +205,7 @@ Exemple  :
 
 #### **desc**
 
-Description des publications générées.
-
-Si ce paramètre est renseigné, la description de la publication sera celle qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
-
-Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir une description.
+Description par défaut des publications à générer.
 
 Exemple  :
 
@@ -222,11 +215,7 @@ Exemple  :
 
 #### **author**
 
-Auteur des publications à générer.
-
-Si ce paramètre est renseigné, l'auteur de la publication sera celui qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
-
-Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir un·e aut·eur·rice.
+Auteur·ices par défaut des publications à générer.
 
 Exemple  :
 
@@ -236,18 +225,32 @@ Exemple  :
 
 #### **chapterpages**
 
-Liste des noms des pages YesWiki à utiliser au début de chaque chapitre des publications à générer.
+Liste des noms des pages YesWiki à utiliser comme chapitre des publications à générer.
 
 Dans la liste, les noms doivent être séparés par des virgules.
 
 Si ce paramètre est renseigné, les pages ainsi désignées seront proposées par défaut dans la publication lors de la sélection.
 
-Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur devra, lors de la sélection, choisir les pages qu'il souhaite mettre en tête de chaque chapitre.
+L'utilisateur pourra, lors de la sélection, choisir les pages qu'il souhaite mettre à la suite de chaque chapitre.
 
 Exemple  :
 
 ```
 {{publicationgenerator chapterpages="DebutChapitreUn, DebutChapitreDeux, DebutChapitreTrois"}}
+```
+
+#### **fields**
+
+Spécifie si les titre, description, auteur·ices, image et chapitres sont modifiables par l'utilisateur.
+
+Ces champs sont gelés à la saisie si sa valeur est `readonly`.
+
+Les paramètres d'impression restent modifiables dans tous les cas.
+
+Exemple :
+
+```
+{{publicationgenerator fields="readonly"}}
 ```
 
 #### **template**

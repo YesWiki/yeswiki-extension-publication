@@ -1,0 +1,14 @@
+on: [push]
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Test and package the extension
+      id: package
+      uses: oncletom/yeswiki-build-repo@feature/action
+
+    - name: Get the test extension md5sum
+      run: echo "md5sum is ${{ steps.package.outputs.md5sum }}"

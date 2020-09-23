@@ -21,7 +21,7 @@
 	</h4>
 		<ul class="list-entries-to-export group-<?php echo $nb; ?> list-group">
 			<?php foreach($form['entries'] as $page) : ?>
-			<?php if ($form['type'] == 'pages') : ?>
+			<?php if ($form['type'] === 'pages') : ?>
 			<li class="list-group-item">
 				<a class="pull-right btn btn-xs btn-success select-page-item" title="<?php echo _t('PUBLICATION_SELECT_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FOR_THE_EBOOK'); ?>" href="#">
 					<i class="fas fa-plus"></i>
@@ -36,7 +36,7 @@
 				<input type="hidden" name="page[]" value="<?php echo $page['tag']; ?>" />
 				<span class="page-label"><?php echo get_title_from_body($page); ?></span>
 			</li>
-			<?php elseif ($form['type'] == 'bazar') : ?>
+			<?php elseif ($form['type'] === 'bazar') : ?>
 			<li class="list-group-item">
 				<a class="pull-right btn btn-xs btn-success select-page-item" title="<?php echo _t('PUBLICATION_SELECT_PAGE'); ?> <?php echo htmlentities($page['id_fiche']); ?> <?php echo _t('PUBLICATION_FOR_THE_EBOOK'); ?>" href="#">
 					<i class="fas fa-plus"></i>
@@ -49,7 +49,7 @@
 					<i class="fas fa-eye"></i>
 				</a>
 				<input type="hidden" name="page[]" value="<?php echo $page['id_fiche']; ?>" />
-                               <span class="page-label"><?php echo $page['bf_titre']; ?></span>
+        <span class="page-label"><?php echo $page['bf_titre']; ?></span>
 			</li>
 			<?php endif; ?>
 			<?php endforeach; ?>
@@ -60,13 +60,13 @@
 
 	<div class="col-lg-8">
 		<h3><?php echo _t('PUBLICATION_YOUR').' '.strtolower($name); ?></h3>
-		<div class="alert alert-info">
-			<?php echo _t('PUBLICATION_ORDER_PAGES_INFO'); ?>
-		</div>
-		<button class="pull-right btn btn-default btn-outline-secondary btn-xs page-break" data-label="<?php echo _t('PUBLICATION_BLANK_PAGE'); ?>" title="<?php echo _t('PUBLICATION_INSERT_BLANK_PAGE'); ?>">
-			<i class="fas fa-plus"></i> <?php echo _t('PUBLICATION_INSERT_BLANK_PAGE'); ?>
-		</button>
-		<div class="clearfix"></div>
+
+    <p class="clearfix text-right">
+      <button class="btn btn-primary btn-xs page-break" data-label="<?php echo _t('PUBLICATION_BLANK_PAGE'); ?>" title="<?php echo _t('PUBLICATION_INSERT_BLANK_PAGE'); ?>">
+        <i class="fas fa-plus"></i> <?php echo _t('PUBLICATION_INSERT_BLANK_PAGE'); ?>
+      </button>
+    </p>
+
 		<div class="well">
 			<form class="export-table-form" method="post" action="<?php echo $url;?>">
 			<?php if (!empty($publicationStart)) : ?>

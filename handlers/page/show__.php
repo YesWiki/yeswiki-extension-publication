@@ -20,6 +20,7 @@ if ($this->HasAccess('write') && isset($this->page['metadatas']['publication-tit
 
     $output = $template->render(array(
       'hasWriteAccess' => $wiki->HasAccess('write'),
+      'hasDeleteAccess' => $wiki->UserIsAdmin() || $wiki->UserIsOwner(),
       'metadata' => $metadata,
       'page' => $wiki->page,
       'wiki' => $wiki,

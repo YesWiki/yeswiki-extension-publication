@@ -236,13 +236,16 @@ if (isset($_POST["page"])) {
           }
           // we assume it is a page tag otherwise
           // maybe we should also explicitly check it is a valid page tag instead?
+          // $page can be 'SomeTag' or 'SomeTag?parameter=value'
+          // the query string is used to parametrize book creation
           else {
-            $output .= '{{include page="' . $page . '" class=""}}' . "\n";
+            list($page, $qs) = explode('?', $page);
+            parse_str($qs, $qs);
+
+            $output .= '{{include page="' . $page . '" type="'. $qs['type'] .'" class="'. $qs['class'] .'"}}' . "\n";
           }
         }
 
-
-				$output .= '//' . _t('PUBLICATION_CONTENT_VISIBLE_ONLINE_FROM_PAGE') . ' : ' . $this->href('', $pageName) . ' // {{button link="' . $this->href('pdf', $pageName) . '" text="' . _t('PUBLICATION_DOWNLOAD_PDF') . '" class="btn-primary pull-right" icon="book"}}' . "\n";
 				unset($_POST['page']);
         unset($_POST['antispam']);
 

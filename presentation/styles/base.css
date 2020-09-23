@@ -32,12 +32,20 @@
 /* .yeswiki-publication  */.publication-cover {
   page: publication-cover;
 }
+/* .yeswiki-publication  */.publication-start {
+  page: publication-cover;
+}
 
-/* .yeswiki-publication  */div.include {
+/* .yeswiki-publication  */.publication-end {
+  page: publication-end;
+}
+
+/* .yeswiki-publication  */div[class="include"],
+.bazar-entry {
   break-before: always;
   page: publication-section;
 }
-  /* .yeswiki-publication  */div.include .include {
+  /* .yeswiki-publication  */div[class="include"] .include {
     break-before: auto;
     page: unset;
   }
@@ -51,7 +59,8 @@
   break-after: page;
 }
 
-.yeswiki-publication .publication-cover {
+.yeswiki-publication .publication-cover,
+.yeswiki-publication .publication-start {
   display: flex;
   height: 100%;
   flex-direction: column;
@@ -140,20 +149,37 @@
 @page publication-cover {
   background-color: var(--header-title-color) !important;
   background-size: cover;
-  color: var(--header-bg-color);
-  break-after: always;
+  break-after: right;
 
   @top-center {
     content: none;
   }
 
+  @bottom-left {
+    content: none;
+  }
+  @bottom-left-corner {
+    content: none;
+  }
+  @bottom-right {
+    content: none;
+  }
   @bottom-right-corner {
+    content: none;
+  }
+  @bottom-center {
     content: none;
   }
 }
 
-  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page * {
-    color: inherit;
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h1,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h2,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h3,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h4,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h5,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page p {
+    color: currentColor;
+    color: var(--header-bg-color);
   }
 
   .yeswiki-publication .pagedjs_publication-cover_page.has-background-image .publication-title,
@@ -177,9 +203,38 @@
     height: 100%;
   }
 
-  .yeswiki-publication .publication-cover h1 {
+  .yeswiki-publication .publication-cover h1,
+  .yeswiki-publication .publication-start h1 {
     string-set: booktitle content(text);
   }
+
+/**
+ * Publication end
+ */
+@page publication-end {
+  background-color: var(--header-title-color) !important;
+  background-size: cover;
+  break-before: right;
+
+  @top-center {
+    content: none;
+  }
+  @bottom-left {
+    content: none;
+  }
+  @bottom-left-corner {
+    content: none;
+  }
+  @bottom-right {
+    content: none;
+  }
+  @bottom-right-corner {
+    content: none;
+  }
+  @bottom-center {
+    content: none;
+  }
+}
 
 /**
  * Publication Section

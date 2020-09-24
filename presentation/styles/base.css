@@ -27,6 +27,14 @@
 }
 
 /**
+ * Browser Print setup
+ * @see http://www.richardnichols.net/2012/08/getting-chrome-to-print-with-background-colors-enabled/
+ */
+.yeswiki-publication {
+  -webkit-print-color-adjust: exact;
+}
+
+/**
  * Page section definition
  */
 /* .yeswiki-publication  */.publication-cover {
@@ -41,7 +49,8 @@
 }
 
 /* .yeswiki-publication  */div[class="include"],
-.bazar-entry {
+.bazar-entry,
+.BAZ_cadre_fiche {
   break-before: always;
   page: publication-section;
 }
@@ -249,6 +258,7 @@
 
 
 /* We hide a .well if it closes a page */
+.yeswiki-publication .BAZ_fiche_info,
 .yeswiki-publication .include .well:last-child {
   display: none;
 }

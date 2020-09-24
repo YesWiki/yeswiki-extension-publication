@@ -14,8 +14,9 @@ $GLOBALS['translations'] = array_merge(
 	$GLOBALS['translations'], array(
 		'PUBLICATION_ADD_ALL' => 'Ajouter tout',
 		'PUBLICATION_AVAILABLE_PAGES' => 'Pages disponibles',
-               'PUBLICATION_BLANK_PAGE' => 'Page blanche',
-		'PUBLICATION_CONTENT_VISIBLE_ONLINE_FROM_PAGE' => 'Contenu en ligne sur la page',
+    'PUBLICATION_BLANK_PAGE' => 'Page blanche',
+    'PUBLICATION_CONTENT_VISIBLE_ONLINE_FROM_PAGE' => 'Contenu en ligne sur la page',
+    'PUBLICATION_CREATE_FROM_BAZAR_RESULTS' => 'Créer une publication imprimée avec ces résultats',
 		'PUBLICATION_DELETE' => 'Supprimer',
 		'PUBLICATION_DELETE_PAGE' => 'Enlever la page',
 		'PUBLICATION_DOWNLOAD' => 'Télécharger',

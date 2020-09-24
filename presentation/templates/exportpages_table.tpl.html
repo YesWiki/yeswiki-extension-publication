@@ -27,7 +27,7 @@
 					<i class="fas fa-plus"></i>
 				</a>
 				<a class="hide pull-right btn btn-xs btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>" href="#" data-group="<?php echo $nb; ?>">
-					<i class="fas fa-minus"></i>
+					<i class="fas fa-trash"></i>
 				</a>
 				<span class="pull-left hide movable"><i class="fas fa-arrows-alt-v"></i></span>
 				<a class="pull-left btn btn-default btn-xs view-page-item modalbox" data-size="modal-lg" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">
@@ -42,7 +42,7 @@
 					<i class="fas fa-plus"></i>
 				</a>
 				<a class="hide pull-right btn btn-xs btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['id_fiche']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>" href="#" data-group="<?php echo $nb; ?>">
-					<i class="fas fa-minus"></i>
+					<i class="fas fa-trash"></i>
 				</a>
 				<span class="pull-left hide movable"><i class="fas fa-arrows-alt-v"></i></span>
 				<a class="pull-left btn btn-default btn-xs view-page-item modalbox" data-size="modal-lg" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['id_fiche']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['id_fiche']); ?>">
@@ -88,7 +88,7 @@
               <?php if (!$areParamsReadonly): ?>
               <button class="pull-right btn btn-danger btn-xs btn-danger remove-page-item"
                 title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>">
-                <i class="fas fa-minus"></i>
+                <i class="fas fa-trash"></i>
               </button>
               <?php endif ?>
 							<span class="pull-left movable"><i class="fas fa-arrows-alt-v"></i></span>
@@ -103,7 +103,7 @@
 				<?php foreach($selectedPages as $page): ?>
 					<li class="list-group-item">
 						<button class="pull-right btn btn-danger btn-xs btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>">
-							<i class="fas fa-minus"></i>
+							<i class="fas fa-trash"></i>
 						</button>
 						<span class="pull-left movable"><i class="fas fa-arrows-alt-v"></i></span>
 						<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">

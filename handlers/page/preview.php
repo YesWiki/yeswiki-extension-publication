@@ -5,17 +5,14 @@ global $wiki;
 if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-title'])) {
     include_once 'includes/squelettephp.class.php';
     $exportTemplate = new SquelettePhp('print-preview.tpl.html', 'publication');
+    $publicationStyle = preg_replace('#^(.+)\.(.+)$#siU', '$1.publication.$2', $wiki->config['favorite_style']);
 
-    $themeCustomCSS = 'themes/' . $wiki->config['favorite_theme'] . '/styles/publication.override.css';
-
-    // we remove the pager from the display
-    $content = preg_replace(
-        '#(<br />\n)?<ul class="pager">.+</ul>#sU',
-        '',
-        $wiki->Format($wiki->page["body"])
-    );
-    $content = preg_replace('#(<br />\n){2,}#sU', "\n$1", $content);
-    $content = preg_replace('#<br />\n(<h\d)#sU', "\n$1", $content);
+    //
+    $wiki->AddCSSFile('tools/publication/presentation/styles/base.css');
+    $wiki->AddCSSFile('tools/publication/presentation/styles/preview.css');
+    $wiki->AddCSSFile('custom/tools/publication/print.css');
+    $wiki->AddCSSFile('themes/'.$wiki->config['favorite_theme'].'/tools/publication/print.css');
+    $wiki->AddCSSFile('themes/'.$wiki->config['favorite_theme'].'/styles/'.$publicationStyle);
 
     // user  options
     $options = array(
@@ -38,12 +35,7 @@ if ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-titl
         "content" => $content,
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
         "metadatas" => $metadatas,
-        "styles" => $wiki->Format("{{linkstyle}}"),
-        "stylesheets" => array_filter(array(
-            'tools/publication/presentation/styles/preview.css',
-            'tools/publication/presentation/styles/base.css',
-            file_exists($themeCustomCSS) ? $themeCustomCSS : ''
-        )),
+        "styles" => $wiki->Format('{{linkstyle}}{{linkjavascript}}'),
         "stylesModifiers" => array(
             "yeswiki-publication",
             $wiki->config['debug'] === 'yes' ? 'debug' : '',

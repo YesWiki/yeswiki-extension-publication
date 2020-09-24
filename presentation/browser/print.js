@@ -1,4 +1,4 @@
-import {Previewer, registerHandlers, Handler} from './vendor/pagedjs/paged.esm.js'
+import {Previewer, registerHandlers, Handler} from '../../libs/vendor/pagedjs/paged.esm.js'
 
 /**
  * Returns true if the second array contains all the selectors of the first array
@@ -100,5 +100,7 @@ registerHandlers(class backgroundImageCover extends Handler {
 })
 
 window.addEventListener('load', () => {
-  new Previewer().preview()
+  new Previewer().preview().then(() => {
+    document.body.dataset.publication = 'ready'
+  })
 })

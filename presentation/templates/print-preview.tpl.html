@@ -16,12 +16,10 @@
       <?php } ?>
     }
   }</style>
-  <?php foreach($stylesheets as $sheet ) { ?>
-  <link rel="stylesheet" href="<?php echo $baseUrl ?>/<?php echo $sheet ?>">
-  <?php } ?>
 
   <!-- Paged.js handles the printing layout -->
-  <script type="module" src="<?php echo $baseUrl ?>/tools/publication/libs/print.js"></script>
+  <script type="module" src="<?php echo $baseUrl ?>/tools/publication/presentation/browser/print.js"></script>
+  <script src="<?php echo $baseUrl ?>/tools/publication/presentation/browser/is-pdf-ready.js"></script>
 </head>
 
 <body class="<?php echo join(" ", $stylesModifiers) ?>">

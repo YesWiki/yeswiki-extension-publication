@@ -6,7 +6,7 @@ Cette extension permet de générer des publications au format PDF à partir d'u
 
 Les publications générées peuvent être de type :
 
-- [ebook](#pour-générer-des-ebooks)
+- [ebook](#pour-générer-des-ebooks-téléchargeables)
 - [newsletter](#pour-générer-des-newsletters)
 
 La mise en page est effectuée par [Paged.js](https://www.pagedjs.org/)
@@ -51,7 +51,7 @@ L'action `{{publicationgenerator}}` prend en charge les étapes 1, 2 et 3.
 
 Le handler `/pdf` prend en charge l'étape 4.
 
-### Pour générer des ebooks
+### Pour générer des ebooks téléchargeables
 
 Utiliser l'action `{{publicationgenerator}}`. Aucun paramètre n'est obligatoire.
 
@@ -89,8 +89,10 @@ L'extension publication ajoute deux actions à votre wiki.
 | ---                       | ---                                           |
 | `{{publicationgenerator}}`| Interface de sélection du contenu de la publication et de création du document imprimable (cf. [Action `{{publicationgenerator}}`](#action-publicationgenerator)) |
 | `{{ebooklist}}`           | Liste des ebooks générés et imprimables (cf. [Action `{{ebooklist}}`](#action-ebooklist)) |
+| `{{bazar2publication}}`   | Liste des ebooks générés et imprimables (cf. [Action `{{bazar2publication}}`](#action-bazar2publication)) |
 | `{{blankpage}}`           | Insère une page vide à l'impression. |
 | `{{pagebreak}}`           | Crée un saut de page à l'impression. |
+| `{{publication-template}}`| Combiné avec `{{bazar2publication}}`, signale l'emplacement réservé à l'injection de contenus. |
 
 Ces actions s'ajoutent, comme toute action YesWiki, dans un contenu de page.
 
@@ -253,19 +255,6 @@ Exemple :
 {{publicationgenerator fields="readonly"}}
 ```
 
-#### **template**
-
-Spécifie le template utilisé pour afficher l'interface de sélection.
-
-Pour le moment, le seul qui existe est `exportpages_table.tpl.html`.
-
-S'il n'est pas précisé, ce paramètre vaut "exportpages_table.tpl.html".
-
-Exemple  :
-```
-{{publicationgenerator template="exportpages_table.tpl.html"}}
-```
-
 #### **titles**
 
 *S'il est utilisé, ce paramètre doit l'être conjointement au paramètre `groupselector`.*
@@ -311,7 +300,7 @@ Cette action liste les ebook générés.
 
 #### **ebookpagenameprefix**
 
-Le paramètre `ebookpagenameprefix` permet de préciser le préfixe par lequel commencent les noms de pages correspondant à des ebooks.
+Le paramètre `ebookpagenameprefix` précise le préfixe par lequel commencent les noms de pages correspondant à des ebooks.
 
 S'il n'est pas précisé, ce paramètre vaut "Ebook".
 
@@ -319,6 +308,63 @@ Exemple – Pour lister les ebooks dont le préfixe est "MesEDoc", il faut donc 
 
 ```
 {{ebooklist outputformat="ebook" ebookpagenameprefix="MesEDoc"}}
+```
+
+### Action `{{bazar2publication}}`
+
+Cette action exporte les résultats d'une sélection de fiches Bazar en PDF en cliquant sur un bouton. Le téléchargement débute au bout de quelques secondes.
+Il n'y a pas d'étape de personnalisation.
+
+L'action est à placer à côté d'une action `{{bazar}}` ou `{{bazarliste}}`.
+
+Tous les paramètres sont facultatifs.
+
+#### **title**
+
+Personnalise le texte affiché sur le bouton.
+
+```
+{{bazar2publication title="Imprimer ces résultats"}}
+```
+
+#### **icon**
+
+_Par défaut_ : `fa-book`.
+
+Personnalise l'icône affichée (par défaut, `fa-book`).
+
+À choisir parmi le [catalogue Font Awesome](https://fontawesome.com/v4.7.0/icons/).
+
+```
+{{bazar2publication icon="fa-cloud-download"}}
+```
+
+#### **publication-template**
+
+Par défaut, chaque fiche Bazar démarre sur une nouvelle page.
+
+Cet attribut importe la configuration d'une page Ebook : thème et style de présentation, ainsi que les éléments de configuration saisis dans le formulaire de création.
+
+```
+{{bazar2publication publication-template="EbookModelePourBazar"}}
+```
+
+Un Ebook modèle se crée comme tout autre publication, à partir d'une [action `{{publicationgenerator}}`](#action-publicationgenerator).
+
+Par défaut, le _contenu_ de la page modèle est remplacé par les fiches Bazar.
+L'utilisation de l'action [`{{publication-template}}`](#action-publication-template) dans la page modèle vous donne la liberté de choisir l'emplacement où les fiches Bazar seront insérées.
+
+### Action `{{publication-template}}`
+
+Cette action se place dans une page Ebook dont vous voulez vous servir comme modèle de publication.
+
+Ce modèle de publication s'utilise notamment pour personnaliser un export depuis une liste Bazar à l'aide du [bouton généré par l'action `{{bazar2publication}}`](#action-bazar2publication).
+
+```
+{{include page="EbookPageIntro" class="publication-cover"}}
+{{include page="EbookRemerciements"}}
+{{publication-template}}
+{{include page="EbookPageFin" class="publication-end"}}
 ```
 
 ## Handlers (ou suffixes) de page
@@ -332,7 +378,8 @@ L'extension publication ajoute deux handlers aux pages de votre wiki.
 
 Ces fonctions sont accessibles depuis le sous-menu "partager" du bas de page.
 
-## Configuration
+
+## Configuration serveur (`wakka.config.php`)
 
 Le fichier de configuration [`wakka.config.php`][wakka-config] accepte
 plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informatique.

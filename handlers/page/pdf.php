@@ -57,13 +57,29 @@ if (is_executable($this->config['htmltopdf_path'])) {
         } else {
             $browserFactory = new HeadlessChromium\BrowserFactory($this->config['htmltopdf_path']);
             $browser = $browserFactory->createBrowser($this->config['htmltopdf_options']);
-            $page = $browser->createPage();
 
+            $page = $browser->createPage();
             $page->navigate($sourceUrl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
 
-            // now generate PDF
-            $page->pdf()->saveToFile($fullFilename);
-            $browser->close();
+            try {
+              $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue(20000);
+
+              // now generate PDF
+              $page->pdf(array(
+                'printBackground' => true,
+                'displayHeaderFooter' => true,
+                'preferCSSPageSize' => true
+              ))->saveToFile($fullFilename);
+              $browser->close();
+            }
+            catch (Exception $e) {
+              $browser->close();
+
+              echo $this->Header()."\n";
+              echo '<div class="alert alert-danger alert-error">'.$e->getMessage().'</div>'."\n";
+              echo $this->Footer()."\n";
+              exit(1);
+            }
         }
     }
 

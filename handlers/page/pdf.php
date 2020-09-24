@@ -36,13 +36,9 @@ if (is_executable($this->config['htmltopdf_path'])) {
             exit;
         }
     } else {
-        if (!empty($_GET['output_like_screen'])) {
-            $sourceUrl = $this->href('iframe', $this->GetPageTag());
-        } else {    
-            $sourceUrl = $this->href('preview', $this->GetPageTag(), 'pdf=1', false);
-        }
-            
-    }
+        $pdfTag = $this->MiniHref('pdf', $this->GetPageTag());
+        $sourceUrl = $this->href('preview', $this->GetPageTag(), preg_replace('#^'. $pdfTag .'&#U', '', $_SERVER['QUERY_STRING']), false);
+      }
 
     $cache_life = '300'; //caching time, in seconds
     $file_exists = file_exists($fullFilename);

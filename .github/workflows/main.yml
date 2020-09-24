@@ -10,5 +10,37 @@ jobs:
       id: package
       uses: oncletom/yeswiki-build-repo@feature/action
 
-    - name: Get the test extension md5sum
-      run: echo "md5sum is ${{ steps.package.outputs.md5sum }}"
+    - name: Assess md5 and archive name
+      run: |
+        echo "${{ steps.package.outputs.archive-name }}md5sum is ${{ steps.package.outputs.md5sum }}"
+
+    - name: Create a release
+      if: startsWith(github.ref, 'refs/tags/')
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+
+    - name: Upload zip file
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/${{ steps.package.output.archive-name }}
+        asset_name: ${{ steps.package.output.archive-name }}
+        asset_content_type: application/zip
+
+    - name: Upload md5 file
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/${{ steps.package.output.archive-name }}.md5
+        asset_name: ${{ steps.package.output.archive-name }}.md5
+        asset_content_type: text/plain

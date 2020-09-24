@@ -45,13 +45,14 @@ if (is_executable($this->config['htmltopdf_path'])) {
     }
 
     $cache_life = '300'; //caching time, in seconds
-    $fileLastModifiedTime = @filemtime($fullFilename);  // returns FALSE if file does not exist
-    $command = '';
+    $file_exists = file_exists($fullFilename);
+    $fileLastModifiedTime = $file_exists ? @filemtime($fullFilename) : 0;  // returns FALSE if file does not exist
     $output = array();
 
-    if (!file_exists($fullFilename)
-    || (file_exists($fullFilename) && isset($_GET['refresh']) && $_GET['refresh']==1)
-    || (file_exists($fullFilename) && (time() - $fileLastModifiedTime >= $this->config['htmltopdf_cache_life']))
+    if (($this->UserIsAdmin() && isset($_GET['print-debug']))
+    || !$file_exists
+    || ($file_exists && isset($_GET['refresh']) && $_GET['refresh']==1)
+    || ($file_exists && (time() - $fileLastModifiedTime >= $this->config['htmltopdf_cache_life']))
     ) {
         if (!empty($this->config['htmltopdf_service_url'])) {
             $url = $this->config['htmltopdf_service_url'].'&url='.urlencode($sourceUrl);
@@ -90,9 +91,6 @@ if (is_executable($this->config['htmltopdf_path'])) {
     } else {
         echo $this->Header()."\n";
         echo '<div class="alert alert-danger alert-error">'._t('PUBLICATION_NO_GENERATED_PDF_FILE_FOUND').'</div>'."\n";
-        if (!empty($command)) {
-            echo $command.'<br>';
-        }
         if (count($output) > 0) {
             echo implode('<br>', $output);
         }

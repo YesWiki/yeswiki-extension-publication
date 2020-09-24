@@ -15,8 +15,11 @@ $wakkaConfig = array_merge(array(
   // options for chromium
   'htmltopdf_options' => array(
     'windowSize' =>   ['1440', '780'],
+    'headless' =>     true,
     'noSandbox' =>    true,
-    // 'debugLogger' =>  'php://stdout',
+    'debugLogger' =>  isset($_GET['publication-debug']) && $_GET['print-debug'] === 'browser' ? 'php://stdout' : null,
+    'ignoreCertificateErrors' => true,
+    'customFlags' =>  isset($_GET['publication-debug']) && $_GET['print-debug'] === 'console' ? ['--enable-logging=stderr', '--v=1'] : null
   ),
 
   // if you want to propose this website as a service for other domains

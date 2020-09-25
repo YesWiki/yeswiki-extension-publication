@@ -251,7 +251,9 @@ if (isset($_POST["page"])) {
 
         if ($this->SavePage($pageName, $output) === 0) {
           $this->SaveMetaDatas($pageName, $_POST);
-          $output = $this->Format('""<div class="alert alert-success">' . _t('PUBLICATION_EBOOK_PAGE_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $pageName . '" text="' . _t('PUBLICATION_GOTO_EBOOK_PAGE') . ' ' . $pageName . '"}}""</div>""' . "\n");
+          $this->SetMessage(_t('PUBLICATION_EBOOK_PAGE_CREATED'));
+          $this->Redirect($this->Href('', $pageName));
+          exit();
         }
         else {
           $output = $this->Format('""<div class="alert alert-danger alert-error">' . _t('PUBLICATION_EBOOK_PAGE_CREATION_FAILED') . '.""' . "\n" . '{{button class="btn-primary" link="' . $this->GetPageTag() . '" text="' . _t('PUBLICATION_GOTO_EBOOK_CREATION_PAGE') . ' ' . $this->GetPageTag() . '"}}""</div>""' . "\n");
@@ -282,8 +284,10 @@ if (isset($_POST["page"])) {
 
 			$acceptedTags = '<h1><h2><h3><h4><h5><h6><hr><hr/><br><br/><span><blockquote><i><u><b><strong><ol><ul><li><small><div><p><a><table><tr><th><td><img><figure><caption><iframe>';
 			$fiche['bf_content'] = strip_tags($fiche['bf_content'], $acceptedTags);
-			$fiche = baz_insertion_fiche($fiche);
-			$output = $this->Format('""<div class="alert alert-success">' . _t('PUBLICATION_NEWSLETTER_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $fiche['id_fiche'] . '" text="' . _t('PUBLICATION_SEE_NEWSLETTER') . ' ' . $fiche['bf_titre'] . '"}}""</div>""' . "\n");
+      $fiche = baz_insertion_fiche($fiche);
+
+      $this->SetMessage(_t('PUBLICATION_NEWSLETTER_CREATED'));
+      $this->Redirect($this->Href('', $fiche['id_fiche']));
 		}
 	} while (FALSE); // End of global do-while loop
 } else { // Not isset($_POST["page"])

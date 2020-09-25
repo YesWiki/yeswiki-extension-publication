@@ -22,11 +22,11 @@ $this->addCssFile('tools/publication/presentation/styles/publication.css');
 
 // Format of the output. Either you want to generate an ebook or a newsletter
 // Default value is ebook
-$outputFormat = $this->getParameter('outputformat');
-if (empty($outputFormat) || $outputFormat != 'newsletter') {
-    $name = _t('PUBLICATION_EBOOK');
-    $outputFormat = 'Ebook';
-} else {
+$name = _t('PUBLICATION_EBOOK');
+$outputFormat = $this->getParameter('outputformat', 'Ebook');
+$messages = [];
+
+if ($outputFormat === 'newsletter') {
 	$formId = $this->getParameter('formid'); // Bazar form used to store the newsletter
 	if (empty($formId)) {
 		exit (_t('PUBLICATION_MISSING_NEWSLETTER_FORM'));
@@ -35,8 +35,20 @@ if (empty($outputFormat) || $outputFormat != 'newsletter') {
 	}
 }
 
+// Deprecated arguments
+// In the form of ['oldvalue', 'newvalue']
+$messages = array_reduce([['ebookpagenameprefix', 'pagenameprefix'], ['fields', 'readonly'], ['ebookstart', 'pagestart'], ['ebookend', 'pageend'], ['publicationstart', 'pagestart'], ['publicationend', 'pageend']], function ($accumulator, $item) {
+  list($key, $expectation) = $item;
+
+  if ($this->getParameter($key, null) !== null) {
+    array_push($accumulator, ['warning', sprintf(_t('PUBLICATION_PARAMETER_DEPRECATED'), $key, $expectation)]);
+  }
+
+  return $accumulator;
+}, $messages);
+
 // Indicates if fields and elements are "read only"
-$areParamsReadonly = $this->getParameter('fields', 'writeable') === 'readonly';
+$areParamsReadonly = $this->getParameter('readonly', null) === '';
 
 // Pages used for intro and outro
 $publicationStart = $this->getParameter('pagestart');
@@ -44,10 +56,7 @@ $publicationEnd = $this->getParameter('pageend');
 
 // prefix for created pages
 // Only used when outputformat="ebook"
-$ebookPageNamePrefix = $this->getParameter('ebookpagenameprefix');
-if (empty($ebookPageNamePrefix)) {
-    $ebookPageNamePrefix = 'Ebook';
-}
+$ebookPageNamePrefix = $this->getParameter('pagenameprefix', 'Ebook');
 
 // include default pages in page listing ?
 $addInstalledPages = $this->getParameter('addinstalledpage');
@@ -333,24 +342,26 @@ if (isset($_POST["page"])) {
     include_once 'includes/squelettephp.class.php';
     $exportTemplate = new SquelettePhp($template, 'publication');
 
-    $output .= $exportTemplate->render(
-        array(
-            'entries' => $results,
-            'areParamsReadonly' => $areParamsReadonly,
-            'publicationStart' => $this->loadPage($publicationStart),
-            'publicationEnd' => $this->loadPage($publicationEnd),
-            'addInstalledPages' => $addInstalledPages,
-            'installedPageNames' => $installedPageNames,
-            'default' => $default,
-            'ebookPageName' => $ebookPageName,
-            'metaDatas' => $this->page["metadatas"],
-            'selectedPages' => $selectedPages,
-            'chapterCoverPages' => $chapterCoverPages,
-            'url' => $this->href('', $this->GetPageTag()),
-            'name' => $name,
-            'outputFormat' => $outputFormat,
-        )
-    );
+    $this->AddJavascriptFile('tools/publication/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
+  	$this->AddJavascriptFile('tools/publication/presentation/actions/publicationgenerator.js');
+
+    $output .= $exportTemplate->render(array(
+      'messages' => $messages,
+      'entries' => $results,
+      'areParamsReadonly' => $areParamsReadonly,
+      'publicationStart' => $this->loadPage($publicationStart),
+      'publicationEnd' => $this->loadPage($publicationEnd),
+      'addInstalledPages' => $addInstalledPages,
+      'installedPageNames' => $installedPageNames,
+      'default' => $default,
+      'ebookPageName' => $ebookPageName,
+      'metaDatas' => $this->page["metadatas"],
+      'selectedPages' => $selectedPages,
+      'chapterCoverPages' => $chapterCoverPages,
+      'url' => $this->href('', $this->GetPageTag()),
+      'name' => $name,
+      'outputFormat' => $outputFormat,
+    ));
 }
 
 echo $output . "\n";

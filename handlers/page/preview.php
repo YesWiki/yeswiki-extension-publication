@@ -7,7 +7,7 @@ $publication = null;
 /**
  * We print bazar list results
  */
-if ($wiki->HasAccess('read') && isset($_GET['query']) && preg_match('#{{bazar#', $wiki->page['body'])) {
+if ($wiki->HasAccess('read') && preg_match('#{{bazar#', $wiki->page['body'])) {
   // we assemble bazar pages
   preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
   list(, $id) = $matches;

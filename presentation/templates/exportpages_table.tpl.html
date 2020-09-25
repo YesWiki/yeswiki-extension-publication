@@ -1,78 +1,101 @@
+<?php if (!empty($messages)): ?>
+<section class="messages">
+  <?php foreach ($messages as list($flag, $message)): ?>
+  <div class="alert alert-<?php echo $flag ?>">
+    <?php echo $message ?>
+  </div>
+  <?php endforeach ?>
+</section>
+<?php endif ?>
+
 <div class="row row-fluid">
 	<div class="col-lg-4 export-table-container">
 		<h3><?php echo _t('PUBLICATION_AVAILABLE_PAGES'); ?></h3>
-		<div class="alert alert-info">
-			<?php echo _t('PUBLICATION_EXPORT_PAGES_INFO'); ?><a class="btn btn-default btn-success btn-mini btn-xs" href="#"><i class="fas fa-plus"></i></a>.
-		</div>
 		<div class="input-group input-prepend input-append">
 			<span class="input-group-addon add-on"><i class="fas fa-filter"></i></span>
-			<input class="form-control input-sm" type="text" id="filter" value="" placeholder="<?php echo _t('PUBLICATION_FILTER_PAGES'); ?>" />
+			<input class="form-control" type="text" id="filter" value="" placeholder="<?php echo _t('PUBLICATION_FILTER_PAGES'); ?>" />
 			<span class="input-group-btn add-on">
-				<button class="btn btn-default btn-sm btn-erase-filter" type="button">&times;</button>
+				<button class="btn btn-default btn-erase-filter" type="button" aria-label="Empty filter">
+          <i class="fas fa-times"></i>
+        </button>
 			</span>
 		</div><!-- /input-group -->
-		<span id="filter-count" class="help-block align-right"></span>
+    <span id="filter-count" class="help-block align-right"></span>
+
+  <?php if (!empty($chapterCoverPages)): ?>
+  <section class="page-groups">
+    <h4><?php echo _t('PUBLICATION_CHAPTERS') ?>
+      <a class="pull-right btn btn-xs btn-success select-all" title="<?php echo _t('PUBLICATION_ADD_ALL'); ?>" href="#">
+        <i class="fas fa-plus"></i> <?php echo _t('PUBLICATION_ADD_ALL'); ?>
+      </a>
+    </h4>
+    <ul class="list-entries-to-export group-chapters list-group">
+    </ul>
+  </section>
+  <?php endif ?>
+
 	<?php if (count($entries) > 0) : $nb = 0; ?>
-	<?php foreach($entries as $form) : $nb++; ?>
-	<h4><?php echo $form['name']; ?>
-		<a class="pull-right btn btn-xs btn-success select-all" title="<?php echo _t('PUBLICATION_ADD_ALL'); ?>" href="#">
-		  <i class="fas fa-plus"></i> <?php echo _t('PUBLICATION_ADD_ALL'); ?>
-		</a>
-	</h4>
-		<ul class="list-entries-to-export group-<?php echo $nb; ?> list-group">
-			<?php foreach($form['entries'] as $page) : ?>
-			<?php if ($form['type'] === 'pages') : ?>
-			<li class="list-group-item">
-				<a class="pull-right btn btn-xs btn-success select-page-item" title="<?php echo _t('PUBLICATION_SELECT_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FOR_THE_EBOOK'); ?>" href="#">
-					<i class="fas fa-plus"></i>
-				</a>
-				<a class="hide pull-right btn btn-xs btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>" href="#" data-group="<?php echo $nb; ?>">
-					<i class="fas fa-trash"></i>
-				</a>
-				<span class="pull-left hide movable"><i class="fas fa-arrows-alt-v"></i></span>
-				<a class="pull-left btn btn-default btn-xs view-page-item modalbox" data-size="modal-lg" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">
-					<i class="fas fa-eye"></i>
-				</a>
-				<input type="hidden" name="page[]" value="<?php echo $page['tag']; ?>" />
-				<span class="page-label"><?php echo get_title_from_body($page); ?></span>
-			</li>
-			<?php elseif ($form['type'] === 'bazar') : ?>
-			<li class="list-group-item">
-				<a class="pull-right btn btn-xs btn-success select-page-item" title="<?php echo _t('PUBLICATION_SELECT_PAGE'); ?> <?php echo htmlentities($page['id_fiche']); ?> <?php echo _t('PUBLICATION_FOR_THE_EBOOK'); ?>" href="#">
-					<i class="fas fa-plus"></i>
-				</a>
-				<a class="hide pull-right btn btn-xs btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['id_fiche']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>" href="#" data-group="<?php echo $nb; ?>">
-					<i class="fas fa-trash"></i>
-				</a>
-				<span class="pull-left hide movable"><i class="fas fa-arrows-alt-v"></i></span>
-				<a class="pull-left btn btn-default btn-xs view-page-item modalbox" data-size="modal-lg" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['id_fiche']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['id_fiche']); ?>">
-					<i class="fas fa-eye"></i>
-				</a>
-				<input type="hidden" name="page[]" value="<?php echo $page['id_fiche']; ?>" />
+  <?php foreach($entries as $form) : $nb++; ?>
+  <section class="page-groups">
+    <h4><?php echo $form['name']; ?>
+      <a class="pull-right btn-xs btn-success select-all" title="<?php echo _t('PUBLICATION_ADD_ALL'); ?>" href="#">
+        <i class="fas fa-plus"></i> <?php echo _t('PUBLICATION_ADD_ALL'); ?>
+      </a>
+    </h4>
+    <ul class="list-entries-to-export group-<?php echo $nb; ?> list-group">
+      <?php foreach($form['entries'] as $page) : ?>
+      <?php if ($form['type'] === 'pages') : ?>
+      <li class="list-group-item">
+        <a class="pull-right btn btn-sm btn-success select-page-item" title="<?php echo _t('PUBLICATION_SELECT_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FOR_THE_EBOOK'); ?>" href="#">
+          <i class="fas fa-plus"></i>
+        </a>
+        <a class="hide pull-right btn btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>" href="#" data-group="<?php echo $nb; ?>">
+          <i class="fas fa-trash"></i>
+        </a>
+        <span class="hide movable"><i class="fas fa-arrows-alt-v"></i></span>
+        <a class="btn btn-default btn-sm view-page-item modalbox" data-size="modal-lg" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">
+          <i class="fas fa-eye"></i>
+        </a>
+        <input type="hidden" name="page[]" value="<?php echo $page['tag']; ?>" />
+        <span class="page-label"><?php echo get_title_from_body($page); ?></span>
+      </li>
+      <?php elseif ($form['type'] === 'bazar') : ?>
+      <li class="list-group-item">
+        <a class="pull-right btn btn-sm btn-success select-page-item" title="<?php echo _t('PUBLICATION_SELECT_PAGE'); ?> <?php echo htmlentities($page['id_fiche']); ?> <?php echo _t('PUBLICATION_FOR_THE_EBOOK'); ?>" href="#">
+          <i class="fas fa-plus"></i>
+        </a>
+        <a class="hide pull-right btn btn-sm btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['id_fiche']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>" href="#" data-group="<?php echo $nb; ?>">
+          <i class="fas fa-trash"></i>
+        </a>
+        <span class="hide movable"><i class="fas fa-arrows-alt-v"></i></span>
+        <a class="btn btn-default btn-sm view-page-item modalbox" data-size="modal-lg" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['id_fiche']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['id_fiche']); ?>">
+          <i class="fas fa-eye"></i>
+        </a>
+        <input type="hidden" name="page[]" value="<?php echo $page['id_fiche']; ?>" />
         <span class="page-label"><?php echo $page['bf_titre']; ?></span>
-			</li>
-			<?php endif; ?>
-			<?php endforeach; ?>
-		</ul>
+      </li>
+      <?php endif; ?>
+      <?php endforeach; ?>
+    </ul>
+  </section>
 	<?php endforeach; ?>
 	<?php endif; ?>
 	</div><!-- /.col-lg-4.export-table-container -->
 
 	<div class="col-lg-8">
-		<h3><?php echo _t('PUBLICATION_YOUR').' '.strtolower($name); ?></h3>
+    <button class="btn btn-primary btn-sm page-break pull-right" data-label="<?php echo _t('PUBLICATION_BLANK_PAGE'); ?>"
+      title="<?php echo _t('PUBLICATION_INSERT_BLANK_PAGE'); ?>">
+      <i class="fas fa-plus"></i> <?php echo _t('PUBLICATION_INSERT_BLANK_PAGE'); ?>
+    </button>
 
-    <p class="clearfix text-right">
-      <button class="btn btn-primary btn-xs page-break" data-label="<?php echo _t('PUBLICATION_BLANK_PAGE'); ?>" title="<?php echo _t('PUBLICATION_INSERT_BLANK_PAGE'); ?>">
-        <i class="fas fa-plus"></i> <?php echo _t('PUBLICATION_INSERT_BLANK_PAGE'); ?>
-      </button>
-    </p>
+		<h3><?php echo _t('PUBLICATION_YOUR').' '.strtolower($name); ?></h3>
 
 		<div class="well">
 			<form class="export-table-form" method="post" action="<?php echo $url;?>">
 			<?php if (!empty($publicationStart)) : ?>
 				<ul class="list-group">
 					<li class="list-group-item list-group-item-info">
-						<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo $publicationStart; ?>" href="<?php echo $GLOBALS['wiki']->href('html', $publicationStart['tag']); ?>">
+						<a class="btn btn-default btn-sm view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo $publicationStart; ?>" href="<?php echo $GLOBALS['wiki']->href('html', $publicationStart['tag']); ?>">
 							<i class="fas fa-eye"></i>
 						</a>
 						<input type="hidden" name="page[]" value="<?php echo $publicationStart['tag']; ?>?type=publication-start" />
@@ -82,17 +105,21 @@
 				</ul>
 			<?php endif; ?>
 				<ul id="publication-selection-container" class="list-group">
-				<?php if (empty($selectedPages)) : ?>
+				<?php if (!empty($chapterCoverPages)) : ?>
 					<?php foreach($chapterCoverPages as $page): ?>
 						<li class="list-group-item list-group-item-info">
               <?php if (!$areParamsReadonly): ?>
-              <button class="pull-right btn btn-danger btn-xs btn-danger remove-page-item"
-                title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>">
+              <button class="hide pull-right btn btn-sm btn-success select-page-item"
+                title="<?php echo _t('PUBLICATION_SELECT_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FOR_THE_EBOOK'); ?>" data-group="chapters">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button class="pull-right btn btn-danger btn-sm btn-danger remove-page-item"
+                title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>" data-group="chapters">
                 <i class="fas fa-trash"></i>
               </button>
               <?php endif ?>
-							<span class="pull-left movable"><i class="fas fa-arrows-alt-v"></i></span>
-							<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">
+							<span class="movable"><i class="fas fa-arrows-alt-v"></i></span>
+							<a class="btn btn-default btn-sm view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">
 								<i class="fas fa-eye"></i>
 							</a>
 							<input type="hidden" name="page[]" value="<?php echo $page['tag']; ?>?class=publication-chapter" />
@@ -105,8 +132,8 @@
 						<button class="pull-right btn btn-danger btn-xs btn-danger remove-page-item" title="<?php echo _t('PUBLICATION_DELETE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?> <?php echo _t('PUBLICATION_FROM_THE_EBOOK'); ?>">
 							<i class="fas fa-trash"></i>
 						</button>
-						<span class="pull-left movable"><i class="fas fa-arrows-alt-v"></i></span>
-						<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">
+						<span class="movable"><i class="fas fa-arrows-alt-v"></i></span>
+						<a class="btn btn-default btn-sm view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> <?php echo htmlentities($page['tag']); ?>" href="<?php echo $GLOBALS['wiki']->href('html', $page['tag']); ?>">
 							<i class="fas fa-eye"></i>
 						</a>
 						<input type="hidden" name="page[]" value="<?php echo $page['tag']; ?>" />
@@ -119,7 +146,7 @@
 			<?php if (!empty($publicationEnd)) : ?>
 				<ul class="list-group">
 					<li class="list-group-item list-group-item-info">
-						<a class="pull-left btn btn-default btn-xs view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> PageEbookFin" href="<?php echo $GLOBALS['wiki']->href('html', $publicationEnd['tag']); ?>">
+						<a class="btn btn-default btn-sm view-page-item modalbox" title="<?php echo _t('PUBLICATION_SEE_PAGE'); ?> PageEbookFin" href="<?php echo $GLOBALS['wiki']->href('html', $publicationEnd['tag']); ?>">
 							<i class="fas fa-eye"></i>
 						</a>
 						<input type="hidden" name="page[]" value="<?php echo $publicationEnd['tag']; ?>?type=publication-end" />
@@ -241,7 +268,3 @@
 		</div>
 	</div> <!-- /.col-lg-8. publication-selection-container -->
 </div> <!-- /.row -->
-<?php
-  	$GLOBALS['wiki']->AddJavascriptFile('tools/publication/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
-  	$GLOBALS['wiki']->AddJavascriptFile('tools/publication/libs/exportpages.js');
-?>

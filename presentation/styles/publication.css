@@ -1,18 +1,25 @@
-.a4 {
-    width:210mm;
-    height:297mm;
+.btn {
+  padding: 5px 10px;
 }
-.space-left {
-    margin-left:1em;
+.btn-sm {
+  font-size: 14px;
 }
-.btn-xs.btn-danger {
-    border: 1px solid #d9534f;
+.btn-xs {
+  font-size: 12px;
+}
+
+.btn i:last-child:first-child {
+  margin: 0;
 }
 
 .yw-publication__show .img-cover {
   object-fit: cover;
   height: 250px;
   width: 200px;
+}
+
+.export-table-container .page-groups {
+  margin-bottom: 1em;
 }
 
 .export-table-form details > summary {
@@ -37,11 +44,12 @@
 .export-table-form .form-row:not(.clearfix) .form-group {
   margin-top: 0;
 }
-
-#publication-selection-container.ui-sortable .blank-page .page-label:before,
+#publication-selection-container.ui-sortable .blank-page .page-label {
+  margin-left: .75em;
+}
 #publication-selection-container.ui-sortable .blank-page .page-label:after {
   color: #aaa;
-  content: "-------";
+  content: "--------------";
   margin-left: .5em;
   margin-right: .5em;
 }

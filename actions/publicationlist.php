@@ -38,8 +38,7 @@ if (!defined("WIKINI_VERSION")) {
 }
 
 
-$ebookPageNamePrefix = $this->getParameter('ebookpagenameprefix');
-if (empty($ebookPageNamePrefix)) $ebookPageNamePrefix = 'Ebook';
+$ebookPageNamePrefix = $this->getParameter('pagenameprefix', 'Ebook');
 
 $output = '';
 
@@ -58,7 +57,7 @@ if (count($pages) > 0) {
 
   $output = $template->render(array(
     'hasWriteAccess' => $this->HasAccess('write'),
-    'hasDeleteAccess' => $this->UserIsAdmin() || $wiki->UserIsOwner(),
+    'hasDeleteAccess' => $this->UserIsAdmin() || $this->UserIsOwner(),
     'pages' => $pages,
     'wiki' => $this,
   ));

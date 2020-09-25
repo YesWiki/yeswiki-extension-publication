@@ -18,22 +18,23 @@ if ($wiki->HasAccess('read') && isset($_GET['query']) && preg_match('#{{bazar#',
   }, '');
 
   // we gather a few things from
-  if (isset($_GET['publication-template'])) {
-    $templatePage = $wiki->loadPage($_GET['publication-template']);
+  if (isset($_GET['template-page'])) {
+    $templatePage = $wiki->loadPage($_GET['template-page']);
 
-    // we inherit from template page user-defined styles
-    if (isset($templatePage['metadatas']['theme'])) {
-      $wiki->config['favorite_theme'] = $templatePage['metadatas']['theme'];
-    }
-    if (isset($templatePage['metadatas']['style'])) {
-      $wiki->config['favorite_style'] = $templatePage['metadatas']['style'];
-    }
+    if ($templatePage) {
+      // we inherit from template page user-defined styles
+      if (isset($templatePage['metadatas']['theme'])) {
+        $wiki->config['favorite_theme'] = $templatePage['metadatas']['theme'];
+      }
+      if (isset($templatePage['metadatas']['style'])) {
+        $wiki->config['favorite_style'] = $templatePage['metadatas']['style'];
+      }
 
-    // {{bazar2publication publication-template="MyPage"}} + {{publication-template}} in MyPage
-    if (preg_match('#{{\s*publication-template\s*}}#siU', $templatePage['body'])) {
-      $content = preg_replace('#<!--publication-template-placeholder-->#siU', $content, $wiki->Format($templatePage['body']));
+      // {{bazar2publication publication-template="MyPage"}} + {{publication-template}} in MyPage
+      if (preg_match('#{{\s*publication-template\s*}}#siU', $templatePage['body'])) {
+        $content = preg_replace('#<!--publication-template-placeholder-->#siU', $content, $wiki->Format($templatePage['body']));
+      }
     }
-
   }
 
   $publication = array(

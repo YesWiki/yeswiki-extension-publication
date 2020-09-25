@@ -55,7 +55,7 @@ Le handler `/pdf` prend en charge l'étape 4.
 
 Utiliser l'action `{{publicationgenerator}}`. Aucun paramètre n'est obligatoire.
 
-Chaque ebook généré sera enregistré sous la forme d'une page sur le wiki. Le nom de cette page sera constitué de la valeur du paramètre `ebookpagenameprefix` suivie du titre de l'ebook.
+Chaque ebook généré sera enregistré sous la forme d'une page sur le wiki. Le nom de cette page sera constitué de la valeur du paramètre `pagenameprefix` suivie du titre de l'ebook.
 
 On pourra utilement consulter la section "Action `{{publicationgenerator}}`" ci-après.
 
@@ -152,7 +152,7 @@ Exemple :
 {{publicationgenerator pageend="MaPageWiki"}}
 ```
 
-#### **ebookpagenameprefix**
+#### **pagenameprefix**
 
 *Paramètre utilisé uniquement dans le cas d'un ebook.*
 
@@ -241,18 +241,16 @@ Exemple  :
 {{publicationgenerator chapterpages="DebutChapitreUn, DebutChapitreDeux, DebutChapitreTrois"}}
 ```
 
-#### **fields**
+#### **readonly**
 
 Spécifie si les titre, description, auteur·ices, image et chapitres sont modifiables par l'utilisateur.
-
-Ces champs sont gelés à la saisie si sa valeur est `readonly`.
 
 Les paramètres d'impression restent modifiables dans tous les cas.
 
 Exemple :
 
 ```
-{{publicationgenerator fields="readonly"}}
+{{publicationgenerator readonly}}
 ```
 
 #### **titles**
@@ -294,20 +292,20 @@ on écrira :
 {{publicationgenerator titles="pages wiki, important, recettes de cuisine, livres" groupselector="pages, pages(important), 1, 2(bf_auteur=Rabelais|bf_taille=long)"}}
 ```
 
-### Action `{{ebooklist}}`
+### Action `{{publicationlist}}`
 
 Cette action liste les ebook générés.
 
-#### **ebookpagenameprefix**
+#### **pagenameprefix**
 
-Le paramètre `ebookpagenameprefix` précise le préfixe par lequel commencent les noms de pages correspondant à des ebooks.
+Le paramètre `pagenameprefix` précise le préfixe par lequel commencent les noms de pages correspondant à des ebooks.
 
 S'il n'est pas précisé, ce paramètre vaut "Ebook".
 
 Exemple – Pour lister les ebooks dont le préfixe est "MesEDoc", il faut donc écrire :
 
 ```
-{{ebooklist outputformat="ebook" ebookpagenameprefix="MesEDoc"}}
+{{publicationlist outputformat="ebook" pagenameprefix="MesEDoc"}}
 ```
 
 ### Action `{{bazar2publication}}`
@@ -339,14 +337,14 @@ Personnalise l'icône affichée (par défaut, `fa-book`).
 {{bazar2publication icon="fa-cloud-download"}}
 ```
 
-#### **publication-template**
+#### **templatepage**
 
 Par défaut, chaque fiche Bazar démarre sur une nouvelle page.
 
 Cet attribut importe la configuration d'une page Ebook : thème et style de présentation, ainsi que les éléments de configuration saisis dans le formulaire de création.
 
 ```
-{{bazar2publication publication-template="EbookModelePourBazar"}}
+{{bazar2publication templatepage="EbookModelePourBazar"}}
 ```
 
 Un Ebook modèle se crée comme tout autre publication, à partir d'une [action `{{publicationgenerator}}`](#action-publicationgenerator).
@@ -390,7 +388,6 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 | `htmltopdf_options`                    | ['windowSize' => ['1440', '780'], 'noSandbox' => true]  | Options par défaut passées au navigateur embarqué
 | `htmltopdf_service_url`                |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
 | `htmltopdf_service_authorized_domains` |                                    | Si votre serveur partage les fonction de générateur de pdf, il faut lui indique les nom de domaines autorisés
-| `htmltopdf_cache_life`                 |        300                         | Durée en secondes avant reconstruction du fichier cache pdf
 
 ### … avec Chrome/Firefox sur votre serveur
 

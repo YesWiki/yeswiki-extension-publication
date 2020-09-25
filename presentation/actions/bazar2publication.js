@@ -9,9 +9,9 @@ $(document).ready(function(){
       params.delete('facette')
     }
 
-    // provide base publication-template
-    if ($button.attr('data-publication-template')) {
-      params.set('publication-template', $button.attr('data-publication-template'))
+    // provide base template-page
+    if ($button.attr('data-template-page')) {
+      params.set('template-page', $button.attr('data-template-page'))
     }
 
     // suffix first parameter with '/pdf' route

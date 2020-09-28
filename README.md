@@ -1,16 +1,12 @@
 # Extension YesWiki publication
 
-> Attention — Ceci est une extension de YesWiki. Elle ne fait pas partie du cœur officiellement maintenu de YesWiki.
-
-Cette extension permet de générer des publications au format PDF à partir d'une sélection de fiches bazar ou de pages YesWiki.
-
-Les publications générées peuvent être de type :
-
-- [ebook](#pour-générer-des-ebooks-téléchargeables)
-- [newsletter](#pour-générer-des-newsletters)
+> Extension [YesWiki] qui génère des publications au format PDF à partir d'une sélection de [fiches Bazar][Bazar] et/ou de [pages de contenu][yeswiki-page].
 
 La mise en page est effectuée par [Paged.js](https://www.pagedjs.org/)
-([documentation](https://www.pagedjs.org/documentation/)).
+([documentation](https://www.pagedjs.org/documentation/)), et la capture PDF par un [navigateur dit "headless"][headless-browser] (par défaut [chromium](#pré-requis)).
+
+Les publications générées sont de type [ebook](#pour-générer-des-ebooks-téléchargeables) ou [newsletter](#pour-générer-des-newsletters).
+
 
 <table>
   <tr>
@@ -22,8 +18,20 @@ La mise en page est effectuée par [Paged.js](https://www.pagedjs.org/)
     </td>
   </tr>
   <tr>
-    <th scope="col">Assemblage des pages wiki pour constituer un ouvrage</th>
-    <th scope="col">Prévisualisaton avant téléchargement</th>
+    <th scope="col">Assemblage de pages (<a href="#action-publicationgenerator">action <code>{{publicationgenerator}}</code></a>)</th>
+    <th scope="col">Publication PDF qui reprend les styles du wiki</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="screenshot-page-index.png" alt="">
+    </td>
+    <td>
+      <img src="screenshot-bazar-export.png" alt="">
+    </td>
+  </tr>
+  <tr>
+    <th scope="col">Une page "publication", avec actions de téléchargement et prévisualisation (auteur·ices et admin)</th>
+    <th scope="col">Bouton d'export à ajouter (<a href="#action-bazar2publication">action <code>{{bazar2publication}}</code></a>)</th>
   </tr>
 </table>
 
@@ -57,7 +65,7 @@ Utiliser l'action `{{publicationgenerator}}`. Aucun paramètre n'est obligatoire
 
 Chaque ebook généré sera enregistré sous la forme d'une page sur le wiki. Le nom de cette page sera constitué de la valeur du paramètre `pagenameprefix` suivie du titre de l'ebook.
 
-On pourra utilement consulter la section "Action `{{publicationgenerator}}`" ci-après.
+On pourra utilement consulter la section [Action `{{publicationgenerator}}`](#action-publicationgenerator) ci-après.
 
 ### Pour générer des newsletters
 
@@ -79,7 +87,7 @@ Soit, au minimum : `{{publicationgenerator outputformat="newsletter" formid="<id
 
 Chaque newsletter générée sera enregistrée sous la forme d'une fiche bazar du formulaire \<id du formulaire> sur le wiki.
 
-On pourra utilement consulter la section "Action `{{publicationgenerator}}`" ci-après.
+On pourra utilement consulter la section [Action `{{publicationgenerator}}`](#action-publicationgenerator) ci-après.
 
 ## Actions YesWiki
 
@@ -185,7 +193,7 @@ Exemple – pour faire apparaître les pages créées lors del 'installation du 
 
 *Paramètre utilisé uniquement dans le cas d'un ebook.*
 
-Ce paramètre contient l'adressse de l'image de couverture utilisée en 1re page de couverture des ebooks générés.
+Ce paramètre contient l'adresse de l'image de couverture utilisée en 1re page de couverture des ebooks générés.
 
 Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection en vue d'un ebook, choisir une image de couverture.
 
@@ -385,7 +393,7 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 | Clé de configuration                   | Valeur par défaut                  | Utilité
 | ---                                    | ---                                | ---
 | `htmltopdf_path`                       | `/usr/bin/chromium`                | Indique l'emplacement du programme chargé
-| `htmltopdf_options`                    | ['windowSize' => ['1440', '780'], 'noSandbox' => true]  | Options par défaut passées au navigateur embarqué
+| `htmltopdf_options`                    | `['windowSize' => ['1440', '780'], 'noSandbox' => true]`  | Options par défaut passées au navigateur embarqué
 | `htmltopdf_service_url`                |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
 | `htmltopdf_service_authorized_domains` |                                    | Si votre serveur partage les fonction de générateur de pdf, il faut lui indique les nom de domaines autorisés
 
@@ -421,3 +429,8 @@ array(
     ...
 );
 ```
+
+[YesWiki]: https://yeswiki.net/
+[Bazar]: https://yeswiki.net/?DocumentationBazaR
+[yeswiki-page]: https://yeswiki.net/?DocumentationEdition
+[headless-browser]: https://developers.google.com/web/updates/2017/04/headless-chrome

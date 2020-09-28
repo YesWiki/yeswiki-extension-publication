@@ -251,7 +251,7 @@ if (isset($_POST["page"])) {
             list($page, $qs) = explode('?', $page);
             parse_str($qs, $qs);
 
-            $output .= '{{include page="' . $page . '" type="'. $qs['type'] .'" class="'. $qs['class'] .'"}}' . "\n";
+            $output .= '{{include page="' . $page . '" class="'. implode(' ', [$qs['type'], $qs['class']]) .'}}' . "\n";
           }
         }
 

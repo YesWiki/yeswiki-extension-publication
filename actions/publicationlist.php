@@ -53,7 +53,7 @@ $pages = $this->LoadAll($sql);
 
 if (count($pages) > 0) {
   include_once 'includes/squelettephp.class.php';
-  $template = new SquelettePhp('ebooklist.tpl.html', 'publication');
+  $template = new SquelettePhp('publicationlist.tpl.html', 'publication');
 
   $output = $template->render(array(
     'hasWriteAccess' => $this->HasAccess('write'),

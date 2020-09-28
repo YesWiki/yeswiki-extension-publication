@@ -30,7 +30,7 @@ if ($wiki->HasAccess('read') && preg_match('#{{bazar#', $wiki->page['body'])) {
         $wiki->config['favorite_style'] = $templatePage['metadatas']['style'];
       }
 
-      // {{bazar2publication publication-template="MyPage"}} + {{publication-template}} in MyPage
+      // {{bazar2publication templatepage="MyPage"}} + {{publication-template}} in MyPage
       if (preg_match('#{{\s*publication-template\s*}}#siU', $templatePage['body'])) {
         $content = preg_replace('#<!--publication-template-placeholder-->#siU', $content, $wiki->Format($templatePage['body']));
       }

@@ -88,11 +88,11 @@ L'extension publication ajoute deux actions à votre wiki.
 | Action                    | Utilité                                       |
 | ---                       | ---                                           |
 | `{{publicationgenerator}}`| Interface de sélection du contenu de la publication et de création du document imprimable (cf. [Action `{{publicationgenerator}}`](#action-publicationgenerator)) |
-| `{{ebooklist}}`           | Liste des ebooks générés et imprimables (cf. [Action `{{ebooklist}}`](#action-ebooklist)) |
+| `{{publicationlist}}`           | Liste des ebooks générés et imprimables (cf. [Action `{{publicationlist}}`](#action-publicationlist)) |
 | `{{bazar2publication}}`   | Liste des ebooks générés et imprimables (cf. [Action `{{bazar2publication}}`](#action-bazar2publication)) |
 | `{{blankpage}}`           | Insère une page vide à l'impression. |
 | `{{pagebreak}}`           | Crée un saut de page à l'impression. |
-| `{{publication-template}}`| Combiné avec `{{bazar2publication}}`, signale l'emplacement réservé à l'injection de contenus. |
+| `{{publication-template}}`| Combiné avec `{{bazar2publication templatepage="…"}}`, signale l'emplacement réservé à l'injection de contenus. |
 
 Ces actions s'ajoutent, comme toute action YesWiki, dans un contenu de page.
 
@@ -361,7 +361,7 @@ Ce modèle de publication s'utilise notamment pour personnaliser un export depui
 ```
 {{include page="EbookPageIntro" class="publication-cover"}}
 {{include page="EbookRemerciements"}}
-{{publication-template}}
+<mark>{{publication-template}}</mark>
 {{include page="EbookPageFin" class="publication-end"}}
 ```
 

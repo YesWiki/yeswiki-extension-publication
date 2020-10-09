@@ -248,7 +248,6 @@
  * Publication Section
  */
 @page publication-section {
-  orphans: 6;
 }
 
   .yeswiki-publication .include h1:first-child {
@@ -262,6 +261,11 @@
   display: none;
 }
 
+.yeswiki-publication .dummy {
+  display: none;
+  margin: 0;
+}
+
 /* Unfold panels and other collapsed content */
 .yeswiki-publication .collapse {
   display: block;
@@ -273,9 +277,7 @@
 .yeswiki-publication h1,
 .yeswiki-publication h2,
 .yeswiki-publication h3,
-.yeswiki-publication h4,
-.yeswiki-publication h5,
-.yeswiki-publication h6 {
+.yeswiki-publication h4 {
   page-break-inside: avoid;
 }
 
@@ -289,7 +291,6 @@
 .yeswiki-publication .well,
 .yeswiki-publication .panel {
   margin-top: 1em;
-  orphans: 6;
 }
 
 .yeswiki-publication .panel-heading[data-toggle="collapse"]::after {
@@ -301,6 +302,9 @@
 .yeswiki-publication/*.page-orientation--portrait*/ .left,
 .yeswiki-publication/*.page-orientation--portrait*/ .right {
   float: none;
+}
+.yeswiki-publication/*.page-orientation--portrait*/ .clearfix {
+  display: none;
 }
 
 .yeswiki-publication/*.page-orientation--portrait*/ [class*="col-"] {

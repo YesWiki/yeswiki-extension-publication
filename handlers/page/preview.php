@@ -64,6 +64,13 @@ elseif ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-
 }
 
 /**
+ * We remove things which are troublesome for the layout
+ *
+ * 1. bazar fiche info footer (contains only edit/admin links)
+ */
+$publication['content'] = preg_replace('#<div class="clearfix"></div><div class="BAZ_fiche_info.+<!-- /.BAZ_fiche_info -->#sU', '', $publication['content']);
+
+/**
  * We now generate the content
  */
 

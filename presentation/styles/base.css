@@ -296,15 +296,20 @@
   display: none;
 }
 
-/* We cancel bootstrap column system on print */
-.yeswiki-publication [class*="col-"],
-.yeswiki-publication .left,
-.yeswiki-publication .right {
+/* We cancel bootstrap column system on portrait print */
+.yeswiki-publication/*.page-orientation--portrait*/ [class*="col-"],
+.yeswiki-publication/*.page-orientation--portrait*/ .left,
+.yeswiki-publication/*.page-orientation--portrait*/ .right {
   float: none;
 }
 
-.yeswiki-publication [class*="col-"] {
+.yeswiki-publication/*.page-orientation--portrait*/ [class*="col-"] {
   width: auto !important;
+}
+
+/* We clear Bazar image setting for pictures */
+.yeswiki-publication .BAZ_cadre_fiche [data-id="bf_image"] img {
+  width: auto;
 }
 
 /* OPTION We remove link URLs from the print */

@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/yeswiki/yeswiki-extension-ebook#readme",
   "dependencies": {
-    "pagedjs": "0.1.42"
+    "pagedjs": "0.1.43"
   }
 }

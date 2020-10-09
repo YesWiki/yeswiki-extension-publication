@@ -1271,6 +1271,8 @@
 	exports.isIgnorable = isIgnorable;
 	exports.isAllWhitespace = isAllWhitespace;
 	exports.previousSignificantNode = previousSignificantNode;
+	exports.breakInsideAvoidParentNode = breakInsideAvoidParentNode;
+	exports.parentOf = parentOf;
 	exports.nextSignificantNode = nextSignificantNode;
 	exports.filterTree = filterTree;
 
@@ -1601,6 +1603,10 @@
 
 	function needsPageBreak(node, previousSignificantNode) {
 	  if (typeof node === "undefined" || !previousSignificantNode || isIgnorable(node)) {
+	    return false;
+	  }
+
+	  if (node.dataset && node.dataset.undisplayed) {
 	    return false;
 	  }
 
@@ -1979,6 +1985,44 @@
 
 	  return null;
 	}
+
+	function breakInsideAvoidParentNode(node) {
+	  while (node = node.parentNode) {
+	    if (node && node.dataset && node.dataset.breakInside === "avoid") {
+	      return node;
+	    }
+	  }
+
+	  return null;
+	}
+	/**
+	 * Find a parent with a given node name.
+	 * @param {Node} node - initial Node
+	 * @param {string} nodeName - node name (eg. "TD", "TABLE", "STRONG"...)
+	 * @param {Node} limiter - go up to the parent until there's no more parent or the current node is equals to the limiter
+	 * @returns {Node|undefined} - Either:
+	 *  1) The closest parent for a the given node name, or
+	 *  2) undefined if no such node exists.
+	 */
+
+
+	function parentOf(node, nodeName, limiter) {
+	  if (limiter && node === limiter) {
+	    return;
+	  }
+
+	  if (node.parentNode) {
+	    while (node = node.parentNode) {
+	      if (limiter && node === limiter) {
+	        return;
+	      }
+
+	      if (node.nodeName === nodeName) {
+	        return node;
+	      }
+	    }
+	  }
+	}
 	/**
 	 * Version of |nextSibling| that skips nodes that are entirely
 	 * whitespace or comments.
@@ -2048,8 +2092,10 @@
 	var dom_31 = dom.isIgnorable;
 	var dom_32 = dom.isAllWhitespace;
 	var dom_33 = dom.previousSignificantNode;
-	var dom_34 = dom.nextSignificantNode;
-	var dom_35 = dom.filterTree;
+	var dom_34 = dom.breakInsideAvoidParentNode;
+	var dom_35 = dom.parentOf;
+	var dom_36 = dom.nextSignificantNode;
+	var dom_37 = dom.filterTree;
 
 	var breaktoken = createCommonjsModule(function (module, exports) {
 
@@ -3147,9 +3193,14 @@
 
 	          if (!range && left >= end) {
 	            // Check if it is a float
-	            var isFloat = false;
+	            var isFloat = false; // Check if the node is inside a break-inside: avoid table cell
 
-	            if ((0, dom.isElement)(node)) {
+	            var insideTableCell = (0, dom.parentOf)(node, "TD", rendered);
+
+	            if (insideTableCell && window.getComputedStyle(insideTableCell)["break-inside"] === "avoid") {
+	              // breaking inside a table cell produces unexpected result, as a workaround, we forcibly avoid break inside in a cell.
+	              prev = insideTableCell;
+	            } else if ((0, dom.isElement)(node)) {
 	              var styles = window.getComputedStyle(node);
 	              isFloat = styles.getPropertyValue("float") !== "none";
 	              skip = styles.getPropertyValue("break-inside") === "avoid";
@@ -3177,7 +3228,7 @@
 	            }
 	          }
 
-	          if (!range && (0, dom.isText)(node) && node.textContent.trim().length && window.getComputedStyle(node.parentNode)["break-inside"] !== "avoid") {
+	          if (!range && (0, dom.isText)(node) && node.textContent.trim().length && !(0, dom.breakInsideAvoidParentNode)(node.parentNode)) {
 	            var rects = (0, utils.getClientRects)(node);
 	            var rect = void 0;
 	            left = 0;
@@ -27635,7 +27686,7 @@
 	  value: true
 	});
 	exports["default"] = void 0;
-	var _default = "\n:root {\n\t--pagedjs-width: 8.5in;\n\t--pagedjs-height: 11in;\n\t--pagedjs-width-right: 8.5in;\n\t--pagedjs-height-right: 11in;\n\t--pagedjs-width-left: 8.5in;\n\t--pagedjs-height-left: 11in;\n\t--pagedjs-pagebox-width: 8.5in;\n\t--pagedjs-pagebox-height: 11in;\n\t--pagedjs-margin-top: 1in;\n\t--pagedjs-margin-right: 1in;\n\t--pagedjs-margin-bottom: 1in;\n\t--pagedjs-margin-left: 1in;\n\t--pagedjs-padding-top: 0mm;\n\t--pagedjs-padding-right: 0mm;\n\t--pagedjs-padding-bottom: 0mm;\n\t--pagedjs-padding-left: 0mm;\n\t--pagedjs-border-top: 0mm;\n\t--pagedjs-border-right: 0mm;\n\t--pagedjs-border-bottom: 0mm;\n\t--pagedjs-border-left: 0mm;\n\t--pagedjs-bleed-top: 0mm;\n\t--pagedjs-bleed-right: 0mm;\n\t--pagedjs-bleed-bottom: 0mm;\n\t--pagedjs-bleed-left: 0mm;\n\t--pagedjs-bleed-right-top: 0mm;\n\t--pagedjs-bleed-right-right: 0mm;\n\t--pagedjs-bleed-right-bottom: 0mm;\n\t--pagedjs-bleed-right-left: 0mm;\n\t--pagedjs-bleed-left-top: 0mm;\n\t--pagedjs-bleed-left-right: 0mm;\n\t--pagedjs-bleed-left-bottom: 0mm;\n\t--pagedjs-bleed-left-left: 0mm;\n\t--pagedjs-crop-color: black;\n\t--pagedjs-crop-offset: 2mm;\n\t--pagedjs-crop-stroke: 1px;\n\t--pagedjs-cross-size: 5mm;\n\t--pagedjs-mark-cross-display: none;\n\t--pagedjs-mark-crop-display: none;\n\t--pagedjs-page-count: 0;\n\t--pagedjs-page-counter-increment: 1;\n}\n\n@page {\n\tsize: letter;\n\tmargin: 0;\n}\n\n.pagedjs_sheet {\n\tbox-sizing: border-box;\n\twidth: var(--pagedjs-width);\n\theight: var(--pagedjs-height);\n\toverflow: hidden;\n\tposition: relative;\n\tdisplay: grid;\n\tgrid-template-columns: [bleed-left] var(--pagedjs-bleed-left) [sheet-center] calc(var(--pagedjs-width) - var(--pagedjs-bleed-left) - var(--pagedjs-bleed-right)) [bleed-right] var(--pagedjs-bleed-right);\n\tgrid-template-rows: [bleed-top] var(--pagedjs-bleed-top) [sheet-middle] calc(var(--pagedjs-height) - var(--pagedjs-bleed-top) - var(--pagedjs-bleed-bottom)) [bleed-bottom] var(--pagedjs-bleed-bottom);\n}\n\n.pagedjs_right_page .pagedjs_sheet {\n\twidth: var(--pagedjs-width-right);\n\theight: var(--pagedjs-height-right);\n\tgrid-template-columns: [bleed-left] var(--pagedjs-bleed-right-left) [sheet-center] calc(var(--pagedjs-width) - var(--pagedjs-bleed-right-left) - var(--pagedjs-bleed-right-right)) [bleed-right] var(--pagedjs-bleed-right-right);\n\tgrid-template-rows: [bleed-top] var(--pagedjs-bleed-right-top) [sheet-middle] calc(var(--pagedjs-height) - var(--pagedjs-bleed-right-top) - var(--pagedjs-bleed-right-bottom)) [bleed-bottom] var(--pagedjs-bleed-right-bottom);\n}\n\n.pagedjs_left_page .pagedjs_sheet {\n\twidth: var(--pagedjs-width-left);\n\theight: var(--pagedjs-height-left);\n\tgrid-template-columns: [bleed-left] var(--pagedjs-bleed-left-left) [sheet-center] calc(var(--pagedjs-width) - var(--pagedjs-bleed-left-left) - var(--pagedjs-bleed-left-right)) [bleed-right] var(--pagedjs-bleed-left-right);\n\tgrid-template-rows: [bleed-top] var(--pagedjs-bleed-left-top) [sheet-middle] calc(var(--pagedjs-height) - var(--pagedjs-bleed-left-top) - var(--pagedjs-bleed-left-bottom)) [bleed-bottom] var(--pagedjs-bleed-left-bottom);\n}\n\n.pagedjs_bleed {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tflex-wrap: nowrap;\n\toverflow: hidden;\n}\n\n.pagedjs_bleed-top {\n\tgrid-column: bleed-left / -1;\n\tgrid-row: bleed-top;\n\tflex-direction: row;\n}\n\n.pagedjs_bleed-bottom {\n\tgrid-column: bleed-left / -1;\n\tgrid-row: bleed-bottom;\n\tflex-direction: row;\n}\n\n.pagedjs_bleed-left {\n\tgrid-column: bleed-left;\n\tgrid-row: bleed-top / -1;\n\tflex-direction: column;\n}\n\n.pagedjs_bleed-right {\n\tgrid-column: bleed-right;\n\tgrid-row: bleed-top / -1;\n\tflex-direction: column;\n}\n\n.pagedjs_marks-crop {\n\tdisplay: var(--pagedjs-mark-crop-display);\n\tflex-grow: 0;\n\tflex-shrink: 0;\n}\n\n.pagedjs_bleed-top .pagedjs_marks-crop:nth-child(1),\n.pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(1) {\n\twidth: calc(var(--pagedjs-bleed-left) - var(--pagedjs-crop-stroke));\n\tborder-right: var(--pagedjs-crop-stroke) solid var(--pagedjs-crop-color);\n}\n\n.pagedjs_right_page .pagedjs_bleed-top .pagedjs_marks-crop:nth-child(1),\n.pagedjs_right_page .pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(1) {\n\twidth: calc(var(--pagedjs-bleed-right-left) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_left_page .pagedjs_bleed-top .pagedjs_marks-crop:nth-child(1),\n.pagedjs_left_page .pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(1) {\n\twidth: calc(var(--pagedjs-bleed-left-left) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_bleed-top .pagedjs_marks-crop:nth-child(3),\n.pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(3) {\n\twidth: calc(var(--pagedjs-bleed-right) - var(--pagedjs-crop-stroke));\n\tborder-left: var(--pagedjs-crop-stroke) solid var(--pagedjs-crop-color);\n}\n\n.pagedjs_right_page .pagedjs_bleed-top .pagedjs_marks-crop:nth-child(3),\n.pagedjs_right_page .pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(3) {\n\twidth: calc(var(--pagedjs-bleed-right-right) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_left_page .pagedjs_bleed-top .pagedjs_marks-crop:nth-child(3),\n.pagedjs_left_page .pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(3) {\n\twidth: calc(var(--pagedjs-bleed-left-right) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_bleed-top .pagedjs_marks-crop {\n\talign-self: flex-start;\n\theight: calc(var(--pagedjs-bleed-top) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_right_page .pagedjs_bleed-top .pagedjs_marks-crop {\n\theight: calc(var(--pagedjs-bleed-right-top) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_left_page .pagedjs_bleed-top .pagedjs_marks-crop {\n\theight: calc(var(--pagedjs-bleed-left-top) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_bleed-bottom .pagedjs_marks-crop {\n\talign-self: flex-end;\n\theight: calc(var(--pagedjs-bleed-bottom) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_right_page .pagedjs_bleed-bottom .pagedjs_marks-crop {\n\theight: calc(var(--pagedjs-bleed-right-bottom) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_left_page .pagedjs_bleed-bottom .pagedjs_marks-crop {\n\theight: calc(var(--pagedjs-bleed-left-bottom) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_bleed-left .pagedjs_marks-crop:nth-child(1),\n.pagedjs_bleed-right .pagedjs_marks-crop:nth-child(1) {\n\theight: calc(var(--pagedjs-bleed-top) - var(--pagedjs-crop-stroke));\n\tborder-bottom: var(--pagedjs-crop-stroke) solid var(--pagedjs-crop-color);\n}\n\n.pagedjs_right_page .pagedjs_bleed-left .pagedjs_marks-crop:nth-child(1),\n.pagedjs_right_page .pagedjs_bleed-right .pagedjs_marks-crop:nth-child(1) {\n\theight: calc(var(--pagedjs-bleed-right-top) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_left_page .pagedjs_bleed-left .pagedjs_marks-crop:nth-child(1),\n.pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-crop:nth-child(1) {\n\theight: calc(var(--pagedjs-bleed-left-top) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_bleed-left .pagedjs_marks-crop:nth-child(3),\n.pagedjs_bleed-right .pagedjs_marks-crop:nth-child(3) {\n\theight: calc(var(--pagedjs-bleed-bottom) - var(--pagedjs-crop-stroke));\n\tborder-top: var(--pagedjs-crop-stroke) solid var(--pagedjs-crop-color);\n}\n\n.pagedjs_right_page .pagedjs_bleed-left .pagedjs_marks-crop:nth-child(3),\n.pagedjs_right_page .pagedjs_bleed-right .pagedjs_marks-crop:nth-child(3) {\n\theight: calc(var(--pagedjs-bleed-right-bottom) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_left_page .pagedjs_bleed-left .pagedjs_marks-crop:nth-child(3),\n.pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-crop:nth-child(3) {\n\theight: calc(var(--pagedjs-bleed-left-bottom) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_bleed-left .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-left) - var(--pagedjs-crop-offset));\n\talign-self: flex-start;\n}\n\n.pagedjs_right_page .pagedjs_bleed-left .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-right-left) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_left_page .pagedjs_bleed-left .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-left-left) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_bleed-right .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-right) - var(--pagedjs-crop-offset));\n\talign-self: flex-end;\n}\n\n.pagedjs_right_page .pagedjs_bleed-right .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-right-right) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-left-right) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_marks-middle {\n\tdisplay: flex;\n\tflex-grow: 1;\n\tflex-shrink: 0;\n\talign-items: center;\n\tjustify-content: center;\n}\n\n.pagedjs_marks-cross {\n\tdisplay: var(--pagedjs-mark-cross-display);\n\tbackground-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIzMi41MzdweCIgaGVpZ2h0PSIzMi41MzdweCIgdmlld0JveD0iMC4xMDQgMC4xMDQgMzIuNTM3IDMyLjUzNyIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwLjEwNCAwLjEwNCAzMi41MzcgMzIuNTM3IiB4bWw6c3BhY2U9InByZXNlcnZlIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMy4zODkzIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0yOS45MzEsMTYuMzczYzAsNy40ODktNi4wNjgsMTMuNTYtMTMuNTU4LDEzLjU2Yy03LjQ4MywwLTEzLjU1Ny02LjA3Mi0xMy41NTctMTMuNTZjMC03LjQ4Niw2LjA3NC0xMy41NTQsMTMuNTU3LTEzLjU1NEMyMy44NjIsMi44MTksMjkuOTMxLDguODg3LDI5LjkzMSwxNi4zNzN6Ii8+PGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjMuMzg5MyIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMC4xMDQiIHkxPSIxNi4zNzMiIHgyPSIzMi42NDIiIHkyPSIxNi4zNzMiLz48bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMy4zODkzIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHgxPSIxNi4zNzMiIHkxPSIwLjEwNCIgeDI9IjE2LjM3MyIgeTI9IjMyLjY0MiIvPjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIzLjM4OTMiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iTTI0LjUwOCwxNi4zNzNjMCw0LjQ5Ni0zLjYzOCw4LjEzNS04LjEzNSw4LjEzNWMtNC40OTEsMC04LjEzNS0zLjYzOC04LjEzNS04LjEzNWMwLTQuNDg5LDMuNjQ0LTguMTM1LDguMTM1LTguMTM1QzIwLjg2OSw4LjIzOSwyNC41MDgsMTEuODg0LDI0LjUwOCwxNi4zNzN6Ii8+PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuNjc3OCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNMjkuOTMxLDE2LjM3M2MwLDcuNDg5LTYuMDY4LDEzLjU2LTEzLjU1OCwxMy41NmMtNy40ODMsMC0xMy41NTctNi4wNzItMTMuNTU3LTEzLjU2YzAtNy40ODYsNi4wNzQtMTMuNTU0LDEzLjU1Ny0xMy41NTRDMjMuODYyLDIuODE5LDI5LjkzMSw4Ljg4NywyOS45MzEsMTYuMzczeiIvPjxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjY3NzgiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgeDE9IjAuMTA0IiB5MT0iMTYuMzczIiB4Mj0iMzIuNjQyIiB5Mj0iMTYuMzczIi8+PGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuNjc3OCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMTYuMzczIiB5MT0iMC4xMDQiIHgyPSIxNi4zNzMiIHkyPSIzMi42NDIiLz48cGF0aCBkPSJNMjQuNTA4LDE2LjM3M2MwLDQuNDk2LTMuNjM4LDguMTM1LTguMTM1LDguMTM1Yy00LjQ5MSwwLTguMTM1LTMuNjM4LTguMTM1LTguMTM1YzAtNC40ODksMy42NDQtOC4xMzUsOC4xMzUtOC4xMzVDMjAuODY5LDguMjM5LDI0LjUwOCwxMS44ODQsMjQuNTA4LDE2LjM3MyIvPjxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIwLjY3NzgiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgeDE9IjguMjM5IiB5MT0iMTYuMzczIiB4Mj0iMjQuNTA4IiB5Mj0iMTYuMzczIi8+PGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjAuNjc3OCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMTYuMzczIiB5MT0iOC4yMzkiIHgyPSIxNi4zNzMiIHkyPSIyNC41MDgiLz48L3N2Zz4=);\n  background-repeat: no-repeat;\n  background-position: 50% 50%;\n  background-size: var(--pagedjs-cross-size);\n\n  z-index: 2147483647;\n\twidth: var(--pagedjs-cross-size);\n\theight: var(--pagedjs-cross-size);\n}\n\n.pagedjs_pagebox {\n\tbox-sizing: border-box;\n\twidth: var(--pagedjs-pagebox-width);\n\theight: var(--pagedjs-pagebox-height);\n\tposition: relative;\n\tdisplay: grid;\n\tgrid-template-columns: [left] var(--pagedjs-margin-left) [center] calc(var(--pagedjs-pagebox-width) - var(--pagedjs-margin-left) - var(--pagedjs-margin-right)) [right] var(--pagedjs-margin-right);\n\tgrid-template-rows: [header] var(--pagedjs-margin-top) [page] calc(var(--pagedjs-pagebox-height) - var(--pagedjs-margin-top) - var(--pagedjs-margin-bottom)) [footer] var(--pagedjs-margin-bottom);\n\tgrid-column: sheet-center;\n\tgrid-row: sheet-middle;\n}\n\n.pagedjs_pagebox * {\n\tbox-sizing: border-box;\n}\n\n.pagedjs_margin-top {\n\twidth: calc(var(--pagedjs-pagebox-width) - var(--pagedjs-margin-left) - var(--pagedjs-margin-right));\n\theight: var(--pagedjs-margin-top);\n\tgrid-column: center;\n\tgrid-row: header;\n\tflex-wrap: nowrap;\n\tdisplay: grid;\n\tgrid-template-columns: repeat(3, 1fr);\n\tgrid-template-rows: 100%;\n}\n\n.pagedjs_margin-top-left-corner-holder {\n\twidth: var(--pagedjs-margin-left);\n\theight: var(--pagedjs-margin-top);\n\tdisplay: flex;\n\tgrid-column: left;\n\tgrid-row: header;\n}\n\n.pagedjs_margin-top-right-corner-holder {\n\twidth: var(--pagedjs-margin-right);\n\theight: var(--pagedjs-margin-top);\n\tdisplay: flex;\n\tgrid-column: right;\n\tgrid-row: header;\n}\n\n.pagedjs_margin-top-left-corner {\n\twidth: var(--pagedjs-margin-left);\n}\n\n.pagedjs_margin-top-right-corner {\n\twidth: var(--pagedjs-margin-right);\n}\n\n.pagedjs_margin-right {\n\theight: calc(var(--pagedjs-pagebox-height) - var(--pagedjs-margin-top) - var(--pagedjs-margin-bottom));\n\twidth: var(--pagedjs-margin-right);\n\tright: 0;\n\tgrid-column: right;\n\tgrid-row: page;\n\tdisplay: grid;\n\tgrid-template-rows: repeat(3, 33.3333%);\n\tgrid-template-columns: 100%;\n}\n\n.pagedjs_margin-bottom {\n\twidth: calc(var(--pagedjs-pagebox-width) - var(--pagedjs-margin-left) - var(--pagedjs-margin-right));\n\theight: var(--pagedjs-margin-bottom);\n\tgrid-column: center;\n\tgrid-row: footer;\n\tdisplay: grid;\n\tgrid-template-columns: repeat(3, 1fr);\n\tgrid-template-rows: 100%;\n}\n\n.pagedjs_margin-bottom-left-corner-holder {\n\twidth: var(--pagedjs-margin-left);\n\theight: var(--pagedjs-margin-bottom);\n\tdisplay: flex;\n\tgrid-column: left;\n\tgrid-row: footer;\n}\n\n.pagedjs_margin-bottom-right-corner-holder {\n\twidth: var(--pagedjs-margin-right);\n\theight: var(--pagedjs-margin-bottom);\n\tdisplay: flex;\n\tgrid-column: right;\n\tgrid-row: footer;\n}\n\n.pagedjs_margin-bottom-left-corner {\n\twidth: var(--pagedjs-margin-left);\n}\n\n.pagedjs_margin-bottom-right-corner {\n\twidth: var(--pagedjs-margin-right);\n}\n\n\n\n.pagedjs_margin-left {\n\theight: calc(var(--pagedjs-pagebox-height) - var(--pagedjs-margin-top) - var(--pagedjs-margin-bottom));\n\twidth: var(--pagedjs-margin-left);\n\tgrid-column: left;\n\tgrid-row: page;\n\tdisplay: grid;\n\tgrid-template-rows: repeat(3, 33.33333%);\n\tgrid-template-columns: 100%;\n}\n\n.pagedjs_pages .pagedjs_pagebox .pagedjs_margin:not(.hasContent) {\n\tvisibility: hidden;\n}\n\n.pagedjs_pagebox > .pagedjs_area {\n\tgrid-column: center;\n\tgrid-row: page;\n\twidth: 100%;\n\theight: 100%;\n\tpadding: var(--pagedjs-padding-top) var(--pagedjs-padding-right) var(--pagedjs-padding-bottom) var(--pagedjs-padding-left);\n\tborder-top: var(--pagedjs-border-top);\n\tborder-right: var(--pagedjs-border-right);\n\tborder-bottom: var(--pagedjs-border-bottom);\n\tborder-left: var(--pagedjs-border-left);\n}\n\n.pagedjs_pagebox > .pagedjs_area > .pagedjs_page_content {\n\twidth: 100%;\n\theight: 100%;\n\tposition: relative;\n\tcolumn-fill: auto;\n}\n\n.pagedjs_page {\n\tcounter-increment: page var(--pagedjs-page-counter-increment);\n\twidth: var(--pagedjs-width);\n\theight: var(--pagedjs-height);\n}\n\n.pagedjs_page.pagedjs_right_page {\n\twidth: var(--pagedjs-width-right);\n\theight: var(--pagedjs-height-right);\n}\n\n.pagedjs_page.pagedjs_left_page {\n\twidth: var(--pagedjs-width-left);\n\theight: var(--pagedjs-height-left);\n}\n\n.pagedjs_pages {\n\tcounter-reset: pages var(--pagedjs-page-count);\n}\n\n.pagedjs_pagebox .pagedjs_margin-top-left-corner,\n.pagedjs_pagebox .pagedjs_margin-top-right-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-left-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-right-corner,\n.pagedjs_pagebox .pagedjs_margin-top-left,\n.pagedjs_pagebox .pagedjs_margin-top-right,\n.pagedjs_pagebox .pagedjs_margin-bottom-left,\n.pagedjs_pagebox .pagedjs_margin-bottom-right,\n.pagedjs_pagebox .pagedjs_margin-top-center,\n.pagedjs_pagebox .pagedjs_margin-bottom-center,\n.pagedjs_pagebox .pagedjs_margin-top-center,\n.pagedjs_pagebox .pagedjs_margin-bottom-center,\n.pagedjs_margin-right-middle,\n.pagedjs_margin-left-middle  {\n\tdisplay: flex;\n\talign-items: center;\n}\n\n.pagedjs_margin-right-top,\n.pagedjs_margin-left-top  {\n\tdisplay: flex;\n\talign-items: flex-top;\n}\n\n\n.pagedjs_margin-right-bottom,\n.pagedjs_margin-left-bottom  {\n\tdisplay: flex;\n\talign-items: flex-end;\n}\n\n\n\n/*\n.pagedjs_pagebox .pagedjs_margin-top-center,\n.pagedjs_pagebox .pagedjs_margin-bottom-center {\n\theight: 100%;\n\tdisplay: none;\n\talign-items: center;\n\tflex: 1 0 33%;\n\tmargin: 0 auto;\n}\n\n.pagedjs_pagebox .pagedjs_margin-top-left-corner,\n.pagedjs_pagebox .pagedjs_margin-top-right-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-right-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-left-corner {\n\tdisplay: none;\n\talign-items: center;\n}\n\n.pagedjs_pagebox .pagedjs_margin-left-top,\n.pagedjs_pagebox .pagedjs_margin-right-top {\n\tdisplay: none;\n\talign-items: flex-start;\n}\n\n.pagedjs_pagebox .pagedjs_margin-right-middle,\n.pagedjs_pagebox .pagedjs_margin-left-middle {\n\tdisplay: none;\n\talign-items: center;\n}\n\n.pagedjs_pagebox .pagedjs_margin-left-bottom,\n.pagedjs_pagebox .pagedjs_margin-right-bottom {\n\tdisplay: none;\n\talign-items: flex-end;\n}\n*/\n\n.pagedjs_pagebox .pagedjs_margin-top-left,\n.pagedjs_pagebox .pagedjs_margin-top-right-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-left,\n.pagedjs_pagebox .pagedjs_margin-bottom-right-corner { text-align: left; }\n\n.pagedjs_pagebox .pagedjs_margin-top-left-corner,\n.pagedjs_pagebox .pagedjs_margin-top-right,\n.pagedjs_pagebox .pagedjs_margin-bottom-left-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-right { text-align: right; }\n\n.pagedjs_pagebox .pagedjs_margin-top-center,\n.pagedjs_pagebox .pagedjs_margin-bottom-center,\n.pagedjs_pagebox .pagedjs_margin-left-top,\n.pagedjs_pagebox .pagedjs_margin-left-middle,\n.pagedjs_pagebox .pagedjs_margin-left-bottom,\n.pagedjs_pagebox .pagedjs_margin-right-top,\n.pagedjs_pagebox .pagedjs_margin-right-middle,\n.pagedjs_pagebox .pagedjs_margin-right-bottom { text-align: center; }\n\n.pagedjs_pages .pagedjs_margin .pagedjs_margin-content {\n\twidth: 100%;\n}\n\n.pagedjs_pages .pagedjs_margin-left .pagedjs_margin-content::after,\n.pagedjs_pages .pagedjs_margin-top .pagedjs_margin-content::after,\n.pagedjs_pages .pagedjs_margin-right .pagedjs_margin-content::after,\n.pagedjs_pages .pagedjs_margin-bottom .pagedjs_margin-content::after {\n\tdisplay: block;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-to] {\n\tmargin-bottom: unset;\n\tpadding-bottom: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from] {\n\ttext-indent: unset;\n\tmargin-top: unset;\n\tpadding-top: unset;\n\tinitial-letter: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from] > *::first-letter,\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from]::first-letter {\n\tcolor: unset;\n\tfont-size: unset;\n\tfont-weight: unset;\n\tfont-family: unset;\n\tcolor: unset;\n\tline-height: unset;\n\tfloat: unset;\n\tpadding: unset;\n\tmargin: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-to]:after,\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-to]::after {\n\tcontent: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from]:before,\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from]::before {\n\tcontent: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div li[data-split-from]:first-of-type {\n\tlist-style: none;\n}\n\n/*\n[data-page]:not([data-split-from]),\n[data-break-before=\"page\"]:not([data-split-from]),\n[data-break-before=\"always\"]:not([data-split-from]),\n[data-break-before=\"left\"]:not([data-split-from]),\n[data-break-before=\"right\"]:not([data-split-from]),\n[data-break-before=\"recto\"]:not([data-split-from]),\n[data-break-before=\"verso\"]:not([data-split-from])\n{\n\tbreak-before: column;\n}\n\n[data-page]:not([data-split-to]),\n[data-break-after=\"page\"]:not([data-split-to]),\n[data-break-after=\"always\"]:not([data-split-to]),\n[data-break-after=\"left\"]:not([data-split-to]),\n[data-break-after=\"right\"]:not([data-split-to]),\n[data-break-after=\"recto\"]:not([data-split-to]),\n[data-break-after=\"verso\"]:not([data-split-to])\n{\n\tbreak-after: column;\n}\n*/\n\n.pagedjs_clear-after::after {\n\tcontent: none !important;\n}\n\nimg {\n\theight: auto;\n}\n\n[data-align-last-split-element='justify'] {\n\ttext-align-last: justify;\n}\n\n\n@media print {\n\thtml {\n\t\twidth: 100%;\n\t\theight: 100%;\n\t}\n\tbody {\n\t\tmargin: 0;\n\t\tpadding: 0;\n\t\twidth: 100% !important;\n\t\theight: 100% !important;\n\t\tmin-width: 100%;\n\t\tmax-width: 100%;\n\t\tmin-height: 100%;\n\t\tmax-height: 100%;\n\t}\n\t.pagedjs_pages {\n\t\twidth: auto;\n\t\tdisplay: block !important;\n\t\ttransform: none !important;\n\t\theight: 100% !important;\n\t\tmin-height: 100%;\n\t\tmax-height: 100%;\n\t\toverflow: visible;\n\t}\n\t.pagedjs_page {\n\t\tmargin: 0;\n\t\tpadding: 0;\n\t\tmax-height: 100%;\n\t\tmin-height: 100%;\n\t\theight: 100% !important;\n\t\tpage-break-after: always;\n\t\tbreak-after: page;\n\t}\n\t.pagedjs_sheet {\n\t\tmargin: 0;\n\t\tpadding: 0;\n\t\tmax-height: 100%;\n\t\tmin-height: 100%;\n\t\theight: 100% !important;\n\t}\n}\n";
+	var _default = "\n:root {\n\t--pagedjs-width: 8.5in;\n\t--pagedjs-height: 11in;\n\t--pagedjs-width-right: 8.5in;\n\t--pagedjs-height-right: 11in;\n\t--pagedjs-width-left: 8.5in;\n\t--pagedjs-height-left: 11in;\n\t--pagedjs-pagebox-width: 8.5in;\n\t--pagedjs-pagebox-height: 11in;\n\t--pagedjs-margin-top: 1in;\n\t--pagedjs-margin-right: 1in;\n\t--pagedjs-margin-bottom: 1in;\n\t--pagedjs-margin-left: 1in;\n\t--pagedjs-padding-top: 0mm;\n\t--pagedjs-padding-right: 0mm;\n\t--pagedjs-padding-bottom: 0mm;\n\t--pagedjs-padding-left: 0mm;\n\t--pagedjs-border-top: 0mm;\n\t--pagedjs-border-right: 0mm;\n\t--pagedjs-border-bottom: 0mm;\n\t--pagedjs-border-left: 0mm;\n\t--pagedjs-bleed-top: 0mm;\n\t--pagedjs-bleed-right: 0mm;\n\t--pagedjs-bleed-bottom: 0mm;\n\t--pagedjs-bleed-left: 0mm;\n\t--pagedjs-bleed-right-top: 0mm;\n\t--pagedjs-bleed-right-right: 0mm;\n\t--pagedjs-bleed-right-bottom: 0mm;\n\t--pagedjs-bleed-right-left: 0mm;\n\t--pagedjs-bleed-left-top: 0mm;\n\t--pagedjs-bleed-left-right: 0mm;\n\t--pagedjs-bleed-left-bottom: 0mm;\n\t--pagedjs-bleed-left-left: 0mm;\n\t--pagedjs-crop-color: black;\n\t--pagedjs-crop-offset: 2mm;\n\t--pagedjs-crop-stroke: 1px;\n\t--pagedjs-cross-size: 5mm;\n\t--pagedjs-mark-cross-display: none;\n\t--pagedjs-mark-crop-display: none;\n\t--pagedjs-page-count: 0;\n\t--pagedjs-page-counter-increment: 1;\n}\n\n@page {\n\tsize: letter;\n\tmargin: 0;\n}\n\n.pagedjs_sheet {\n\tbox-sizing: border-box;\n\twidth: var(--pagedjs-width);\n\theight: var(--pagedjs-height);\n\toverflow: hidden;\n\tposition: relative;\n\tdisplay: grid;\n\tgrid-template-columns: [bleed-left] var(--pagedjs-bleed-left) [sheet-center] calc(var(--pagedjs-width) - var(--pagedjs-bleed-left) - var(--pagedjs-bleed-right)) [bleed-right] var(--pagedjs-bleed-right);\n\tgrid-template-rows: [bleed-top] var(--pagedjs-bleed-top) [sheet-middle] calc(var(--pagedjs-height) - var(--pagedjs-bleed-top) - var(--pagedjs-bleed-bottom)) [bleed-bottom] var(--pagedjs-bleed-bottom);\n}\n\n.pagedjs_right_page .pagedjs_sheet {\n\twidth: var(--pagedjs-width-right);\n\theight: var(--pagedjs-height-right);\n\tgrid-template-columns: [bleed-left] var(--pagedjs-bleed-right-left) [sheet-center] calc(var(--pagedjs-width) - var(--pagedjs-bleed-right-left) - var(--pagedjs-bleed-right-right)) [bleed-right] var(--pagedjs-bleed-right-right);\n\tgrid-template-rows: [bleed-top] var(--pagedjs-bleed-right-top) [sheet-middle] calc(var(--pagedjs-height) - var(--pagedjs-bleed-right-top) - var(--pagedjs-bleed-right-bottom)) [bleed-bottom] var(--pagedjs-bleed-right-bottom);\n}\n\n.pagedjs_left_page .pagedjs_sheet {\n\twidth: var(--pagedjs-width-left);\n\theight: var(--pagedjs-height-left);\n\tgrid-template-columns: [bleed-left] var(--pagedjs-bleed-left-left) [sheet-center] calc(var(--pagedjs-width) - var(--pagedjs-bleed-left-left) - var(--pagedjs-bleed-left-right)) [bleed-right] var(--pagedjs-bleed-left-right);\n\tgrid-template-rows: [bleed-top] var(--pagedjs-bleed-left-top) [sheet-middle] calc(var(--pagedjs-height) - var(--pagedjs-bleed-left-top) - var(--pagedjs-bleed-left-bottom)) [bleed-bottom] var(--pagedjs-bleed-left-bottom);\n}\n\n.pagedjs_bleed {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tflex-wrap: nowrap;\n\toverflow: hidden;\n}\n\n.pagedjs_bleed-top {\n\tgrid-column: bleed-left / -1;\n\tgrid-row: bleed-top;\n\tflex-direction: row;\n}\n\n.pagedjs_bleed-bottom {\n\tgrid-column: bleed-left / -1;\n\tgrid-row: bleed-bottom;\n\tflex-direction: row;\n}\n\n.pagedjs_bleed-left {\n\tgrid-column: bleed-left;\n\tgrid-row: bleed-top / -1;\n\tflex-direction: column;\n}\n\n.pagedjs_bleed-right {\n\tgrid-column: bleed-right;\n\tgrid-row: bleed-top / -1;\n\tflex-direction: column;\n}\n\n.pagedjs_marks-crop {\n\tdisplay: var(--pagedjs-mark-crop-display);\n\tflex-grow: 0;\n\tflex-shrink: 0;\n\tz-index: 9999999999;\n}\n\n.pagedjs_bleed-top .pagedjs_marks-crop:nth-child(1),\n.pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(1) {\n\twidth: calc(var(--pagedjs-bleed-left) - var(--pagedjs-crop-stroke));\n\tborder-right: var(--pagedjs-crop-stroke) solid var(--pagedjs-crop-color);\n}\n\n.pagedjs_right_page .pagedjs_bleed-top .pagedjs_marks-crop:nth-child(1),\n.pagedjs_right_page .pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(1) {\n\twidth: calc(var(--pagedjs-bleed-right-left) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_left_page .pagedjs_bleed-top .pagedjs_marks-crop:nth-child(1),\n.pagedjs_left_page .pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(1) {\n\twidth: calc(var(--pagedjs-bleed-left-left) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_bleed-top .pagedjs_marks-crop:nth-child(3),\n.pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(3) {\n\twidth: calc(var(--pagedjs-bleed-right) - var(--pagedjs-crop-stroke));\n\tborder-left: var(--pagedjs-crop-stroke) solid var(--pagedjs-crop-color);\n}\n\n.pagedjs_right_page .pagedjs_bleed-top .pagedjs_marks-crop:nth-child(3),\n.pagedjs_right_page .pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(3) {\n\twidth: calc(var(--pagedjs-bleed-right-right) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_left_page .pagedjs_bleed-top .pagedjs_marks-crop:nth-child(3),\n.pagedjs_left_page .pagedjs_bleed-bottom .pagedjs_marks-crop:nth-child(3) {\n\twidth: calc(var(--pagedjs-bleed-left-right) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_bleed-top .pagedjs_marks-crop {\n\talign-self: flex-start;\n\theight: calc(var(--pagedjs-bleed-top) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_right_page .pagedjs_bleed-top .pagedjs_marks-crop {\n\theight: calc(var(--pagedjs-bleed-right-top) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_left_page .pagedjs_bleed-top .pagedjs_marks-crop {\n\theight: calc(var(--pagedjs-bleed-left-top) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_bleed-bottom .pagedjs_marks-crop {\n\talign-self: flex-end;\n\theight: calc(var(--pagedjs-bleed-bottom) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_right_page .pagedjs_bleed-bottom .pagedjs_marks-crop {\n\theight: calc(var(--pagedjs-bleed-right-bottom) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_left_page .pagedjs_bleed-bottom .pagedjs_marks-crop {\n\theight: calc(var(--pagedjs-bleed-left-bottom) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_bleed-left .pagedjs_marks-crop:nth-child(1),\n.pagedjs_bleed-right .pagedjs_marks-crop:nth-child(1) {\n\theight: calc(var(--pagedjs-bleed-top) - var(--pagedjs-crop-stroke));\n\tborder-bottom: var(--pagedjs-crop-stroke) solid var(--pagedjs-crop-color);\n}\n\n.pagedjs_right_page .pagedjs_bleed-left .pagedjs_marks-crop:nth-child(1),\n.pagedjs_right_page .pagedjs_bleed-right .pagedjs_marks-crop:nth-child(1) {\n\theight: calc(var(--pagedjs-bleed-right-top) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_left_page .pagedjs_bleed-left .pagedjs_marks-crop:nth-child(1),\n.pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-crop:nth-child(1) {\n\theight: calc(var(--pagedjs-bleed-left-top) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_bleed-left .pagedjs_marks-crop:nth-child(3),\n.pagedjs_bleed-right .pagedjs_marks-crop:nth-child(3) {\n\theight: calc(var(--pagedjs-bleed-bottom) - var(--pagedjs-crop-stroke));\n\tborder-top: var(--pagedjs-crop-stroke) solid var(--pagedjs-crop-color);\n}\n\n.pagedjs_right_page .pagedjs_bleed-left .pagedjs_marks-crop:nth-child(3),\n.pagedjs_right_page .pagedjs_bleed-right .pagedjs_marks-crop:nth-child(3) {\n\theight: calc(var(--pagedjs-bleed-right-bottom) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_left_page .pagedjs_bleed-left .pagedjs_marks-crop:nth-child(3),\n.pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-crop:nth-child(3) {\n\theight: calc(var(--pagedjs-bleed-left-bottom) - var(--pagedjs-crop-stroke));\n}\n\n.pagedjs_bleed-left .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-left) - var(--pagedjs-crop-offset));\n\talign-self: flex-start;\n}\n\n.pagedjs_right_page .pagedjs_bleed-left .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-right-left) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_left_page .pagedjs_bleed-left .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-left-left) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_bleed-right .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-right) - var(--pagedjs-crop-offset));\n\talign-self: flex-end;\n}\n\n.pagedjs_right_page .pagedjs_bleed-right .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-right-right) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_left_page .pagedjs_bleed-right .pagedjs_marks-crop {\n\twidth: calc(var(--pagedjs-bleed-left-right) - var(--pagedjs-crop-offset));\n}\n\n.pagedjs_marks-middle {\n\tdisplay: flex;\n\tflex-grow: 1;\n\tflex-shrink: 0;\n\talign-items: center;\n\tjustify-content: center;\n}\n\n.pagedjs_marks-cross {\n\tdisplay: var(--pagedjs-mark-cross-display);\n\tbackground-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSIzMi41MzdweCIgaGVpZ2h0PSIzMi41MzdweCIgdmlld0JveD0iMC4xMDQgMC4xMDQgMzIuNTM3IDMyLjUzNyIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwLjEwNCAwLjEwNCAzMi41MzcgMzIuNTM3IiB4bWw6c3BhY2U9InByZXNlcnZlIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMy4zODkzIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0yOS45MzEsMTYuMzczYzAsNy40ODktNi4wNjgsMTMuNTYtMTMuNTU4LDEzLjU2Yy03LjQ4MywwLTEzLjU1Ny02LjA3Mi0xMy41NTctMTMuNTZjMC03LjQ4Niw2LjA3NC0xMy41NTQsMTMuNTU3LTEzLjU1NEMyMy44NjIsMi44MTksMjkuOTMxLDguODg3LDI5LjkzMSwxNi4zNzN6Ii8+PGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjMuMzg5MyIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMC4xMDQiIHkxPSIxNi4zNzMiIHgyPSIzMi42NDIiIHkyPSIxNi4zNzMiLz48bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMy4zODkzIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHgxPSIxNi4zNzMiIHkxPSIwLjEwNCIgeDI9IjE2LjM3MyIgeTI9IjMyLjY0MiIvPjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIzLjM4OTMiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iTTI0LjUwOCwxNi4zNzNjMCw0LjQ5Ni0zLjYzOCw4LjEzNS04LjEzNSw4LjEzNWMtNC40OTEsMC04LjEzNS0zLjYzOC04LjEzNS04LjEzNWMwLTQuNDg5LDMuNjQ0LTguMTM1LDguMTM1LTguMTM1QzIwLjg2OSw4LjIzOSwyNC41MDgsMTEuODg0LDI0LjUwOCwxNi4zNzN6Ii8+PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuNjc3OCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNMjkuOTMxLDE2LjM3M2MwLDcuNDg5LTYuMDY4LDEzLjU2LTEzLjU1OCwxMy41NmMtNy40ODMsMC0xMy41NTctNi4wNzItMTMuNTU3LTEzLjU2YzAtNy40ODYsNi4wNzQtMTMuNTU0LDEzLjU1Ny0xMy41NTRDMjMuODYyLDIuODE5LDI5LjkzMSw4Ljg4NywyOS45MzEsMTYuMzczeiIvPjxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjY3NzgiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgeDE9IjAuMTA0IiB5MT0iMTYuMzczIiB4Mj0iMzIuNjQyIiB5Mj0iMTYuMzczIi8+PGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuNjc3OCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMTYuMzczIiB5MT0iMC4xMDQiIHgyPSIxNi4zNzMiIHkyPSIzMi42NDIiLz48cGF0aCBkPSJNMjQuNTA4LDE2LjM3M2MwLDQuNDk2LTMuNjM4LDguMTM1LTguMTM1LDguMTM1Yy00LjQ5MSwwLTguMTM1LTMuNjM4LTguMTM1LTguMTM1YzAtNC40ODksMy42NDQtOC4xMzUsOC4xMzUtOC4xMzVDMjAuODY5LDguMjM5LDI0LjUwOCwxMS44ODQsMjQuNTA4LDE2LjM3MyIvPjxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIwLjY3NzgiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgeDE9IjguMjM5IiB5MT0iMTYuMzczIiB4Mj0iMjQuNTA4IiB5Mj0iMTYuMzczIi8+PGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjAuNjc3OCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiB4MT0iMTYuMzczIiB5MT0iOC4yMzkiIHgyPSIxNi4zNzMiIHkyPSIyNC41MDgiLz48L3N2Zz4=);\n  background-repeat: no-repeat;\n  background-position: 50% 50%;\n  background-size: var(--pagedjs-cross-size);\n\n  z-index: 2147483647;\n\twidth: var(--pagedjs-cross-size);\n\theight: var(--pagedjs-cross-size);\n}\n\n.pagedjs_pagebox {\n\tbox-sizing: border-box;\n\twidth: var(--pagedjs-pagebox-width);\n\theight: var(--pagedjs-pagebox-height);\n\tposition: relative;\n\tdisplay: grid;\n\tgrid-template-columns: [left] var(--pagedjs-margin-left) [center] calc(var(--pagedjs-pagebox-width) - var(--pagedjs-margin-left) - var(--pagedjs-margin-right)) [right] var(--pagedjs-margin-right);\n\tgrid-template-rows: [header] var(--pagedjs-margin-top) [page] calc(var(--pagedjs-pagebox-height) - var(--pagedjs-margin-top) - var(--pagedjs-margin-bottom)) [footer] var(--pagedjs-margin-bottom);\n\tgrid-column: sheet-center;\n\tgrid-row: sheet-middle;\n}\n\n.pagedjs_pagebox * {\n\tbox-sizing: border-box;\n}\n\n.pagedjs_margin-top {\n\twidth: calc(var(--pagedjs-pagebox-width) - var(--pagedjs-margin-left) - var(--pagedjs-margin-right));\n\theight: var(--pagedjs-margin-top);\n\tgrid-column: center;\n\tgrid-row: header;\n\tflex-wrap: nowrap;\n\tdisplay: grid;\n\tgrid-template-columns: repeat(3, 1fr);\n\tgrid-template-rows: 100%;\n}\n\n.pagedjs_margin-top-left-corner-holder {\n\twidth: var(--pagedjs-margin-left);\n\theight: var(--pagedjs-margin-top);\n\tdisplay: flex;\n\tgrid-column: left;\n\tgrid-row: header;\n}\n\n.pagedjs_margin-top-right-corner-holder {\n\twidth: var(--pagedjs-margin-right);\n\theight: var(--pagedjs-margin-top);\n\tdisplay: flex;\n\tgrid-column: right;\n\tgrid-row: header;\n}\n\n.pagedjs_margin-top-left-corner {\n\twidth: var(--pagedjs-margin-left);\n}\n\n.pagedjs_margin-top-right-corner {\n\twidth: var(--pagedjs-margin-right);\n}\n\n.pagedjs_margin-right {\n\theight: calc(var(--pagedjs-pagebox-height) - var(--pagedjs-margin-top) - var(--pagedjs-margin-bottom));\n\twidth: var(--pagedjs-margin-right);\n\tright: 0;\n\tgrid-column: right;\n\tgrid-row: page;\n\tdisplay: grid;\n\tgrid-template-rows: repeat(3, 33.3333%);\n\tgrid-template-columns: 100%;\n}\n\n.pagedjs_margin-bottom {\n\twidth: calc(var(--pagedjs-pagebox-width) - var(--pagedjs-margin-left) - var(--pagedjs-margin-right));\n\theight: var(--pagedjs-margin-bottom);\n\tgrid-column: center;\n\tgrid-row: footer;\n\tdisplay: grid;\n\tgrid-template-columns: repeat(3, 1fr);\n\tgrid-template-rows: 100%;\n}\n\n.pagedjs_margin-bottom-left-corner-holder {\n\twidth: var(--pagedjs-margin-left);\n\theight: var(--pagedjs-margin-bottom);\n\tdisplay: flex;\n\tgrid-column: left;\n\tgrid-row: footer;\n}\n\n.pagedjs_margin-bottom-right-corner-holder {\n\twidth: var(--pagedjs-margin-right);\n\theight: var(--pagedjs-margin-bottom);\n\tdisplay: flex;\n\tgrid-column: right;\n\tgrid-row: footer;\n}\n\n.pagedjs_margin-bottom-left-corner {\n\twidth: var(--pagedjs-margin-left);\n}\n\n.pagedjs_margin-bottom-right-corner {\n\twidth: var(--pagedjs-margin-right);\n}\n\n\n\n.pagedjs_margin-left {\n\theight: calc(var(--pagedjs-pagebox-height) - var(--pagedjs-margin-top) - var(--pagedjs-margin-bottom));\n\twidth: var(--pagedjs-margin-left);\n\tgrid-column: left;\n\tgrid-row: page;\n\tdisplay: grid;\n\tgrid-template-rows: repeat(3, 33.33333%);\n\tgrid-template-columns: 100%;\n}\n\n.pagedjs_pages .pagedjs_pagebox .pagedjs_margin:not(.hasContent) {\n\tvisibility: hidden;\n}\n\n.pagedjs_pagebox > .pagedjs_area {\n\tgrid-column: center;\n\tgrid-row: page;\n\twidth: 100%;\n\theight: 100%;\n\tpadding: var(--pagedjs-padding-top) var(--pagedjs-padding-right) var(--pagedjs-padding-bottom) var(--pagedjs-padding-left);\n\tborder-top: var(--pagedjs-border-top);\n\tborder-right: var(--pagedjs-border-right);\n\tborder-bottom: var(--pagedjs-border-bottom);\n\tborder-left: var(--pagedjs-border-left);\n}\n\n.pagedjs_pagebox > .pagedjs_area > .pagedjs_page_content {\n\twidth: 100%;\n\theight: 100%;\n\tposition: relative;\n\tcolumn-fill: auto;\n}\n\n.pagedjs_page {\n\tcounter-increment: page var(--pagedjs-page-counter-increment);\n\twidth: var(--pagedjs-width);\n\theight: var(--pagedjs-height);\n}\n\n.pagedjs_page.pagedjs_right_page {\n\twidth: var(--pagedjs-width-right);\n\theight: var(--pagedjs-height-right);\n}\n\n.pagedjs_page.pagedjs_left_page {\n\twidth: var(--pagedjs-width-left);\n\theight: var(--pagedjs-height-left);\n}\n\n.pagedjs_pages {\n\tcounter-reset: pages var(--pagedjs-page-count);\n}\n\n.pagedjs_pagebox .pagedjs_margin-top-left-corner,\n.pagedjs_pagebox .pagedjs_margin-top-right-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-left-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-right-corner,\n.pagedjs_pagebox .pagedjs_margin-top-left,\n.pagedjs_pagebox .pagedjs_margin-top-right,\n.pagedjs_pagebox .pagedjs_margin-bottom-left,\n.pagedjs_pagebox .pagedjs_margin-bottom-right,\n.pagedjs_pagebox .pagedjs_margin-top-center,\n.pagedjs_pagebox .pagedjs_margin-bottom-center,\n.pagedjs_pagebox .pagedjs_margin-top-center,\n.pagedjs_pagebox .pagedjs_margin-bottom-center,\n.pagedjs_margin-right-middle,\n.pagedjs_margin-left-middle  {\n\tdisplay: flex;\n\talign-items: center;\n}\n\n.pagedjs_margin-right-top,\n.pagedjs_margin-left-top  {\n\tdisplay: flex;\n\talign-items: flex-top;\n}\n\n\n.pagedjs_margin-right-bottom,\n.pagedjs_margin-left-bottom  {\n\tdisplay: flex;\n\talign-items: flex-end;\n}\n\n\n\n/*\n.pagedjs_pagebox .pagedjs_margin-top-center,\n.pagedjs_pagebox .pagedjs_margin-bottom-center {\n\theight: 100%;\n\tdisplay: none;\n\talign-items: center;\n\tflex: 1 0 33%;\n\tmargin: 0 auto;\n}\n\n.pagedjs_pagebox .pagedjs_margin-top-left-corner,\n.pagedjs_pagebox .pagedjs_margin-top-right-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-right-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-left-corner {\n\tdisplay: none;\n\talign-items: center;\n}\n\n.pagedjs_pagebox .pagedjs_margin-left-top,\n.pagedjs_pagebox .pagedjs_margin-right-top {\n\tdisplay: none;\n\talign-items: flex-start;\n}\n\n.pagedjs_pagebox .pagedjs_margin-right-middle,\n.pagedjs_pagebox .pagedjs_margin-left-middle {\n\tdisplay: none;\n\talign-items: center;\n}\n\n.pagedjs_pagebox .pagedjs_margin-left-bottom,\n.pagedjs_pagebox .pagedjs_margin-right-bottom {\n\tdisplay: none;\n\talign-items: flex-end;\n}\n*/\n\n.pagedjs_pagebox .pagedjs_margin-top-left,\n.pagedjs_pagebox .pagedjs_margin-top-right-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-left,\n.pagedjs_pagebox .pagedjs_margin-bottom-right-corner { text-align: left; }\n\n.pagedjs_pagebox .pagedjs_margin-top-left-corner,\n.pagedjs_pagebox .pagedjs_margin-top-right,\n.pagedjs_pagebox .pagedjs_margin-bottom-left-corner,\n.pagedjs_pagebox .pagedjs_margin-bottom-right { text-align: right; }\n\n.pagedjs_pagebox .pagedjs_margin-top-center,\n.pagedjs_pagebox .pagedjs_margin-bottom-center,\n.pagedjs_pagebox .pagedjs_margin-left-top,\n.pagedjs_pagebox .pagedjs_margin-left-middle,\n.pagedjs_pagebox .pagedjs_margin-left-bottom,\n.pagedjs_pagebox .pagedjs_margin-right-top,\n.pagedjs_pagebox .pagedjs_margin-right-middle,\n.pagedjs_pagebox .pagedjs_margin-right-bottom { text-align: center; }\n\n.pagedjs_pages .pagedjs_margin .pagedjs_margin-content {\n\twidth: 100%;\n}\n\n.pagedjs_pages .pagedjs_margin-left .pagedjs_margin-content::after,\n.pagedjs_pages .pagedjs_margin-top .pagedjs_margin-content::after,\n.pagedjs_pages .pagedjs_margin-right .pagedjs_margin-content::after,\n.pagedjs_pages .pagedjs_margin-bottom .pagedjs_margin-content::after {\n\tdisplay: block;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-to] {\n\tmargin-bottom: unset;\n\tpadding-bottom: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from] {\n\ttext-indent: unset;\n\tmargin-top: unset;\n\tpadding-top: unset;\n\tinitial-letter: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from] > *::first-letter,\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from]::first-letter {\n\tcolor: unset;\n\tfont-size: unset;\n\tfont-weight: unset;\n\tfont-family: unset;\n\tcolor: unset;\n\tline-height: unset;\n\tfloat: unset;\n\tpadding: unset;\n\tmargin: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-to]:after,\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-to]::after {\n\tcontent: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from]:before,\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div [data-split-from]::before {\n\tcontent: unset;\n}\n\n.pagedjs_pages > .pagedjs_page > .pagedjs_sheet > .pagedjs_pagebox > .pagedjs_area > div li[data-split-from]:first-of-type {\n\tlist-style: none;\n}\n\n/*\n[data-page]:not([data-split-from]),\n[data-break-before=\"page\"]:not([data-split-from]),\n[data-break-before=\"always\"]:not([data-split-from]),\n[data-break-before=\"left\"]:not([data-split-from]),\n[data-break-before=\"right\"]:not([data-split-from]),\n[data-break-before=\"recto\"]:not([data-split-from]),\n[data-break-before=\"verso\"]:not([data-split-from])\n{\n\tbreak-before: column;\n}\n\n[data-page]:not([data-split-to]),\n[data-break-after=\"page\"]:not([data-split-to]),\n[data-break-after=\"always\"]:not([data-split-to]),\n[data-break-after=\"left\"]:not([data-split-to]),\n[data-break-after=\"right\"]:not([data-split-to]),\n[data-break-after=\"recto\"]:not([data-split-to]),\n[data-break-after=\"verso\"]:not([data-split-to])\n{\n\tbreak-after: column;\n}\n*/\n\n.pagedjs_clear-after::after {\n\tcontent: none !important;\n}\n\n[data-align-last-split-element='justify'] {\n\ttext-align-last: justify;\n}\n\n\n@media print {\n\thtml {\n\t\twidth: 100%;\n\t\theight: 100%;\n\t}\n\tbody {\n\t\tmargin: 0;\n\t\tpadding: 0;\n\t\twidth: 100% !important;\n\t\theight: 100% !important;\n\t\tmin-width: 100%;\n\t\tmax-width: 100%;\n\t\tmin-height: 100%;\n\t\tmax-height: 100%;\n\t}\n\t.pagedjs_pages {\n\t\twidth: auto;\n\t\tdisplay: block !important;\n\t\ttransform: none !important;\n\t\theight: 100% !important;\n\t\tmin-height: 100%;\n\t\tmax-height: 100%;\n\t\toverflow: visible;\n\t}\n\t.pagedjs_page {\n\t\tmargin: 0;\n\t\tpadding: 0;\n\t\tmax-height: 100%;\n\t\tmin-height: 100%;\n\t\theight: 100% !important;\n\t\tpage-break-after: always;\n\t\tbreak-after: page;\n\t}\n\t.pagedjs_sheet {\n\t\tmargin: 0;\n\t\tpadding: 0;\n\t\tmax-height: 100%;\n\t\tmin-height: 100%;\n\t\theight: 100% !important;\n\t}\n}\n";
 	exports["default"] = _default;
 	});
 
@@ -29026,53 +29077,46 @@
 	    key: "addPageClasses",
 	    value: function addPageClasses(pages, ast, sheet) {
 	      // First add * page
-	      if ("*" in pages && !pages["*"].added) {
+	      if ("*" in pages) {
 	        var p = this.createPage(pages["*"], ast.children, sheet);
 	        sheet.insertRule(p);
-	        pages["*"].added = true;
 	      } // Add :left & :right
 
 
-	      if (":left" in pages && !pages[":left"].added) {
+	      if (":left" in pages) {
 	        var left = this.createPage(pages[":left"], ast.children, sheet);
 	        sheet.insertRule(left);
-	        pages[":left"].added = true;
 	      }
 
-	      if (":right" in pages && !pages[":right"].added) {
+	      if (":right" in pages) {
 	        var right = this.createPage(pages[":right"], ast.children, sheet);
 	        sheet.insertRule(right);
-	        pages[":right"].added = true;
 	      } // Add :first & :blank
 
 
-	      if (":first" in pages && !pages[":first"].first) {
+	      if (":first" in pages) {
 	        var first = this.createPage(pages[":first"], ast.children, sheet);
 	        sheet.insertRule(first);
-	        pages[":first"].added = true;
 	      }
 
-	      if (":blank" in pages && !pages[":blank"].added) {
+	      if (":blank" in pages) {
 	        var blank = this.createPage(pages[":blank"], ast.children, sheet);
 	        sheet.insertRule(blank);
-	        pages[":blank"].added = true;
 	      } // Add nth pages
 
 
 	      for (var pg in pages) {
-	        if (pages[pg].nth && !pages[pg].added) {
+	        if (pages[pg].nth) {
 	          var nth = this.createPage(pages[pg], ast.children, sheet);
 	          sheet.insertRule(nth);
-	          pages[pg].added = true;
 	        }
 	      } // Add named pages
 
 
 	      for (var _pg in pages) {
-	        if (pages[_pg].name && !pages[_pg].added) {
+	        if (pages[_pg].name) {
 	          var named = this.createPage(pages[_pg], ast.children, sheet);
 	          sheet.insertRule(named);
-	          pages[_pg].added = true;
 	        }
 	      }
 	    }
@@ -30577,10 +30621,17 @@
 	                  nodeAfter.setAttribute("data-previous-break-after", prop.value);
 	                }
 	              } else if (prop.property === "break-before") {
-	                var nodeBefore = (0, dom.displayedElementBefore)(elements[i], parsed);
-	                elements[i].setAttribute("data-break-before", prop.value);
+	                var nodeBefore = (0, dom.displayedElementBefore)(elements[i], parsed); // Breaks are only allowed between siblings, not between a box and its container.
+	                // If we cannot find a node before we should not break!
+	                // https://drafts.csswg.org/css-break-3/#break-propagation
 
 	                if (nodeBefore) {
+	                  if (prop.value === "page" && (0, dom.needsPageBreak)(elements[i], nodeBefore)) {
+	                    // we ignore this explicit page break because an implicit page break is already needed
+	                    continue;
+	                  }
+
+	                  elements[i].setAttribute("data-break-before", prop.value);
 	                  nodeBefore.setAttribute("data-next-break-before", prop.value);
 	                }
 	              } else if (prop.property === "page") {
@@ -30879,6 +30930,7 @@
 	    _this = _super.call(this, chunker, polisher, caller);
 	    _this.styleSheet = polisher.styleSheet;
 	    _this.counters = {};
+	    _this.resetCountersMap = new Map();
 	    return _this;
 	  }
 
@@ -31116,9 +31168,17 @@
 
 	      var pgreset = pageElement.querySelectorAll("[data-counter-page-reset]");
 	      pgreset.forEach(function (reset) {
-	        var value = reset.dataset.counterPageReset;
+	        var ref = reset.dataset && reset.dataset.ref;
 
-	        _this2.styleSheet.insertRule("[data-page-number=\"".concat(pageElement.dataset.pageNumber, "\"] { counter-increment: none; counter-reset: page ").concat(value, "; }"), _this2.styleSheet.cssRules.length);
+	        if (ref && _this2.resetCountersMap.has(ref)) ; else {
+	          if (ref) {
+	            _this2.resetCountersMap.set(ref, "");
+	          }
+
+	          var value = reset.dataset.counterPageReset;
+
+	          _this2.styleSheet.insertRule("[data-page-number=\"".concat(pageElement.dataset.pageNumber, "\"] { counter-increment: none; counter-reset: page ").concat(value, "; }"), _this2.styleSheet.cssRules.length);
+	        }
 	      });
 	    }
 	  }]);
@@ -32094,11 +32154,20 @@
 	        this.type = funcNode.children.last().name;
 	        funcNode.name = "var";
 	        funcNode.children = new _cssTree["default"].List();
-	        funcNode.children.append(funcNode.children.createItem({
-	          type: "Identifier",
-	          loc: null,
-	          name: "--pagedjs-string-" + identifier
-	        }));
+
+	        if (this.type === "first" || this.type === "last" || this.type === "start" || this.type === "first-except") {
+	          funcNode.children.append(funcNode.children.createItem({
+	            type: "Identifier",
+	            loc: null,
+	            name: "--pagedjs-string-" + this.type + "-" + identifier
+	          }));
+	        } else {
+	          funcNode.children.append(funcNode.children.createItem({
+	            type: "Identifier",
+	            loc: null,
+	            name: "--pagedjs-string-first-" + identifier
+	          }));
+	        }
 	      }
 	    }
 	  }, {
@@ -32108,43 +32177,58 @@
 
 	      if (this.pageLastString === undefined) {
 	        this.pageLastString = {};
-	      } // get the value of the previous last string
-
+	      }
 
 	      var _loop = function _loop() {
 	        var name = _Object$keys[_i];
 	        var set = _this2.stringSetSelectors[name];
-	        var selected = fragment.querySelectorAll(set.selector); // let cssVar = previousPageLastString;
-	        // Get the last found string for the current identifier
+	        var selected = fragment.querySelectorAll(set.selector); // Get the last found string for the current identifier
 
-	        var cssVar = name in _this2.pageLastString ? _this2.pageLastString[name] : "";
-	        selected.forEach(function (sel) {
-	          // push each content into the array to define in the variable the first and the last element of the page.
-	          //this.pageLastString = selected[selected.length - 1].textContent;
-	          // Index by identifier
-	          _this2.pageLastString[name] = selected[selected.length - 1].textContent;
+	        var stringPrevPage = name in _this2.pageLastString ? _this2.pageLastString[name] : "";
+	        var varFirst = void 0,
+	            varLast = void 0,
+	            varStart = void 0,
+	            varFirstExcept = void 0;
 
-	          if (_this2.type === "first") {
-	            cssVar = selected[0].textContent;
-	          } else if (_this2.type === "last") {
-	            cssVar = selected[selected.length - 1].textContent;
-	          } else if (_this2.type === "start") {
-	            if (sel.parentElement.firstChild === sel) {
-	              cssVar = sel.textContent;
-	            }
-	          } else if (_this2.type === "first-except") {
-	            cssVar = "";
+	        if (selected.length == 0) {
+	          // if there is no sel. on the page
+	          varFirst = stringPrevPage;
+	          varLast = stringPrevPage;
+	          varStart = stringPrevPage;
+	          varFirstExcept = stringPrevPage;
+	        } else {
+	          selected.forEach(function (sel) {
+	            // push each content into the array to define in the variable the first and the last element of the page.
+	            _this2.pageLastString[name] = selected[selected.length - 1].textContent;
+	          });
+	          /* FIRST */
+
+	          varFirst = selected[0].textContent;
+	          /* LAST */
+
+	          varLast = selected[selected.length - 1].textContent;
+	          /* START */
+	          // Hack to find if the sel. is the first elem of the page / find a better way 
+
+	          var selTop = selected[0].getBoundingClientRect().top;
+	          var pageContent = selected[0].closest(".pagedjs_page_content");
+	          var pageContentTop = pageContent.getBoundingClientRect().top;
+
+	          if (selTop == pageContentTop) {
+	            varStart = varFirst;
 	          } else {
-	            cssVar = selected[0].textContent;
+	            varStart = stringPrevPage;
 	          }
-	        });
-	        fragment.setAttribute("data-string", "string-type-".concat(_this2.type, "-").concat(name)); // fragment.style.setProperty(`--pagedjs-string-${name}`, `"${cssVar.replace(/\\([\s\S])|(["|'])/g, "\\$1$2")}"`);
+	          /* FIRST EXCEPT */
 
-	        fragment.style.setProperty("--pagedjs-string-".concat(name), "\"".concat((0, css.cleanPseudoContent)(cssVar))); // if there is no new string on the page
 
-	        if (!fragment.hasAttribute("data-string")) {
-	          fragment.style.setProperty("--pagedjs-string-".concat(name), "\"".concat(_this2.pageLastString, "\""));
+	          varFirstExcept = "";
 	        }
+
+	        fragment.style.setProperty("--pagedjs-string-first-".concat(name), "\"".concat((0, css.cleanPseudoContent)(varFirst)));
+	        fragment.style.setProperty("--pagedjs-string-last-".concat(name), "\"".concat((0, css.cleanPseudoContent)(varLast)));
+	        fragment.style.setProperty("--pagedjs-string-start-".concat(name), "\"".concat((0, css.cleanPseudoContent)(varStart)));
+	        fragment.style.setProperty("--pagedjs-string-first-except-".concat(name), "\"".concat((0, css.cleanPseudoContent)(varFirstExcept)));
 	      };
 
 	      for (var _i = 0, _Object$keys = Object.keys(this.stringSetSelectors); _i < _Object$keys.length; _i++) {

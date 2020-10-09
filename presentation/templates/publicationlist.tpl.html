@@ -18,6 +18,15 @@
         <?php echo $metas['publication-description'] ?>
       </p>
 
+      <?php if ($hasWriteAccess): ?>
+      <p class="text-muted">
+        <small>
+          <?php echo $metas['publication-page-format'] ?>
+          <?php echo _t(sprintf('PUBLICATION_EBOOK_ORIENTATION_%s', strtoupper($metas['publication-page-orientation']))) ?>
+        </small>
+      </p>
+      <?php endif ?>
+
       <div class="btn-group" role="group" aria-label="">
         <a class="btn btn-xs btn-primary" href="<?php echo $wiki->href('pdf',$page['resource']) ?>">
           <i class="fas fa-book"></i>&nbsp;

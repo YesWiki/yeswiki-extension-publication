@@ -13,6 +13,15 @@
         <h3><?php echo $metadata['publication-title'] ?></h3>
 
         <p class="clearfix"><?php echo $metadata['publication-description'] ?></p>
+
+        <?php if ($hasWriteAccess): ?>
+        <p class="text-muted">
+          <small>
+            <?php echo $metadata['publication-page-format'] ?>
+            <?php echo _t(sprintf('PUBLICATION_EBOOK_ORIENTATION_%s', strtoupper($metadata['publication-page-orientation']))) ?>
+          </small>
+        </p>
+        <?php endif ?>
       </div>
     </div>
   </div>

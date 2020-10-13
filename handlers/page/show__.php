@@ -1,7 +1,7 @@
 <?php
 global $wiki;
 
-if ($this->HasAccess('write') && isset($this->page['metadatas']['publication-title'])) {
+if ($this->HasAccess('read') && isset($this->page['metadatas']['publication-title'])) {
     include_once 'includes/squelettephp.class.php';
 
     // user  options

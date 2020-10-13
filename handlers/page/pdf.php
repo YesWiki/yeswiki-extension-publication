@@ -32,21 +32,21 @@ if (!empty($_GET['url']) && !in_array(parse_url($_SERVER['HTTP_REFERER'], PHP_UR
 }
 
 $url = str_replace(array('/wakka.php?wiki=', '/?'), '', $this->config['base_url']);
-$pagedjs_hash = hash('sha256', [
+$pagedjs_hash = sha1(json_encode(array_merge([
   file_get_contents(__DIR__ . '/../../presentation/browser/print.js'),
   file_get_contents(__DIR__ . '/../../libs/vendor/pagedjs/paged.esm.js')
-]);
+])));
 
 if (!empty($_GET['url'])) {
   $fullFilename = '/tmp/page.pdf';
   $pageTag = isset($_GET['urlPageTag']) ? $_GET['urlPageTag'] : 'publication';
   $sourceUrl = $_GET['url'];
-  $hash = substr(hash('sha256', $pagedjs_hash . strtolower($_SERVER['QUERY_STRING'])), 0, 10);
+  $hash = substr(sha1($pagedjs_hash . strtolower($_SERVER['QUERY_STRING'])), 0, 10);
 } else {
   $pdfTag = $this->MiniHref('pdf', $this->GetPageTag());
   $pageTag = $this->GetPageTag();
   $sourceUrl = $this->href('preview', $this->GetPageTag(), preg_replace('#^'. $pdfTag .'&#U', '', $_SERVER['QUERY_STRING']), false);
-  $hash = substr(hash('sha256', $pagedjs_hash . json_encode(array_merge(
+  $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
     $this->page,
     ['query_string' => strtolower($_SERVER['QUERY_STRING'])]
   ))), 0, 10);

@@ -187,7 +187,6 @@ if (!empty($groupselector)) {
     $results[1]['type'] = 'bazar';
     $results[1]['name'] = 'Fiches bazar';
     $results[1]['entries'] = $bazarFiche->search();
-    $results[1]['entries'] = searchResultstoArray($results[1]['entries'], array());
     $GLOBALS['ordre'] = 'asc';
     $GLOBALS['champ'] = 'bf_titre';
     usort($results[1]['entries'], 'champCompare');

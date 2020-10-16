@@ -69,10 +69,10 @@
 
 .yeswiki-publication .publication-cover,
 .yeswiki-publication .publication-start {
-  display: flex;
+  /* display: flex;
   height: 100%;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center; */
 }
 
 /**
@@ -155,8 +155,6 @@
  * Publication Cover
  */
 @page publication-cover {
-  background-color: var(--header-title-color) !important;
-  background-size: cover;
   break-after: right;
 
   @top-center {
@@ -180,19 +178,35 @@
   }
 }
 
-  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h1,
-  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h2,
-  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h3,
-  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h4,
-  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page h5,
-  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page p {
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page {
+    background-color: var(--header-title-color) !important;
+    background-size: cover;
+  }
+    .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page .pagedjs_page_content > div {
+      height: 100%;
+    }
+    .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page .include {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      justify-content: center;
+    }
+
+
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page h1,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page h2,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page h3,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page h4,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page h5,
+  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page p {
     color: currentColor;
     color: var(--header-bg-color);
   }
 
-  .yeswiki-publication .pagedjs_publication-cover_page.has-background-image .publication-title,
-  .yeswiki-publication .pagedjs_publication-cover_page.has-background-image .publication-description,
-  .yeswiki-publication .pagedjs_publication-cover_page.has-background-image .publication-author {
+  .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image h1,
+  .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image .publication-title,
+  .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image .publication-description,
+  .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image .publication-author {
     background-color: var(--header-title-color);
     padding: .5em 20px;
     align-self: flex-start;
@@ -203,12 +217,8 @@
   }
 
   /* empty element are hidden */
-  .yeswiki-publication .pagedjs_publication-cover_page.has-background-image *:empty {
+  .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image *:empty {
     display: none;
-  }
-
-  .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_page .pagedjs_page_content > div {
-    height: 100%;
   }
 
   .yeswiki-publication .publication-cover h1,

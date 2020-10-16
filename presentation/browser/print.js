@@ -87,14 +87,28 @@ registerHandlers(class backgroundImageCover extends Handler {
     return null
   }
 
+  afterParsed (parsed) {
+    const node = {}
+
+    const coverImage = parsed.querySelector('figure.attached_file.cover img')
+
+    if (coverImage) {
+      const figureElement = coverImage.parentElement
+      const section = this.getParent(figureElement, (n) => n.classList.contains('publication-cover') || n.classList.contains('publication-start'))
+
+      section.classList.add('has-background-image')
+      section.dataset.backgroundImage = String(coverImage.src)
+      figureElement.remove()
+    }
+  }
+
   renderNode (node) {
     if (node.classList && node.classList.contains('has-background-image')) {
       const page = this.getParent(node, (n) => n.classList.contains('pagedjs_page'))
 
       // we swap style attributes
       page.classList.add('has-background-image')
-      page.style.backgroundImage = node.style.backgroundImage
-      node.style.backgroundImage = null
+      page.style.backgroundImage = `url(${node.dataset.backgroundImage})`
     }
   }
 })

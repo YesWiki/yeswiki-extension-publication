@@ -89,22 +89,38 @@ if ($publication) {
     // user  options
     $options = array(
         "publication-hide-links-url" => '1',
+        "publication-cover-image" => '',
         "publication-cover-page" => '0',
         "publication-book-fold" => '0',
         "publication-page-format" => 'A4',
         "publication-page-orientation" => 'portrait',
         "publication-pagination" => "bottom-center",
-        "publication-print-marks" => '0'
+        "publication-print-marks" => '0',
     );
 
     $metadatas = array_merge($options, $publication['metadatas']);
     $blankpage = $wiki->Format('{{blankpage}}');
+
+    // cover image
+    $coverImage = '';
+
+    if ($metadatas['publication-cover-image']) {
+      // use an external image
+      if (preg_match('#^(https?://|//|/)#iU', $metadatas['publication-cover-image'])) {
+        $coverImage = '<figure class="attached_file attached_file--external cover"><img src="'. $metadatas['publication-cover-image'] .'" alt="" class="img-responsive"></figure>';
+      }
+      // use a wiki attachment
+      else {
+        $coverImage = $wiki->Format('{{ attach file="'. $metadatas['publication-cover-image'] .'" desc=" " size="original" class="cover"}}');
+      }
+    }
 
     // build the preview/printing page
     $output = $exportTemplate->render(array(
         "baseUrl" => $wiki->getBaseUrl(),
         "blankpage" => $blankpage,
         "content" => $publication['content'],
+        "coverImage" => $coverImage,
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
         "metadatas" => $metadatas,
         "styles" => $wiki->Format('{{linkstyle}}{{linkjavascript}}'),

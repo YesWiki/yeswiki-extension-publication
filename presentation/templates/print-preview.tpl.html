@@ -24,12 +24,14 @@
 
 <body class="<?php echo join(" ", $stylesModifiers) ?>">
   <?php if ($metadatas['publication-cover-page'] === '1') { ?>
-  <section class="publication-cover <?php echo !$metadatas['publication-cover-image'] ?: 'has-background-image'?>"<?php echo $metadatas['publication-cover-image'] ? ' style="background-image: url('. $metadatas['publication-cover-image'] .')"' : '' ?>>
+  <div class="include publication-cover">
     <h1 class="publication-title"><?php echo $metadatas['publication-title'] ?></h1>
+
+    <?php echo $coverImage ?>
 
     <p class="publication-description"><?php echo $metadatas['publication-description'] ?></p>
     <p class="publication-author"><?php echo $metadatas['publication-author'] ?></p>
-  </section>
+  </div>
   <?php } ?>
 
   <?php echo $content ?>

@@ -302,7 +302,7 @@ on écrira :
 {{publicationgenerator titles="pages wiki, important, recettes de cuisine, livres" groupselector="pages, pages(important), 1, 2(bf_auteur=Rabelais|bf_taille=long)"}}
 ```
 
-### Action `{{ebooklist}}`
+### Action `{{publicationlist}}`
 
 Cette action liste les ebook générés.
 
@@ -315,7 +315,7 @@ S'il n'est pas précisé, ce paramètre vaut "Ebook".
 Exemple – Pour lister les ebooks dont le préfixe est "MesEDoc", il faut donc écrire :
 
 ```
-{{ebooklist outputformat="ebook" ebookpagenameprefix="MesEDoc"}}
+{{publicationlist outputformat="ebook" ebookpagenameprefix="MesEDoc"}}
 ```
 
 ## Handlers (ou suffixes) de page

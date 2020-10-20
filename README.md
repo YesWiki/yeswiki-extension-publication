@@ -88,7 +88,7 @@ L'extension publication ajoute deux actions à votre wiki.
 | Action                    | Utilité                                       |
 | ---                       | ---                                           |
 | `{{publicationgenerator}}`| Interface de sélection du contenu de la publication et de création du document imprimable  |
-| `{{ebooklist}}`           | Liste des ebooks générés et imprimables               |
+| `{{publicationlist}}`           | Liste des ebooks générés et imprimables               |
 Ces actions s'ajoutent, comme toute action YesWiki, dans un contenu de page.
 
 ### Action `{{publicationgenerator}}`
@@ -134,7 +134,7 @@ Nom de la page à utiliser comme page d'introduction de la publication.
 Exemple :
 
 ```
-{{publicationgenerator publicationstart="MaPageWiki"}}
+{{publicationgenerator pagestart="MaPageWiki"}}
 ```
 
 #### **publicationend**
@@ -144,7 +144,7 @@ Nom de la page à utiliser comme page de fin de la publication.
 Exemple :
 
 ```
-{{publicationgenerator publicationend="MaPageWiki"}}
+{{publicationgenerator pageend="MaPageWiki"}}
 ```
 
 #### **ebookpagenameprefix**
@@ -374,3 +374,8 @@ array(
     ...
 );
 ```
+### Vous souhaitez escamoter certaines parties de vos pages wiki lors de l'édition du pdf
+
+à priori, deux class permettent de cacher des parties du votre wiki :
+ - ""<div class="no-print"> ""bla bla à supprimer""</div>"" 
+ - ""<div class="hide-print"> ""bla bla à supprimer""</div>"" 

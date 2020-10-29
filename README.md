@@ -377,5 +377,5 @@ array(
 ### Vous souhaitez escamoter certaines parties de vos pages wiki lors de l'édition du pdf
 
 à priori, deux class permettent de cacher des parties du votre wiki :
- - ""<div class="no-print"> ""bla bla à supprimer""</div>"" 
- - ""<div class="hide-print"> ""bla bla à supprimer""</div>"" 
+ - `""<div class="no-print"> ""bla bla à supprimer""</div>"" `
+ - `""<div class="hide-print"> ""bla bla à supprimer""</div>"" `

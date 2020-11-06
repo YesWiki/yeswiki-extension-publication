@@ -12,11 +12,13 @@
  *@version       $Revision: 0.1 $ $Date: 2010/03/04 14:19:03 $
  */
 
+use YesWiki\Bazar\Service\FicheManager;
+
 if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
 }
 
-$ficheManager = $this->services->get('bazar.fiche.manager');
+$ficheManager = $this->services->get(FicheManager::class);
 
 include_once 'tools/tags/libs/tags.functions.php';
 

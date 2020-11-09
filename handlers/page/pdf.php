@@ -13,7 +13,7 @@ if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
 }
 
-if (is_executable($this->config['htmltopdf_path'])) {
+if (is_executable($this->config['htmltopdf_path']) || !empty($this->config['htmltopdf_service_url'])) {
     $dir = getcwd();
     $url = str_replace(array('/wakka.php?wiki=', '/?'), '', $this->config['base_url']);
     $dlFilename = str_replace(
@@ -23,7 +23,7 @@ if (is_executable($this->config['htmltopdf_path'])) {
     ).'-'.$this->GetPageTag().".pdf";
     $fullFilename = $dir."/cache/".$dlFilename;
     if (!empty($_GET['url'])) {
-        $domain = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
+        $domain = parse_url($_GET['url'], PHP_URL_HOST);
         if (in_array($domain, $this->config['htmltopdf_service_authorized_domains'])) {
             $sourceUrl = $_GET['url'];
             $_GET['refresh']=1; //for external pdfs, no cache
@@ -111,4 +111,3 @@ if (is_executable($this->config['htmltopdf_path'])) {
       .'.</div>'."\n";
     echo $this->Footer()."\n";
 }
-

@@ -12,13 +12,13 @@
  *@version       $Revision: 0.1 $ $Date: 2010/03/04 14:19:03 $
  */
 
-use YesWiki\Bazar\Service\FicheManager;
+use YesWiki\Bazar\Service\EntryManager;
 
 if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
 }
 
-$ficheManager = $this->services->get(FicheManager::class);
+$entryManager = $this->services->get(EntryManager::class);
 
 include_once 'tools/tags/libs/tags.functions.php';
 
@@ -126,7 +126,7 @@ if (!empty($groupselector)) {
                     }
                 }
             }
-            $results[$i]['entries'] = $ficheManager->search(['queries' => $tabQuery, 'formsIds' => [$formId]]);
+            $results[$i]['entries'] = $entryManager->search(['queries' => $tabQuery, 'formsIds' => [$formId]]);
             $results[$i]['entries'] = searchResultstoArray($results[$i]['entries'], array(), $formValues);
             // tri des fiches
             $GLOBALS['ordre'] = 'asc';
@@ -188,7 +188,7 @@ if (!empty($groupselector)) {
     // bazar entries
     $results[1]['type'] = 'bazar';
     $results[1]['name'] = 'Fiches bazar';
-    $results[1]['entries'] = $ficheManager->search();
+    $results[1]['entries'] = $entryManager->search();
     $GLOBALS['ordre'] = 'asc';
     $GLOBALS['champ'] = 'bf_titre';
     usort($results[1]['entries'], 'champCompare');
@@ -261,7 +261,7 @@ if (isset($_POST["page"])) {
 			$acceptedTags = '<h1><h2><h3><h4><h5><h6><hr><hr/><br><br/><span><blockquote><i><u><b><strong><ol><ul><li><small><div><p><a><table><tr><th><td><img><figure><caption><iframe>';
 			$fiche['bf_content'] = strip_tags($fiche['bf_content'], $acceptedTags);
             $fiche['antispam'] = 1;
-            $fiche = $ficheManager->create($formId, $fiche);
+            $fiche = $entryManager->create($formId, $fiche);
 			$output = $this->Format('""<div class="alert alert-success">' . _t('PUBLICATION_NEWSLETTER_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $fiche['id_fiche'] . '" text="' . _t('PUBLICATION_SEE_NEWSLETTER') . ' ' . $fiche['bf_titre'] . '"}}""</div>""' . "\n");
 		}
 	} while (FALSE); // End of global do-while loop

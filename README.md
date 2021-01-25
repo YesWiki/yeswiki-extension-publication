@@ -191,7 +191,7 @@ Exemple – pour générer une newsletter avec le formulaire bazar "2", il faut 
 {{publicationgenerator outputformat="newsletter" formid="2"}}
 ```
 
-#### **publicationstart**
+#### **pagestart**
 
 Nom de la page à utiliser comme page d'introduction de la publication.
 
@@ -201,7 +201,7 @@ Exemple :
 {{publicationgenerator pagestart="MaPageWiki"}}
 ```
 
-#### **publicationend**
+#### **pageend**
 
 Nom de la page à utiliser comme page de fin de la publication.
 

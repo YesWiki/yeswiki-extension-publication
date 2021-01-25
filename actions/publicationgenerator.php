@@ -12,9 +12,13 @@
  *@version       $Revision: 0.1 $ $Date: 2010/03/04 14:19:03 $
  */
 
+use YesWiki\Bazar\Service\EntryManager;
+
 if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
 }
+
+$entryManager = $this->services->get(EntryManager::class);
 
 include_once 'tools/tags/libs/tags.functions.php';
 
@@ -133,7 +137,7 @@ if (!empty($groupselector)) {
                     }
                 }
             }
-            $results[$i]['entries'] = baz_requete_recherche_fiches($tabQuery, 'alphabetique', $formId, '', 1, '', '', true, '');
+            $results[$i]['entries'] = $entryManager->search(['queries' => $tabQuery, 'formsIds' => [$formId]]);
             $results[$i]['entries'] = searchResultstoArray($results[$i]['entries'], array(), $formValues);
             // tri des fiches
             $GLOBALS['ordre'] = 'asc';
@@ -195,8 +199,7 @@ if (!empty($groupselector)) {
     // bazar entries
     $results[1]['type'] = 'bazar';
     $results[1]['name'] = 'Fiches bazar';
-    $results[1]['entries'] = baz_requete_recherche_fiches('', 'alphabetique', '', '', 1, '', '', true, '');
-    $results[1]['entries'] = searchResultstoArray($results[1]['entries'], array());
+    $results[1]['entries'] = $entryManager->search();
     $GLOBALS['ordre'] = 'asc';
     $GLOBALS['champ'] = 'bf_titre';
     usort($results[1]['entries'], 'champCompare');
@@ -293,10 +296,9 @@ if (isset($_POST["page"])) {
 
 			$acceptedTags = '<h1><h2><h3><h4><h5><h6><hr><hr/><br><br/><span><blockquote><i><u><b><strong><ol><ul><li><small><div><p><a><table><tr><th><td><img><figure><caption><iframe>';
 			$fiche['bf_content'] = strip_tags($fiche['bf_content'], $acceptedTags);
-      $fiche = baz_insertion_fiche($fiche);
-
-      $this->SetMessage(_t('PUBLICATION_NEWSLETTER_CREATED'));
-      $this->Redirect($this->Href('', $fiche['id_fiche']));
+      $fiche['antispam'] = 1;
+      $fiche = $entryManager->create($formId, $fiche);
+      array_push($messages, array('success', _t('PUBLICATION_NEWSLETTER_CREATED')))
 		}
 	} while (FALSE); // End of global do-while loop
 } else { // Not isset($_POST["page"])

@@ -1,14 +1,15 @@
 parameters:
   htmltopdf_path: '/usr/bin/chromium'  # MacOs: /Applications/Chromium.app/Contents/MacOS/Chromium
   htmltopdf_service_url: ''             # Should be a complete url like https://example.org/yeswiki/?PagePrincipale/pdf
+  # Advanced
+  # Has to comply with HeadlessChromium::createBrowser() options
+  # see https://github.com/chrome-php/headless-chromium-php#options
   htmltopdf_options:
-    windowSize:
-      - '1440'
-      - '780'
+    windowSize: [1440, 780]
     noSandbox: true
     # debugLogger: 'php://stdout'
   # if you want to propose this website as a service for other domains
   htmltopdf_service_authorized_domains:
   #  - 'example.org'
   #  - 'another-one.com'
-  htmltopdf_cache_life: '300'
+  htmltopdf_cache_life: 300

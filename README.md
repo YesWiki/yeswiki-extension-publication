@@ -393,7 +393,7 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 | Clé de configuration                   | Valeur par défaut                  | Utilité
 | ---                                    | ---                                | ---
 | `htmltopdf_path`                       | `/usr/bin/chromium`                | Indique l'emplacement du programme chargé
-| `htmltopdf_options`                    | `['windowSize' => ['1440', '780'], 'noSandbox' => true]`  | Options par défaut passées au navigateur embarqué
+| `htmltopdf_options`                    | `['windowSize' => [1440, 780], 'noSandbox' => true]`  | Options par défaut passées au navigateur embarqué
 | `htmltopdf_service_url`                |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
 | `htmltopdf_service_authorized_domains` |                                    | Si votre serveur partage les fonction de générateur de pdf, il faut lui indique les nom de domaines autorisés
 
@@ -403,7 +403,7 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 array(
     ...
     'htmltopdf_path' => '/usr/bin/chromium',
-    'htmltopdf_options' => ['windowSize' => ['1440', '780'], 'noSandbox' => true],
+    'htmltopdf_options' => ['windowSize' => [1440, 780], 'noSandbox' => true],
     ...
 );
 ```

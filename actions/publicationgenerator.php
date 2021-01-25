@@ -138,7 +138,7 @@ if (!empty($groupselector)) {
                 }
             }
             $results[$i]['entries'] = $entryManager->search(['queries' => $tabQuery, 'formsIds' => [$formId]]);
-            $results[$i]['entries'] = searchResultstoArray($results[$i]['entries'], array(), $formValues);
+
             // tri des fiches
             $GLOBALS['ordre'] = 'asc';
             $GLOBALS['champ'] = 'bf_titre';
@@ -298,7 +298,7 @@ if (isset($_POST["page"])) {
 			$fiche['bf_content'] = strip_tags($fiche['bf_content'], $acceptedTags);
       $fiche['antispam'] = 1;
       $fiche = $entryManager->create($formId, $fiche);
-      array_push($messages, array('success', _t('PUBLICATION_NEWSLETTER_CREATED')))
+      array_push($messages, array('success', _t('PUBLICATION_NEWSLETTER_CREATED')));
 		}
 	} while (FALSE); // End of global do-while loop
 } else { // Not isset($_POST["page"])

@@ -103,6 +103,70 @@ Les différents paramètres de cette action sont les suivants.
 
 *N.B* — Dans les explications qui suivent, le terme "sélection" désigne la sélection des éléments constitutifs d'une publication.
 
+#### **groupselector**
+
+*S'il est utilisé, ce paramètre doit l'être conjointement au paramètre `titles`.*
+
+Liste des groupes d'éléments proposés à la sélection.
+
+Dans la liste,
+
+- les groupes doivent être séparés par des virgules ;
+- les pages YesWiki seront identifiées par le mot "pages" ;
+  pour une page YesWiki, on peut préciser, entre parenthèses et après "pages",
+  - une liste de mots clefs associés à ces pages,
+  - les critères doivent être séparés par des "|" ;
+- un formulaire bazar est identifié par son numéro identifiant (exemple : "1"),
+  pour un formulaire, on peut préciser, entre parenthèses et après son numéro,
+  - une liste de critères de sélection dans ce formulaire,
+  - les critères doivent être séparés par des "|".
+  
+Exemple – les éléments suivants
+- Les pages wiki "pages wiki", reprenant les pages du wiki ;
+```
+{{publicationgenerator titles="pages wiki" groupselector="pages"}}
+```
+- Les pages wiki taggées "important", reprenant les pages du wiki catégorisées (au moyen d'un mot-clef) comme importantes ;
+```
+{{publicationgenerator titles="important" groupselector="pages(important)"}}
+```
+- Les fiches associées à un formulaire "recettes de cuisine", reprenant les fiches du formulaire 1 ;
+```
+{{publicationgenerator titles="recettes de cuisine" groupselector="1"}}
+```
+- Certaines fiches "livres", reprenant les fiches du formulaire 2 dont l'auteur est "Rabelais" ou dont la taille est "long" ;
+```
+{{publicationgenerator titles="livres" groupselector="2(bf_auteur=Rabelais|bf_taille=long)"}}
+```
+
+```
+{{publicationgenerator titles="pages wiki, important, recettes de cuisine, livres" groupselector="pages, pages(important), 1, 2(bf_auteur=Rabelais|bf_taille=long)"}}
+```
+
+Exemple – Pour organiser les éléments proposés dans quatre groupes différents,
+- un groupe, nommé "pages wiki", reprenant les pages du wiki ;
+- un groupe, nommé "important", reprenant les pages du wiki catégorisées (au moyen d'un mot-clef) comme importantes ;
+- un groupe, nommé "recettes de cuisine", reprenant les fiches du formulaire 1 ;
+- un groupe, nommé "livres", reprenant les fiches du formulaire 2 dont l'auteur est "Rabelais" ou dont la taille est "long" ;
+
+```
+{{publicationgenerator titles="pages wiki, important, recettes de cuisine, livres" groupselector="pages, pages(important), 1, 2(bf_auteur=Rabelais|bf_taille=long)"}}
+```
+
+#### **title**
+
+Titre des publications à générer.
+
+Si ce paramètre est renseigné, le titre de la publication sera celui qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
+
+Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir un titre.
+
+Exemple  :
+
+```
+{{publicationgenerator title="Guerre et paix"}}
+```
+
 #### **outputformat**
 
 Détermine le type de publication générée (ebook ou newsletter).
@@ -117,7 +181,7 @@ Exemple – pour générer une newsletter il faut donc écrire :
 
 #### **formid**
 
-*Paramètre obligatoire dans le cas où on souhaite générer une newsletter.*
+*Paramètre spécifique et obligatoire dans le cas où on souhaite générer une newsletter.*
 
 Lorsqu'une newsletter est générée, elle est enregistrée sous forme d'une fiche bazar (voir à cet effet la section "Pour générer des newsletters"). Ce paramètre permet de spécifier le numéro identifiant du formulaire bazar en question.
 
@@ -192,20 +256,6 @@ Exemple  :
 {{publicationgenerator outputformat="ebook" coverimage="monImage.jpg"}}
 ```
 
-#### **title**
-
-Titre des publications à générer.
-
-Si ce paramètre est renseigné, le titre de la publication sera celui qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
-
-Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir un titre.
-
-Exemple  :
-
-```
-{{publicationgenerator title="Guerre et paix"}}
-```
-
 #### **desc**
 
 Description des publications générées.
@@ -270,37 +320,6 @@ Exemple  :
 Liste des noms des groupes dans lesquels seront proposés les éléments (fiches bazar ou pages) lors de la sélection.
 
 Dans la liste, les noms doivent être séparés par des virgules.
-
-#### **groupselector**
-
-*S'il est utilisé, ce paramètre doit l'être conjointement au paramètre `titles`.*
-
-Liste des groupes d'éléments proposés à la sélection.
-
-Dans la liste,
-
-- les groupes doivent être séparés par des virgules ;
-- les pages YesWiki seront identifiées par le mot "pages" ;
-  pour une page YesWiki, on peut préciser, entre parenthèses et après "pages",
-  - une liste de mots clefs associés à ces pages,
-  - les critères doivent être séparés par des "|" ;
-- un formulaire bazar est identifié par son numéro identifiant (exemple : "1"),
-  pour un formulaire, on peut préciser, entre parenthèses et après son numéro,
-  - une liste de critères de sélection dans ce formulaire,
-  - les critères doivent être séparés par des "|".
-
-Exemple – Pour organiser les éléments proposés dans quatre groupes,
-
-- un groupe, nommé "pages wiki", reprenant les pages du wiki ;
-- un groupe, nommé "important", reprenant les pages du wiki catégorisées (au moyen d'un mot-clef) comme importantes ;
-- un groupe, nommé "recettes de cuisine", reprenant les fiches du formulaire 1 ;
-- un groupe, nommé "livres", reprenant les fiches du formulaire 2 dont l'auteur est "Rabelais" ou dont la taille est "long" ;
-
-on écrira :
-
-```
-{{publicationgenerator titles="pages wiki, important, recettes de cuisine, livres" groupselector="pages, pages(important), 1, 2(bf_auteur=Rabelais|bf_taille=long)"}}
-```
 
 ### Action `{{publicationlist}}`
 

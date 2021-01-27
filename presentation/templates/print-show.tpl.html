@@ -1,0 +1,56 @@
+<div class="alert alert-info">
+  <p><?php echo _t('PUBLICATION_SHOW_NOTICE') ?></p>
+</div>
+
+<div class="row yw-publication__show">
+  <div class="col-sm-8">
+    <div class="thumbnail">
+      <div class="caption">
+        <?php if ($metadata['publication-cover-image']) { ?>
+          <img class="pull-right img-cover img-thumbnail" alt="" src="<?php echo $metadata['publication-cover-image'] ?>">
+        <?php } ?>
+
+        <h3><?php echo $metadata['publication-title'] ?></h3>
+
+        <p class="clearfix"><?php echo $metadata['publication-description'] ?></p>
+
+        <?php if ($hasWriteAccess): ?>
+        <p class="text-muted">
+          <small>
+            <?php echo $metadata['publication-page-format'] ?>
+            <?php echo _t(sprintf('PUBLICATION_EBOOK_ORIENTATION_%s', strtoupper($metadata['publication-page-orientation']))) ?>
+          </small>
+        </p>
+        <?php endif ?>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-4">
+    <div class="btn-group-vertical" role="group" aria-label="">
+      <a href="<?php echo $wiki->href('pdf', $page['tag']) ?>" download type="application/pdf" class="btn btn-primary">
+        <i class="fas fa-book"></i>
+        <?php echo _t('PUBLICATION_VIEW_PDF') ?>
+      </a>
+
+      <?php if ($hasWriteAccess) { ?>
+      <a href="<?php echo $wiki->href('preview', $page['tag']) ?>" class="btn btn-info btn-secondary">
+        <i class="fas fa-book-reader"></i>
+        <?php echo _t('PUBLICATION_PREVIEW') ?>
+      </a>
+      <?php } ?>
+
+      <a href="<?php echo $wiki->href('share', $page['tag']) ?>" class="btn btn-info btn-secondary modalbox">
+        <i class="fas fa-share-alt"></i>
+        <?php echo _t('TEMPLATE_SHARE') ?>
+      </a>
+
+      <?php if ($hasDeleteAccess) { ?>
+      <a href="<?php echo $wiki->href('deletepage', $page['tag']) ?>" class="btn btn-danger link-deletepage modalbox">
+        <i class="fas fa-trash"></i>
+        <?php echo _t('TEMPLATE_DELETE') ?>
+      </a>
+      <?php } ?>
+    </div>
+  </div>
+</div>

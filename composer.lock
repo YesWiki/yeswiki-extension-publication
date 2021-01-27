@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9ff0aacf024840149a96ac1c57ab2c4f",
+    "content-hash": "8406d83e1ecc83f78d721b6d7fdb0a98",
     "packages": [
         {
             "name": "apix/log",
@@ -59,16 +59,16 @@
         },
         {
             "name": "chrome-php/chrome",
-            "version": "v0.7.0",
+            "version": "v0.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/chrome-php/headless-chromium-php.git",
-                "reference": "f44dcf49cf5ab9adf693ac5c8deb8da8dbcf41b2"
+                "reference": "7abdf64d706cbf568e7c0dfa7c4532ce687028a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/chrome-php/headless-chromium-php/zipball/f44dcf49cf5ab9adf693ac5c8deb8da8dbcf41b2",
-                "reference": "f44dcf49cf5ab9adf693ac5c8deb8da8dbcf41b2",
+                "url": "https://api.github.com/repos/chrome-php/headless-chromium-php/zipball/7abdf64d706cbf568e7c0dfa7c4532ce687028a8",
+                "reference": "7abdf64d706cbf568e7c0dfa7c4532ce687028a8",
                 "shasum": ""
             },
             "require": {
@@ -76,8 +76,8 @@
                 "evenement/evenement": "^3.0.1",
                 "php": ">=7.0",
                 "psr/log": "^1.0",
-                "symfony/filesystem": "^3|^4",
-                "symfony/process": "^3|^4",
+                "symfony/filesystem": "^3|^4|^5",
+                "symfony/process": "^3|^4|^5",
                 "wrench/wrench": "^2.0"
             },
             "require-dev": {
@@ -112,7 +112,7 @@
                 "pdf",
                 "screenshot"
             ],
-            "time": "2019-10-04T13:40:57+00:00"
+            "time": "2020-02-20T20:36:20+00:00"
         },
         {
             "name": "evenement/evenement",
@@ -435,5 +435,6 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1"
-    }
+    },
+    "plugin-api-version": "1.1.0"
 }

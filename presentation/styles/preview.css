@@ -8,15 +8,20 @@
 #controls {
   display: none;
 }
+
+body {
+  overflow: auto !important;
+}
+
 @media screen {
   body {
-    background-color: whitesmoke;
+    background-color: whitesmoke !important;
   }
   .pagedjs_page {
-    background-color: #fdfdfd;
+    background-color: #fdfdfd !important;
     margin: calc(var(--margin) * 4) var(--margin);
     flex: none;
-    box-shadow: 0 0 0 1px var(--color-mbox);
+    box-shadow: 0 0 0 1px var(--color-mbox) !important;
   }
   .pagedjs_pages {
     width: calc((var(--pagedjs-width) * 2) + (var(--margin) * 4));
@@ -35,7 +40,37 @@
   .pagedjs_first_page {
     margin-left: calc(50% + var(--margin));
   }
+
+  .pagedjs_blank-page_page {
+    position: relative;
+  }
+  
+    /* .yeswiki-publication  */.pagebreak:after,
+    /* .yeswiki-publication  */.page-break:after {
+      content: "⤵️⤵️⤵️⤵️";
+      display: block;
+      margin-top: 1em;
+    }
+
+    .pagedjs_blank-page_page .pagedjs_page_content,
+    /* .yeswiki-publication  */.pagebreak:after,
+    /* .yeswiki-publication  */.page-break:after  {
+      border: 4px dotted currentColor;
+      opacity: 0.5;
+    }
+
+    .pagedjs_blank-page_page .blank-page:before {
+      content: attr(aria-label);
+      font-size: 4em;
+      font-weight: bold;
+      position: absolute;
+      text-align: center;
+      top: 50%;
+      transform: rotate(-0.15turn);
+      width: 100%;
+    }
 }
+
 @media screen {
   .debug .pagedjs_margin-top .pagedjs_margin-top-left-corner,
   .debug .pagedjs_margin-top .pagedjs_margin-top-right-corner {

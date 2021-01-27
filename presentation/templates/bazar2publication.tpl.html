@@ -1,0 +1,10 @@
+<?php if ($options['templatepage'] && !$templatePage): ?>
+<div class="alert alert-warning">
+  <?php printf(_t('PUBLICATION_TEMPLATE_PAGE_NOT_FOUND'), $options['templatepage']) ?>
+</div>
+<?php endif ?>
+
+<button class="btn btn-primary bazar2publication-action <?php echo $options['class'] ?>"<?php if($options['templatepage']): ?> data-template-page="<?php echo $options['templatepage'] ?>"<?php endif ?>>
+  <i class="fas <?php echo $options['icon'] ?>"></i>
+  <?php echo $options['title'] ?>
+</button>

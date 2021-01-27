@@ -27,7 +27,9 @@
  **/
 
 $(document).ready(function () {
-    $('.export-table-form').on('submit', function() {$(this).append('<input type="hidden" name="antispam" value="1" />')})
+    $('.export-table-form').on('submit', function() {
+        $(this).append('<input type="hidden" name="antispam" value="1" />')
+    })
 
     $("#publication-selection-container").sortable();
 
@@ -41,7 +43,17 @@ $(document).ready(function () {
     });
 
     $('.page-break').on('click', function() {
-        $("#publication-selection-container").append('<li class="list-group-item"><a class="pull-right btn btn-xs btn-danger remove-page-break" title="Enlever le saut de page" href="#" ><i class="fas fa-minus"></i></a><span class="pull-left movable"><i class="fas fa-arrows-alt-v"></i></span><input type="hidden" name="page[]" value="{{pagebreak}}">-------------- Saut de page --------------</li>');
+        const label = this.dataset.label
+        $("#publication-selection-container").append(`<li class="list-group-item blank-page">
+            <button class="pull-right btn btn-sm btn-danger remove-page-break" title="Enlever le saut de page" href="#">
+                <i class="fas fa-trash"></i>
+            </button>
+            <span class="movable">
+                <i class="fas fa-arrows-alt-v"></i>
+            </span>
+            <input type="hidden" name="page[]" value="{{blankpage}}">
+            <span class="page-label">${label}</span>
+        </li>`);
         return false;
     });
 
@@ -51,30 +63,35 @@ $(document).ready(function () {
     });
 
 	$('.select-page-item').on('click', function() {
-        var $this = $(this);
-		$this.siblings().filter('.remove-page-item').removeClass('hide');
-        $this.siblings().filter(".movable").removeClass('hide');
-		$this.addClass('hide');
-		var listitem = $this.parent();
-		listitem.fadeOut("fast", function() {
-			listitem.appendTo("#publication-selection-container").fadeIn("fast");
-		});
-        return false;
+      var $this = $(this);
+		  $this.siblings().filter('.remove-page-item').removeClass('hide');
+      $this.siblings().filter(".movable").removeClass('hide');
+		  $this.addClass('hide');
+		  var listitem = $this.parent();
+		  listitem.fadeOut("fast", function() {
+			  listitem.appendTo("#publication-selection-container").fadeIn("fast");
+      });
+
+      return false;
 	});
 
-    $('.remove-page-item').on('click', function() {
-        var $this = $(this);
-        $this.siblings().filter('.select-page-item').removeClass('hide');
-        $this.siblings().filter(".movable").addClass('hide');
-        $this.addClass('hide');
-        var listitem = $this.parent();
-        listitem.fadeOut("fast", function() {
-            listitem.prependTo(".list-entries-to-export.group-"+$this.data('group')).fadeIn("fast");
-        });
-        return false;
-    });
+  $('.remove-page-item').on('click', function() {
+      var $this = $(this);
+      $this.siblings().filter('.select-page-item').removeClass('hide');
+      $this.siblings().filter(".movable").addClass('hide');
+      $this.addClass('hide');
+      var listitem = $this.parent();
+      listitem.fadeOut("fast", function() {
+        listitem.prependTo(".list-entries-to-export.group-"+$this.data('group')).fadeIn("fast");
+      });
 
-    var listpages = $(".export-table-container .list-group-item"), filter = $("#filter"), filtercount = $("#filter-count");
+      return false;
+  });
+
+  var listpages = $(".export-table-container .list-group-item");
+  var filter = $("#filter");
+  var filtercount = $("#filter-count");
+
 	filter.keyup(function(){
         // Retrieve the input field text and reset the count to zero
         var count = 0;
@@ -93,7 +110,6 @@ $(document).ready(function () {
         });
 
         // Update the count
-        var numberItems = count;
-        filtercount.text("Nombre de pages : "+count);
+        filtercount.text(`Nombre de pages : ${count}`);
     });
 });

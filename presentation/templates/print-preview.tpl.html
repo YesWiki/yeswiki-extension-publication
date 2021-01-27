@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title><?php echo isset($metadatas['publication-title']) ? $metadatas['publication-title'] : 'Publication' ?> • <?php echo $siteTitle ?></title>
+  <?php echo $styles ?>
+
+  <style type="text/css">
+  @media print {
+    @page {
+      size: <?php echo $metadatas['publication-page-format'] ?> <?php echo $metadatas['publication-page-orientation'] ?>;
+      <?php if ($metadatas['publication-print-marks'] === '1') { ?>
+      bleed: 6mm;
+      marks: crop cross;
+      <?php } ?>
+    }
+  }</style>
+
+  <!-- Paged.js handles the printing layout -->
+  <script type="module" src="<?php echo $baseUrl ?>/tools/publication/presentation/browser/print.js"></script>
+  <script src="<?php echo $baseUrl ?>/tools/publication/presentation/browser/is-pdf-ready.js"></script>
+</head>
+
+<body class="<?php echo join(" ", $stylesModifiers) ?>">
+  <?php if ($metadatas['publication-cover-page'] === '1') { ?>
+  <div class="include publication-cover">
+    <h1 class="publication-title"><?php echo isset($metadatas['publication-title']) ? $metadatas['publication-title'] : '' ?></h1>
+
+    <?php echo $coverImage ?>
+
+    <p class="publication-description"><?php echo isset($metadatas['publication-description']) ? $metadatas['publication-description'] : '' ?></p>
+    <p class="publication-author"><?php echo isset($metadatas['publication-author']) ? $metadatas['publication-author'] : '' ?></p>
+  </div>
+  <?php } ?>
+
+  <?php echo $content ?>
+</body>
+</html>

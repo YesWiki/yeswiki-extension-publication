@@ -1,16 +1,12 @@
 # Extension YesWiki publication
 
-> Attention — Ceci est une extension de YesWiki. Elle ne fait pas partie du cœur officiellement maintenu de YesWiki.
+> Extension [YesWiki] qui génère des publications au format PDF à partir d'une sélection de [fiches Bazar][Bazar] et/ou de [pages de contenu][yeswiki-page].
 
-Cette extension permet de générer des publications au format PDF à partir d'une sélection de fiches bazar ou de pages YesWiki.
+La mise en page est effectuée par [Paged.js](https://www.pagedjs.org/)
+([documentation](https://www.pagedjs.org/documentation/)), et la capture PDF par un [navigateur dit "headless"][headless-browser] (par défaut [chromium](#pré-requis)).
 
-Les publications générées peuvent être de type :
+Les publications générées sont de type [ebook](#pour-générer-des-ebooks-téléchargeables) ou [newsletter](#pour-générer-des-newsletters).
 
-- ebook
-- newsletter
-
-La mise en page est effectuée par [Paged.js](https://gitlab.pagedmedia.org/tools/pagedjs)
-([fonctionnement](https://www.pagedmedia.org/paged-js/)).
 
 <table>
   <tr>
@@ -22,8 +18,20 @@ La mise en page est effectuée par [Paged.js](https://gitlab.pagedmedia.org/tool
     </td>
   </tr>
   <tr>
-    <th scope="col">Assemblage des pages wiki pour constituer un ouvrage</th>
-    <th scope="col">Prévisualisaton avant téléchargement</th>
+    <th scope="col">Assemblage de pages (<a href="#action-publicationgenerator">action <code>{{publicationgenerator}}</code></a>)</th>
+    <th scope="col">Publication PDF qui reprend les styles du wiki</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="screenshot-page-index.png" alt="">
+    </td>
+    <td>
+      <img src="screenshot-bazar-export.png" alt="">
+    </td>
+  </tr>
+  <tr>
+    <th scope="col">Une page "publication", avec actions de téléchargement et prévisualisation (auteur·ices et admin)</th>
+    <th scope="col">Bouton d'export à ajouter (<a href="#action-bazar2publication">action <code>{{bazar2publication}}</code></a>)</th>
   </tr>
 </table>
 
@@ -49,15 +57,15 @@ La génération d'une publication se fait en plusieurs étapes.
 
 L'action `{{publicationgenerator}}` prend en charge les étapes 1, 2 et 3.
 
-Le handler `/pdf` prend en charge la production du PDF.
+Le handler `/pdf` prend en charge l'étape 4.
 
-### Pour générer des ebooks
+### Pour générer des ebooks téléchargeables
 
 Utiliser l'action `{{publicationgenerator}}`. Aucun paramètre n'est obligatoire.
 
-Chaque ebook généré sera enregistré sous la forme d'une page sur le wiki. Le nom de cette page sera constitué de la valeur du paramètre `ebookpagenameprefix` suivie du titre de l'ebook.
+Chaque ebook généré sera enregistré sous la forme d'une page sur le wiki. Le nom de cette page sera constitué de la valeur du paramètre `pagenameprefix` suivie du titre de l'ebook.
 
-On pourra utilement consulter la section "Action `{{publicationgenerator}}`" ci-après.
+On pourra utilement consulter la section [Action `{{publicationgenerator}}`](#action-publicationgenerator) ci-après.
 
 ### Pour générer des newsletters
 
@@ -79,7 +87,7 @@ Soit, au minimum : `{{publicationgenerator outputformat="newsletter" formid="<id
 
 Chaque newsletter générée sera enregistrée sous la forme d'une fiche bazar du formulaire \<id du formulaire> sur le wiki.
 
-On pourra utilement consulter la section "Action `{{publicationgenerator}}`" ci-après.
+On pourra utilement consulter la section [Action `{{publicationgenerator}}`](#action-publicationgenerator) ci-après.
 
 ## Actions YesWiki
 
@@ -87,8 +95,13 @@ L'extension publication ajoute deux actions à votre wiki.
 
 | Action                    | Utilité                                       |
 | ---                       | ---                                           |
-| `{{publicationgenerator}}`| Interface de sélection du contenu de la publication et de création du document imprimable  |
-| `{{publicationlist}}`           | Liste des ebooks générés et imprimables               |
+| `{{publicationgenerator}}`| Interface de sélection du contenu de la publication et de création du document imprimable (cf. [Action `{{publicationgenerator}}`](#action-publicationgenerator)) |
+| `{{publicationlist}}`           | Liste des ebooks générés et imprimables (cf. [Action `{{publicationlist}}`](#action-publicationlist)) |
+| `{{bazar2publication}}`   | Liste des ebooks générés et imprimables (cf. [Action `{{bazar2publication}}`](#action-bazar2publication)) |
+| `{{blankpage}}`           | Insère une page vide à l'impression. |
+| `{{pagebreak}}`           | Crée un saut de page à l'impression. |
+| `{{publication-template}}`| Combiné avec `{{bazar2publication templatepage="…"}}`, signale l'emplacement réservé à l'injection de contenus. |
+
 Ces actions s'ajoutent, comme toute action YesWiki, dans un contenu de page.
 
 ### Action `{{publicationgenerator}}`
@@ -211,7 +224,7 @@ Exemple :
 {{publicationgenerator pageend="MaPageWiki"}}
 ```
 
-#### **ebookpagenameprefix**
+#### **pagenameprefix**
 
 *Paramètre utilisé uniquement dans le cas d'un ebook.*
 
@@ -244,9 +257,7 @@ Exemple – pour faire apparaître les pages créées lors del 'installation du 
 
 *Paramètre utilisé uniquement dans le cas d'un ebook.*
 
-Ce paramètre contient l'adressse de l'image de couverture utilisée en 1re page de couverture des ebooks générés.
-
-Si ce paramètre est renseigné, l'utilisateur ne se verra pas proposer de choix lors de la sélection.
+Ce paramètre contient l'adresse de l'image de couverture utilisée en 1re page de couverture des ebooks générés.
 
 Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection en vue d'un ebook, choisir une image de couverture.
 
@@ -256,13 +267,19 @@ Exemple  :
 {{publicationgenerator outputformat="ebook" coverimage="monImage.jpg"}}
 ```
 
+#### **title**
+
+Titre par défaut des publications à générer.
+
+Exemple  :
+
+```
+{{publicationgenerator title="Guerre et paix"}}
+```
+
 #### **desc**
 
-Description des publications générées.
-
-Si ce paramètre est renseigné, la description de la publication sera celle qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
-
-Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir une description.
+Description par défaut des publications à générer.
 
 Exemple  :
 
@@ -272,11 +289,7 @@ Exemple  :
 
 #### **author**
 
-Auteur des publications à générer.
-
-Si ce paramètre est renseigné, l'auteur de la publication sera celui qu'il donne. Et l'utilisateur ne se verra pas proposer de choix lors de la sélection.
-
-Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur pourra, lors de la sélection, saisir un·e aut·eur·rice.
+Auteur·ices par défaut des publications à générer.
 
 Exemple  :
 
@@ -286,13 +299,13 @@ Exemple  :
 
 #### **chapterpages**
 
-Liste des noms des pages YesWiki à utiliser au début de chaque chapitre des publications à générer.
+Liste des noms des pages YesWiki à utiliser comme chapitre des publications à générer.
 
 Dans la liste, les noms doivent être séparés par des virgules.
 
 Si ce paramètre est renseigné, les pages ainsi désignées seront proposées par défaut dans la publication lors de la sélection.
 
-Si ce paramètre n'est pas renseigné ou est vide, l'utilisateur devra, lors de la sélection, choisir les pages qu'il souhaite mettre en tête de chaque chapitre.
+L'utilisateur pourra, lors de la sélection, choisir les pages qu'il souhaite mettre à la suite de chaque chapitre.
 
 Exemple  :
 
@@ -300,41 +313,89 @@ Exemple  :
 {{publicationgenerator chapterpages="DebutChapitreUn, DebutChapitreDeux, DebutChapitreTrois"}}
 ```
 
-#### **template**
+#### **readonly**
 
-Spécifie le template utilisé pour afficher l'interface de sélection.
+Spécifie si les titre, description, auteur·ices, image et chapitres sont modifiables par l'utilisateur.
 
-Pour le moment, le seul qui existe est `exportpages_table.tpl.html`.
+Les paramètres d'impression restent modifiables dans tous les cas.
 
-S'il n'est pas précisé, ce paramètre vaut "exportpages_table.tpl.html".
+Exemple :
 
-Exemple  :
 ```
-{{publicationgenerator template="exportpages_table.tpl.html"}}
+{{publicationgenerator readonly}}
 ```
-
-#### **titles**
-
-*S'il est utilisé, ce paramètre doit l'être conjointement au paramètre `groupselector`.*
-
-Liste des noms des groupes dans lesquels seront proposés les éléments (fiches bazar ou pages) lors de la sélection.
-
-Dans la liste, les noms doivent être séparés par des virgules.
 
 ### Action `{{publicationlist}}`
 
 Cette action liste les ebook générés.
 
-#### **ebookpagenameprefix**
+#### **pagenameprefix**
 
-Le paramètre `ebookpagenameprefix` permet de préciser le préfixe par lequel commencent les noms de pages correspondant à des ebooks.
+Le paramètre `pagenameprefix` précise le préfixe par lequel commencent les noms de pages correspondant à des ebooks.
 
 S'il n'est pas précisé, ce paramètre vaut "Ebook".
 
 Exemple – Pour lister les ebooks dont le préfixe est "MesEDoc", il faut donc écrire :
 
 ```
-{{publicationlist outputformat="ebook" ebookpagenameprefix="MesEDoc"}}
+{{publicationlist outputformat="ebook" pagenameprefix="MesEDoc"}}
+```
+
+### Action `{{bazar2publication}}`
+
+Cette action exporte les résultats d'une sélection de fiches Bazar en PDF en cliquant sur un bouton. Le téléchargement débute au bout de quelques secondes.
+Il n'y a pas d'étape de personnalisation.
+
+L'action est à placer à côté d'une action `{{bazar}}` ou `{{bazarliste}}`.
+
+Tous les paramètres sont facultatifs.
+
+#### **title**
+
+Personnalise le texte affiché sur le bouton.
+
+```
+{{bazar2publication title="Imprimer ces résultats"}}
+```
+
+#### **icon**
+
+_Par défaut_ : `fa-book`.
+
+Personnalise l'icône affichée (par défaut, `fa-book`).
+
+À choisir parmi le [catalogue Font Awesome](https://fontawesome.com/v4.7.0/icons/).
+
+```
+{{bazar2publication icon="fa-cloud-download"}}
+```
+
+#### **templatepage**
+
+Par défaut, chaque fiche Bazar démarre sur une nouvelle page.
+
+Cet attribut importe la configuration d'une page Ebook : thème et style de présentation, ainsi que les éléments de configuration saisis dans le formulaire de création.
+
+```
+{{bazar2publication templatepage="EbookModelePourBazar"}}
+```
+
+Un Ebook modèle se crée comme tout autre publication, à partir d'une [action `{{publicationgenerator}}`](#action-publicationgenerator).
+
+Par défaut, le _contenu_ de la page modèle est remplacé par les fiches Bazar.
+L'utilisation de l'action [`{{publication-template}}`](#action-publication-template) dans la page modèle vous donne la liberté de choisir l'emplacement où les fiches Bazar seront insérées.
+
+### Action `{{publication-template}}`
+
+Cette action se place dans une page Ebook dont vous voulez vous servir comme modèle de publication.
+
+Ce modèle de publication s'utilise notamment pour personnaliser un export depuis une liste Bazar à l'aide du [bouton généré par l'action `{{bazar2publication}}`](#action-bazar2publication).
+
+```
+{{include page="EbookPageIntro" class="publication-cover"}}
+{{include page="EbookRemerciements"}}
+<mark>{{publication-template}}</mark>
+{{include page="EbookPageFin" class="publication-end"}}
 ```
 
 ## Handlers (ou suffixes) de page
@@ -348,7 +409,8 @@ L'extension publication ajoute deux handlers aux pages de votre wiki.
 
 Ces fonctions sont accessibles depuis le sous-menu "partager" du bas de page.
 
-## Configuration
+
+## Configuration serveur (`wakka.config.php`)
 
 Le fichier de configuration [`wakka.config.php`][wakka-config] accepte
 plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informatique.
@@ -356,10 +418,9 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 | Clé de configuration                   | Valeur par défaut                  | Utilité
 | ---                                    | ---                                | ---
 | `htmltopdf_path`                       | `/usr/bin/chromium`                | Indique l'emplacement du programme chargé
-| `htmltopdf_options`                    | ['windowSize' => ['1440', '780'], 'noSandbox' => true]  | Options par défaut passées au navigateur embarqué
+| `htmltopdf_options`                    | `['windowSize' => [1440, 780], 'noSandbox' => true]`  | Options par défaut passées au navigateur embarqué
 | `htmltopdf_service_url`                |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
 | `htmltopdf_service_authorized_domains` |                                    | Si votre serveur partage les fonction de générateur de pdf, il faut lui indique les nom de domaines autorisés
-| `htmltopdf_cache_life`                 |        300                         | Durée en secondes avant reconstruction du fichier cache pdf
 
 ### … avec Chrome/Firefox sur votre serveur
 
@@ -367,7 +428,7 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 array(
     ...
     'htmltopdf_path' => '/usr/bin/chromium',
-    'htmltopdf_options' => ['windowSize' => ['1440', '780'], 'noSandbox' => true],
+    'htmltopdf_options' => ['windowSize' => [1440, 780], 'noSandbox' => true],
     ...
 );
 ```
@@ -393,8 +454,14 @@ array(
     ...
 );
 ```
+
 ### Vous souhaitez escamoter certaines parties de vos pages wiki lors de l'édition du pdf
 
 à priori, deux class permettent de cacher des parties du votre wiki :
  - `""<div class="no-print"> ""bla bla à supprimer""</div>"" `
  - `""<div class="hide-print"> ""bla bla à supprimer""</div>"" `
+
+[YesWiki]: https://yeswiki.net/
+[Bazar]: https://yeswiki.net/?DocumentationBazaR
+[yeswiki-page]: https://yeswiki.net/?DocumentationEdition
+[headless-browser]: https://developers.google.com/web/updates/2017/04/headless-chrome

@@ -1,10 +1,64 @@
-.a4 {
-    width:210mm;
-    height:297mm;
+.btn {
+  padding: 5px 10px;
 }
-.space-left {
-    margin-left:1em;
+.btn-sm {
+  font-size: 14px;
 }
-.btn-xs.btn-danger {
-    border: 1px solid #d9534f;
+.btn-xs {
+  font-size: 12px;
 }
+
+.btn i:last-child:first-child {
+  margin: 0;
+}
+
+.yw-publication__show .img-cover {
+  object-fit: cover;
+  height: 250px;
+  width: 200px;
+}
+
+.export-table-container .page-groups {
+  margin-bottom: 1em;
+}
+
+.export-table-form details > summary {
+  cursor: pointer;
+  display: revert;  /* this is somewhat unset by Bootstrap, which we don't want in this case */
+  font-weight: bold;
+}
+
+.export-table-form .d-block {
+  display: block;
+}
+
+.export-table-form .form-row {
+  margin-bottom: 1em;
+}
+
+/* we reduce spacing for rows without .col-* elements inside */
+.export-table-form .form-row.clearfix .form-group {
+  margin-top: 10px;
+}
+
+.export-table-form .form-row:not(.clearfix) .form-group {
+  margin-top: 0;
+}
+#publication-selection-container.ui-sortable .blank-page .page-label {
+  margin-left: .75em;
+}
+#publication-selection-container.ui-sortable .blank-page .page-label:after {
+  color: #aaa;
+  content: "--------------";
+  margin-left: .5em;
+  margin-right: .5em;
+}
+
+#publication-selection-container.ui-sortable > * {
+    cursor: move;
+}
+    #publication-selection-container.ui-sortable > *:hover,
+    #publication-selection-container.ui-sortable > *:focus {
+        background-color: var(--neutral-light-color);
+        border-color: var(--primary-color);
+    }

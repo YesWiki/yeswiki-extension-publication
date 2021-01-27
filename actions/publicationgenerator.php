@@ -12,9 +12,13 @@
  *@version       $Revision: 0.1 $ $Date: 2010/03/04 14:19:03 $
  */
 
+use YesWiki\Bazar\Service\EntryManager;
+
 if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
 }
+
+$entryManager = $this->services->get(EntryManager::class);
 
 include_once 'tools/tags/libs/tags.functions.php';
 
@@ -22,11 +26,11 @@ $this->addCssFile('tools/publication/presentation/styles/publication.css');
 
 // Format of the output. Either you want to generate an ebook or a newsletter
 // Default value is ebook
-$outputFormat = $this->getParameter('outputformat');
-if (empty($outputFormat) || $outputFormat != 'newsletter') {
-    $name = _t('PUBLICATION_EBOOK');
-    $outputFormat = 'Ebook';
-} else {
+$name = _t('PUBLICATION_EBOOK');
+$outputFormat = $this->getParameter('outputformat', 'Ebook');
+$messages = [];
+
+if ($outputFormat === 'newsletter') {
 	$formId = $this->getParameter('formid'); // Bazar form used to store the newsletter
 	if (empty($formId)) {
 		exit (_t('PUBLICATION_MISSING_NEWSLETTER_FORM'));
@@ -35,17 +39,28 @@ if (empty($outputFormat) || $outputFormat != 'newsletter') {
 	}
 }
 
+// Deprecated arguments
+// In the form of ['oldvalue', 'newvalue']
+$messages = array_reduce([['ebookpagenameprefix', 'pagenameprefix'], ['fields', 'readonly'], ['ebookstart', 'pagestart'], ['ebookend', 'pageend'], ['publicationstart', 'pagestart'], ['publicationend', 'pageend']], function ($accumulator, $item) {
+  list($key, $expectation) = $item;
+
+  if ($this->getParameter($key, null) !== null) {
+    array_push($accumulator, ['warning', sprintf(_t('PUBLICATION_PARAMETER_DEPRECATED'), $key, $expectation)]);
+  }
+
+  return $accumulator;
+}, $messages);
+
+// Indicates if fields and elements are "read only"
+$areParamsReadonly = $this->getParameter('readonly', null) === '';
 
 // Pages used for intro and outro
-$publicationStart = $this->getParameter('publicationstart');
-$publicationEnd = $this->getParameter('publicationend');
+$publicationStart = $this->getParameter('pagestart');
+$publicationEnd = $this->getParameter('pageend');
 
 // prefix for created pages
 // Only used when outputformat="ebook"
-$ebookPageNamePrefix = $this->getParameter('ebookpagenameprefix');
-if (empty($ebookPageNamePrefix)) {
-    $ebookPageNamePrefix = 'Ebook';
-}
+$ebookPageNamePrefix = $this->getParameter('pagenameprefix', 'Ebook');
 
 // include default pages in page listing ?
 $addInstalledPages = $this->getParameter('addinstalledpage');
@@ -122,8 +137,8 @@ if (!empty($groupselector)) {
                     }
                 }
             }
-            $results[$i]['entries'] = baz_requete_recherche_fiches($tabQuery, 'alphabetique', $formId, '', 1, '', '', true, '');
-            $results[$i]['entries'] = searchResultstoArray($results[$i]['entries'], array(), $formValues);
+            $results[$i]['entries'] = $entryManager->search(['queries' => $tabQuery, 'formsIds' => [$formId]]);
+
             // tri des fiches
             $GLOBALS['ordre'] = 'asc';
             $GLOBALS['champ'] = 'bf_titre';
@@ -155,11 +170,11 @@ if (!empty($groupselector)) {
             if (!empty($tagList)) {
                 $sql .= ' AND tags.value IN (' . $tagList . ') AND tags.property = "http://outils-reseaux.org/_vocabulary/tag" AND tags.resource = tag';
             }
-            
+
             if ($addInstalledPages) {
                 var_dump(implode(',', $installedPageNames));
             }
-            
+
             $sql .= ' ORDER BY tag ASC';
             $results[$i]['entries'] = $this->LoadAll($sql);
         }
@@ -184,8 +199,7 @@ if (!empty($groupselector)) {
     // bazar entries
     $results[1]['type'] = 'bazar';
     $results[1]['name'] = 'Fiches bazar';
-    $results[1]['entries'] = baz_requete_recherche_fiches('', 'alphabetique', '', '', 1, '', '', true, '');
-    $results[1]['entries'] = searchResultstoArray($results[1]['entries'], array());
+    $results[1]['entries'] = $entryManager->search();
     $GLOBALS['ordre'] = 'asc';
     $GLOBALS['champ'] = 'bf_titre';
     usort($results[1]['entries'], 'champCompare');
@@ -211,54 +225,80 @@ if (isset($_POST["page"])) {
 		// So far everything is OK
 		if ($_POST['outputformat'] == 'Ebook') {  // We want to produce an ebook (default behaviour)
 			do { // use of a do-while loop in order to allow for breaks (in case of errors specific to ebooks)
-				if (!isset($_POST["publication-description"]) || $_POST["publication-description"] == '') {
-					// There is no publication-description
-					$output = '<div class="alert alert-danger">' . _t('PUBLICATION_NO_DESC_FOUND') . '</div>' . "\n";
-					break; // Stops the current do-while loop
-		 		}
-				if (!isset($_POST["publication-author"]) || $_POST["publication-author"] == '') {
-					// there is no publication-author
-					$output = '<div class="alert alert-danger">' . _t('PUBLICATION_NO_AUTHOR_FOUND') . '</div>' . "\n";
-					break; // Stops the current do-while loop
-			  }
-			  if (!isset($_POST["publication-cover-image"]) || $_POST["publication-cover-image"] == '') {
+			  if (isset($_POST["publication-cover-image"]) && $_POST["publication-cover-image"] !== '' && preg_match("/.(jpe?g|png|svg)$/i", $_POST["publication-cover-image"]) != 1) {
 					// there is no publication-cover-image
-					$output = '<div class="alert alert-danger">' . _t('PUBLICATION_NO_IMAGE_FOUND') . '</div>' . "\n";
-					break; // Stops the current do-while loop
-				}
-				if (preg_match("/.(jpe?g)$/i", $_POST["publication-cover-image"]) != 1) {
-					// publication-cover-image is not correct
 					$output = '<div class="alert alert-danger">' . _t('PUBLICATION_NOT_IMAGE_FILE') . '</div>' . "\n";
+					break; // Stops the current do-while loop
 				}
 				// So far everything is OK (regarding ebooks)
 				if (isset($ebookPageName) && !empty($ebookPageName)) {
 					$pageName = $ebookPageName;
 				} else {
 					$pageName = generatePageName($ebookPageNamePrefix . ' ' . $_POST["publication-title"]);
-				}
-				foreach ($_POST["page"] as $page) {
-					$output .= '{{include page="' . $page . '" class=""}}' . "\n";
-				}
-				$output .= '//' . _t('PUBLICATION_CONTENT_VISIBLE_ONLINE_FROM_PAGE') . ' : ' . $this->href('', $pageName) . ' // {{button link="' . $this->href('pdf', $pageName) . '" text="' . _t('PUBLICATION_DOWNLOAD_PDF') . '" class="btn-primary pull-right" icon="book"}}' . "\n";
+        }
+
+
+        // Generate the content of the page body
+        // @todo refactor it to share its logic with newsletter
+        foreach ($_POST["page"] as $page) {
+          // we turn some actions into explicit content
+          // for now, {{blankpage}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
+          if (preg_match('#{{\s*blankpage\s*}}#U', $page)) {
+            $output .= $page . "\n";
+          }
+          // we assume it is a page tag otherwise
+          // maybe we should also explicitly check it is a valid page tag instead?
+          // $page can be 'SomeTag' or 'SomeTag?parameter=value'
+          // the query string is used to parametrize book creation
+          else {
+            list($page, $qs) = explode('?', $page);
+            parse_str($qs, $qs);
+
+            $output .= '{{include page="' . $page . '" class="'. trim(implode(' ', [$qs['type'], $qs['class']])) .'"}}' . "\n";
+          }
+        }
+
 				unset($_POST['page']);
-				unset($_POST['antispam']);
-				$this->SaveMetaDatas($pageName, $_POST);
-				$this->SavePage($pageName, $output);
-				$output = $this->Format('""<div class="alert alert-success">' . _t('PUBLICATION_EBOOK_PAGE_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $pageName . '" text="' . _t('PUBLICATION_GOTO_EBOOK_PAGE') . ' ' . $pageName . '"}}""</div>""' . "\n");
+        unset($_POST['antispam']);
+
+        if ($this->SavePage($pageName, $output) === 0) {
+          $this->SaveMetaDatas($pageName, $_POST);
+          $this->SetMessage(_t('PUBLICATION_EBOOK_PAGE_CREATED'));
+          $this->Redirect($this->Href('', $pageName));
+          exit();
+        }
+        else {
+          $output = $this->Format('""<div class="alert alert-danger alert-error">' . _t('PUBLICATION_EBOOK_PAGE_CREATION_FAILED') . '.""' . "\n" . '{{button class="btn-primary" link="' . $this->GetPageTag() . '" text="' . _t('PUBLICATION_GOTO_EBOOK_CREATION_PAGE') . ' ' . $this->GetPageTag() . '"}}""</div>""' . "\n");
+        }
+
 			} while (FALSE); // end of ebook specific loop
 		} elseif ($outputFormat == 'newsletter') { // We want to produce a newsletter
 			$fiche['id_typeannonce'] = $formId;
 			$fiche['bf_titre'] = $_POST["publication-title"];
 			$fiche['bf_description'] = $_POST["publication-description"];
 			$fiche['bf_author'] = $_POST["publication-author"];
-			$fiche['bf_content'] = '';
+      $fiche['bf_content'] = '';
+
+      // Generate the content of the page body
+      // @todo Refactor this as a function to share it with Ebook logic
 			foreach ($_POST["page"] as $page) {
-				$fiche['bf_content'] .= $this->Format('{{include page="' . $page . '" class=""}}' . "\n");
-			}
+        // we turn some actions into explicit content
+        // for now, {{blankpage}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
+        if (preg_match('#{{\s*blankpage\s*}}#U', $page)) {
+          $fiche['bf_content'] .= $this->Format($page . "\n");
+        }
+        // we assume it is a page tag otherwise
+        // maybe we should also explicitly check it is a valid page tag instead?
+        else {
+  				$fiche['bf_content'] .= $this->Format('{{include page="' . $page . '" class=""}}' . "\n");
+        }
+      }
+
 			$acceptedTags = '<h1><h2><h3><h4><h5><h6><hr><hr/><br><br/><span><blockquote><i><u><b><strong><ol><ul><li><small><div><p><a><table><tr><th><td><img><figure><caption><iframe>';
 			$fiche['bf_content'] = strip_tags($fiche['bf_content'], $acceptedTags);
-			$fiche = baz_insertion_fiche($fiche);
-			$output = $this->Format('""<div class="alert alert-success">' . _t('PUBLICATION_NEWSLETTER_CREATED') . ' !""' . "\n" . '{{button class="btn-primary" link="' . $fiche['id_fiche'] . '" text="' . _t('PUBLICATION_SEE_NEWSLETTER') . ' ' . $fiche['bf_titre'] . '"}}""</div>""' . "\n");
+      $fiche['antispam'] = 1;
+      $fiche = $entryManager->create($formId, $fiche);
+      array_push($messages, array('success', _t('PUBLICATION_NEWSLETTER_CREATED')));
 		}
 	} while (FALSE); // End of global do-while loop
 } else { // Not isset($_POST["page"])
@@ -304,23 +344,26 @@ if (isset($_POST["page"])) {
     include_once 'includes/squelettephp.class.php';
     $exportTemplate = new SquelettePhp($template, 'publication');
 
-    $output .= $exportTemplate->render(
-        array(
-            'entries' => $results,
-            'publicationStart' => $publicationStart,
-            'publicationEnd' => $publicationEnd,
-            'addInstalledPages' => $addInstalledPages,
-            'installedPageNames' => $installedPageNames,
-            'default' => $default,
-            'ebookPageName' => $ebookPageName,
-            'metaDatas' => $this->page["metadatas"],
-            'selectedPages' => $selectedPages,
-            'chapterCoverPages' => $chapterCoverPages,
-            'url' => $this->href('', $this->GetPageTag()),
-            'name' => $name,
-            'outputFormat' => $outputFormat,
-        )
-    );
+    $this->AddJavascriptFile('tools/publication/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
+  	$this->AddJavascriptFile('tools/publication/presentation/actions/publicationgenerator.js');
+
+    $output .= $exportTemplate->render(array(
+      'messages' => $messages,
+      'entries' => $results,
+      'areParamsReadonly' => $areParamsReadonly,
+      'publicationStart' => $this->loadPage($publicationStart),
+      'publicationEnd' => $this->loadPage($publicationEnd),
+      'addInstalledPages' => $addInstalledPages,
+      'installedPageNames' => $installedPageNames,
+      'default' => $default,
+      'ebookPageName' => $ebookPageName,
+      'metaDatas' => $this->page["metadatas"],
+      'selectedPages' => $selectedPages,
+      'chapterCoverPages' => $chapterCoverPages,
+      'url' => $this->href('', $this->GetPageTag()),
+      'name' => $name,
+      'outputFormat' => $outputFormat,
+    ));
 }
 
 echo $output . "\n";

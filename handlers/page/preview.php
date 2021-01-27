@@ -1,5 +1,9 @@
 <?php
 
+use YesWiki\Bazar\Controller\EntryController;
+use YesWiki\Bazar\Service\EntryManager;
+use YesWiki\Core\Service\PageManager;
+
 global $wiki;
 
 $publication = null;
@@ -10,16 +14,21 @@ $publication = null;
 if ($wiki->HasAccess('read') && preg_match('#{{bazar#', $wiki->page['body'])) {
   // we assemble bazar pages
   preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
-  list(, $id) = $matches;
+  list(, $formId) = $matches;
 
-  $results = baz_requete_recherche_fiches('', '', $id);
-  $content = array_reduce($results, function($html, $fiche){
-    return $html . baz_voir_fiche('', $fiche['tag']);
+  $query = isset($_GET['query']) ? $_GET['query'] : '';
+  $entryManager = $wiki->services->get(EntryManager::class);
+  $entryController = $wiki->services->get(EntryController::class);
+
+  $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
+
+  $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
+    return $html . $entryController->view($fiche);
   }, '');
 
   // we gather a few things from
   if (isset($_GET['template-page'])) {
-    $templatePage = $wiki->loadPage($_GET['template-page']);
+    $templatePage = $wiki->services->get(PageManager::class)->getOne($_GET['template-page']);
 
     if ($templatePage) {
       // we inherit from template page user-defined styles
@@ -38,7 +47,7 @@ if ($wiki->HasAccess('read') && preg_match('#{{bazar#', $wiki->page['body'])) {
   }
 
   $publication = array(
-    'metadatas' => $templatePage ? $templatePage['metadatas'] : array(),
+    'metadatas' => isset($templatePage) ? $templatePage['metadatas'] : array(),
     'content' => $content
   );
 }

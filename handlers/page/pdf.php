@@ -68,6 +68,7 @@ $fullFilename = sprintf('%s/yeswiki/%s-%s-%s.pdf',
 $file_exists = file_exists($fullFilename);
 $fileLastModifiedTime = $file_exists ? @filemtime($fullFilename) : 0;  // returns FALSE if file does not exist
 $output = array();
+$DEBUG = $this->GetConfigValue('debug')==='yes';
 
 if (($this->UserIsAdmin() && isset($_GET['print-debug']))
 || !$file_exists
@@ -95,11 +96,16 @@ if (($this->UserIsAdmin() && isset($_GET['print-debug']))
         $browser->close();
       }
       catch (Exception $e) {
-        $browser->close();
+        $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
 
         echo $this->Header()."\n";
         echo '<div class="alert alert-danger alert-error">'.$e->getMessage().'</div>'."\n";
+
+        echo '<pre><code lang="html">'. htmlentities($html) .'</code></pre>';
+
         echo $this->Footer()."\n";
+
+        $browser->close();
         exit(1);
       }
   }

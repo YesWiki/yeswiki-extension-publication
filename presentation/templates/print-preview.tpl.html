@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title><?php echo $metadatas['publication-title'] ?> • <?php echo $siteTitle ?></title>
+  <title><?php echo isset($metadatas['publication-title']) ? $metadatas['publication-title'] : 'Publication' ?> • <?php echo $siteTitle ?></title>
   <?php echo $styles ?>
 
   <style type="text/css">
@@ -25,12 +25,12 @@
 <body class="<?php echo join(" ", $stylesModifiers) ?>">
   <?php if ($metadatas['publication-cover-page'] === '1') { ?>
   <div class="include publication-cover">
-    <h1 class="publication-title"><?php echo $metadatas['publication-title'] ?></h1>
+    <h1 class="publication-title"><?php echo isset($metadatas['publication-title']) ? $metadatas['publication-title'] : '' ?></h1>
 
     <?php echo $coverImage ?>
 
-    <p class="publication-description"><?php echo $metadatas['publication-description'] ?></p>
-    <p class="publication-author"><?php echo $metadatas['publication-author'] ?></p>
+    <p class="publication-description"><?php echo isset($metadatas['publication-description']) ? $metadatas['publication-description'] : '' ?></p>
+    <p class="publication-author"><?php echo isset($metadatas['publication-author']) ? $metadatas['publication-author'] : '' ?></p>
   </div>
   <?php } ?>
 

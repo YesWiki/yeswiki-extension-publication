@@ -1,0 +1,65 @@
+label: "Publication"
+actions:
+  blankpage:
+    label: "Bouton : insérer une page vide"
+    description: À insérer dans une page de contenu, pour insérer une page vide lors de la génération de la publication.
+    properties:
+  pagebreak:
+    label: "Bouton : insérer un saut de page"
+    description: À insérer dans une page de contenu, pour forcer le passage à la page suivante.
+    properties:
+  bazar2publication:
+    label: Impression de résultats Bazar
+    description: Bouton à positionner à côté d'une action.
+    properties:
+      title:
+        label: Titre
+        type: text
+  publicationgenerator:
+    label: Générateur de publication
+    description: Configure quels contenus sont utilisables dans le générateur de publication.
+    properties:
+      outputformat:
+        label: Mode de publication
+        type: list
+        default: ebook
+        options:
+          ebook: PDF imprimable
+          newsletter: Newsletter
+      formid:
+        label: Formulaire lié
+        type: form-field
+        showif:
+          outputformat: newsletter
+      groupselector:
+        label: Sélection des pages
+        hint: "pages(étiquette), 22"
+        type: text
+      titles:
+        label: Libellé de chaque groupe de sélection
+        showif: groupselector
+        type: text
+      pagestart:
+        label: Page de démarrage
+        hint: Utiliser son identifiant.
+        type: text
+      pageend:
+        label: Page de fin
+        hint: Utiliser son identifiant.
+        type: text
+      pagenameprefix:
+        label: Préfixe de page
+        advanced: true
+        hint: Préfixe appliqué à la publication après sa création.
+        showif:
+          outputformat: ebook
+      readonly:
+        label: Lecture seule
+        hint: Spécifie si les titre, description, auteur·ices, image et chapitres sont modifiables par l'utilisateur.
+        type: checkbox
+        default: false
+        showif:
+          outputformat: ebook
+
+
+

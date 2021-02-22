@@ -5,6 +5,6 @@
 <?php endif ?>
 
 <a download href="<?php echo $href ?>" class="btn btn-primary bazar2publication-action hide-from-print <?php echo $options['class'] ?>">
-  <i class="fas <?php echo $options['icon'] ?>"></i>
+  <?php if ($options['icon']): ?><i class="fas <?php echo $options['icon'] ?>"></i><?php endif ?>
   <?php echo $options['title'] ?>
 </a>

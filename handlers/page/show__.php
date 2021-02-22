@@ -26,5 +26,5 @@ if ($this->HasAccess('read') && isset($this->page['metadatas']['publication-titl
       'wiki' => $wiki,
     ));
 
-    $plugin_output_new = preg_replace('/<div class="page" >.+<hr class="hr_clear" \/>/siU', '<div class="page" >'. $output .'<hr class="hr_clear" />', $plugin_output_new);
+    $plugin_output_new = preg_replace('#<div class="page".+<hr class="hr_clear" />#siU', '<div class="page" >'. $output .'<hr class="hr_clear" />', $plugin_output_new);
 }

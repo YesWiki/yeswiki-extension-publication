@@ -55,7 +55,7 @@ if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarli
 /**
  * We print a Wiki page which has been created as an ebook
  */
-elseif ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-title'])) {
+elseif ($wiki->HasAccess('read')) {
   // we remove the pager from the display
   $content = preg_replace(
       '#(<br />\n)?<ul class="pager">.+</ul>#sU',

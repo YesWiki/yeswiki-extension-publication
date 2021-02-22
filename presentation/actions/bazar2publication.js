@@ -1,30 +1,21 @@
 $(document).ready(function(){
-  $(document).on('click', 'button.bazar2publication-action', function(event) {
-    const params = new URLSearchParams(document.location.search)
+  $(document).on('click', 'a.bazar2publication-action', function(event) {
+    event.preventDefault()
+
     const $button = $(this)
+    const url = new URL($button.attr('href'))
+    const params = url.searchParams
+    const pageParams = new URLSearchParams(window.location.search)
 
     // rename 'facette' as 'query'
-    if (params.has('facette')) {
-      params.set('query', params.get('facette'))
-      params.delete('facette')
+    if (pageParams.has('facette')) {
+      params.set('query', pageParams.get('facette'))
     }
 
-    // provide base template-page
-    if ($button.attr('data-template-page')) {
-      params.set('template-page', $button.attr('data-template-page'))
+    if (pageParams.has('debug')) {
+      console.debug('Redirecting to %s', url)
     }
 
-    // suffix first parameter with '/pdf' route
-    const {value: page} = params.keys().next()
-    const newPageAction = `${page}/pdf`
-
-    const entries = Array.from(params.entries()).map(([key, value]) => {
-      return (key === page) ? [newPageAction, value] : [key, value]
-    })
-
-    const redirectUrl = decodeURIComponent(new URLSearchParams(entries).toString())
-      .replace(newPageAction + '=', newPageAction)
-
-    window.location.search = redirectUrl
+    window.location = url
   })
 });

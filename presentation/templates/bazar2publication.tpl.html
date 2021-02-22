@@ -4,7 +4,7 @@
 </div>
 <?php endif ?>
 
-<button class="btn btn-primary bazar2publication-action <?php echo $options['class'] ?>"<?php if($options['templatepage']): ?> data-template-page="<?php echo $options['templatepage'] ?>"<?php endif ?>>
+<a download href="<?php echo $href ?>" class="btn btn-primary bazar2publication-action hide-from-print <?php echo $options['class'] ?>">
   <i class="fas <?php echo $options['icon'] ?>"></i>
   <?php echo $options['title'] ?>
-</button>
+</a>

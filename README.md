@@ -35,7 +35,7 @@ Les publications générées sont de type [ebook](#pour-générer-des-ebooks-té
   </tr>
 </table>
 
-## Pré-requis
+## Pré-requis technique
 
 Avoir installé [Chromium](https://www.chromium.org/Home) **sur
 le serveur** et connaitre le chemin d'accès vers l'exécutable.
@@ -133,7 +133,7 @@ Dans la liste,
   pour un formulaire, on peut préciser, entre parenthèses et après son numéro,
   - une liste de critères de sélection dans ce formulaire,
   - les critères doivent être séparés par des "|".
-  
+
 Exemple – les éléments suivants
 - Les pages wiki "pages wiki", reprenant les pages du wiki ;
 ```
@@ -409,6 +409,14 @@ L'extension publication ajoute deux handlers aux pages de votre wiki.
 
 Ces fonctions sont accessibles depuis le sous-menu "partager" du bas de page.
 
+## Adapter templates et contenus
+
+### Vous souhaitez escamoter certaines parties de vos pages wiki lors de l'édition du pdf
+
+à priori, deux class permettent de cacher des parties du votre wiki :
+ - `""<div class="no-print"> ""bla bla à supprimer à l'impression""</div>"" `
+ - `""<div class="hide-print"> ""bla bla à supprimer à l'impression""</div>"" `
+
 
 ## Configuration serveur (`wakka.config.php`)
 
@@ -421,13 +429,14 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 | `htmltopdf_options`                    | `['windowSize' => [1440, 780], 'noSandbox' => true]`  | Options par défaut passées au navigateur embarqué
 | `htmltopdf_service_url`                |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
 | `htmltopdf_service_authorized_domains` |                                    | Si votre serveur partage les fonction de générateur de pdf, il faut lui indique les nom de domaines autorisés
+| `htmltopdf_base_url` |                 | Si votre serveur n'a pas accès au wiki via la valeur de `base_url`
 
-### … avec Chrome/Firefox sur votre serveur
+### … avec Chrome sur votre serveur
 
 ```php
 array(
     ...
-    'htmltopdf_path' => '/usr/bin/chromium',
+    'htmltopdf_path' => '/usr/bin/chrome',
     'htmltopdf_options' => ['windowSize' => [1440, 780], 'noSandbox' => true],
     ...
 );
@@ -455,11 +464,21 @@ array(
 );
 ```
 
-### Vous souhaitez escamoter certaines parties de vos pages wiki lors de l'édition du pdf
+### Avec Docker / reverse-proxy
 
-à priori, deux class permettent de cacher des parties du votre wiki :
- - `""<div class="no-print"> ""bla bla à supprimer""</div>"" `
- - `""<div class="hide-print"> ""bla bla à supprimer""</div>"" `
+⚠️ **Utilisation avancée**
+
+La génération de PDF va échouer sur un environnement technique où YesWiki _et_ Chromium sont dans un conteneur Docker — ou un reverse-proxy — qui n'a pas accès au réseau externe, c'est-à-dire au wiki via l'URL configurée dans `base_url` du `wakka.config.php`.
+
+`htmltopdf_base_url` sera utilisée comme substitut pour accéder aus contenus du wiki (pages, images, vidéos, etc.).
+
+```php
+array(
+    'base_url' => 'https://example.com/?,
+    ...
+    'htmltopdf_base_url' => 'http://localhost:8000',
+);
+```
 
 [YesWiki]: https://yeswiki.net/
 [Bazar]: https://yeswiki.net/?DocumentationBazaR

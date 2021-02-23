@@ -7,9 +7,21 @@ parameters:
   htmltopdf_options:
     windowSize: [1440, 780]
     noSandbox: true
+    headless: true
+    userAgent: 'YesWiki/4.0'
+    customFlags:
+    - '--crash-dumps-dir=/tmp'
     # debugLogger: 'php://stdout'
   # if you want to propose this website as a service for other domains
   htmltopdf_service_authorized_domains:
   #  - 'example.org'
   #  - 'another-one.com'
-  htmltopdf_cache_life: 300
+
+  # ADVANCED SETUP
+  # Configure this when the HTTP server does not have access to the YesWiki via its public URL.
+  #
+  # Eg, if Docker/base_url is https://example.com/? and Apache runs as http://localhost:8000,
+  # … then `htmltopdf_base_url` value should be `http://localhost:8000/?`.
+  # Use cases: reverse-proxy, within a YesWiki Docker container.
+  htmltopdf_base_url: ~
+  #htmltopdf_base_url: http://localhost:8000/?

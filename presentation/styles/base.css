@@ -271,6 +271,12 @@
   display: none;
 }
 
+/* We hide bazarliste elements */
+.yeswiki-publication .bazar-search,
+.yeswiki-publication .filters-col {
+  display: none;
+}
+
 .yeswiki-publication .dummy {
   display: none;
   margin: 0;

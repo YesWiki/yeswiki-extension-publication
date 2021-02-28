@@ -33,12 +33,10 @@
           <?php echo _t('PUBLICATION_VIEW_PDF') ?>
         </a>
 
-        <?php if ($hasWriteAccess): ?>
         <a class="btn btn-xs btn-info" href="<?php echo $wiki->href('preview',$page['resource']) ?>">
           <i class="fas fa-book-reader"></i>&nbsp;
           <?php echo _t('PUBLICATION_PREVIEW') ?>
         </a>
-        <?php endif ?>
 
         <a href="<?php echo $wiki->href('share', $page['tag']) ?>" class="btn btn-xs btn-info btn-secondary modalbox">
           <i class="fas fa-share-alt"></i>

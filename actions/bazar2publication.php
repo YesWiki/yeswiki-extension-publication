@@ -22,7 +22,13 @@ $publicationTemplate = $wiki->getParameter('templatepage') ? $wiki->loadPage($wi
 
 $template = new SquelettePhp('bazar2publication.tpl.html', 'publication');
 
+$href = $wiki->Href('pdf', null, array(
+  'via' => 'bazarliste',
+  'template-page' => $wiki->getParameter('templatepage'),
+));
+
 echo $template->render(array(
+  'href' => $href,
   'options' => $options,
   'templatePage' => $publicationTemplate,
 ));

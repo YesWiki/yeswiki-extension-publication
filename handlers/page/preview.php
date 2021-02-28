@@ -11,7 +11,7 @@ $publication = null;
 /**
  * We print bazar list results
  */
-if ($wiki->HasAccess('read') && preg_match('#{{bazar#', $wiki->page['body'])) {
+if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarliste') {
   // we assemble bazar pages
   preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
   list(, $formId) = $matches;
@@ -55,7 +55,7 @@ if ($wiki->HasAccess('read') && preg_match('#{{bazar#', $wiki->page['body'])) {
 /**
  * We print a Wiki page which has been created as an ebook
  */
-elseif ($wiki->HasAccess('read') && isset($wiki->page['metadatas']['publication-title'])) {
+elseif ($wiki->HasAccess('read')) {
   // we remove the pager from the display
   $content = preg_replace(
       '#(<br />\n)?<ul class="pager">.+</ul>#sU',

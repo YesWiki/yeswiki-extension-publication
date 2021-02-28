@@ -43,13 +43,19 @@ if (!empty($_GET['url'])) {
   $sourceUrl = $_GET['url'];
   $hash = substr(sha1($pagedjs_hash . strtolower($_SERVER['QUERY_STRING'])), 0, 10);
 } else {
-  $pdfTag = $this->MiniHref('pdf', $this->GetPageTag());
   $pageTag = $this->GetPageTag();
-  $sourceUrl = $this->href('preview', $this->GetPageTag(), preg_replace('#^'. $pdfTag .'&#U', '', $_SERVER['QUERY_STRING']), false);
+  $pdfTag = $this->MiniHref('pdf', $pageTag);
+  $sourceUrl = $this->href('preview', $pageTag, preg_replace('#^'. $pdfTag .'&?#', '', $_SERVER['QUERY_STRING']), false);
   $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
     $this->page,
     ['query_string' => strtolower($_SERVER['QUERY_STRING'])]
   ))), 0, 10);
+
+  // In case we are behind a proxy (like a Docker container)
+  // It allows us to properly load the document from within the container itself
+  if ($this->config['htmltopdf_base_url']) {
+    $sourceUrl = str_replace($this->config['base_url'], $this->config['htmltopdf_base_url'], $sourceUrl);
+  }
 }
 
 $dlFilename = sprintf('%s-%s.pdf',
@@ -78,13 +84,13 @@ if (($this->UserIsAdmin() && isset($_GET['print-debug']))
       header('Location: '.$url);
       exit;
   } else {
-      $browserFactory = new HeadlessChromium\BrowserFactory($this->config['htmltopdf_path']);
-      $browser = $browserFactory->createBrowser($this->config['htmltopdf_options']);
-
-      $page = $browser->createPage();
-      $page->navigate($sourceUrl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
-
       try {
+        $browserFactory = new HeadlessChromium\BrowserFactory($this->config['htmltopdf_path']);
+        $browser = $browserFactory->createBrowser($this->config['htmltopdf_options']);
+
+        $page = $browser->createPage();
+        $page->navigate($sourceUrl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
+
         $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue(20000);
 
         // now generate PDF
@@ -93,15 +99,18 @@ if (($this->UserIsAdmin() && isset($_GET['print-debug']))
           'displayHeaderFooter' => true,
           'preferCSSPageSize' => true
         ))->saveToFile($fullFilename);
+
         $browser->close();
       }
       catch (Exception $e) {
-        $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
 
         echo $this->Header()."\n";
         echo '<div class="alert alert-danger alert-error">'.$e->getMessage().'</div>'."\n";
 
-        echo '<pre><code lang="html">'. htmlentities($html) .'</code></pre>';
+        if (($e instanceof HeadlessChromium\Exception\OperationTimedOut) === false) {
+          $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
+          echo '<pre><code lang="html">'. htmlentities($html) .'</code></pre>';
+        }
 
         echo $this->Footer()."\n";
 

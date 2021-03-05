@@ -57,16 +57,17 @@ if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarli
  * We print a Wiki page which has been created as an ebook
  */
 elseif ($wiki->HasAccess('read')) {
+    // if page is a bazar entry format the json into html
     if ($entryManager->isEntry($wiki->GetPageTag())) {
-        $wiki->AddJavascriptFile('tools/bazar/libs/bazar.js');
-        $wiki->page["body"] = '""'.$entryController->view($this->GetPageTag(), 0).'""';
+        $content = $entryController->view($this->GetPageTag(), 0);
+    } else {
+        // we remove the pager from the display
+        $content = preg_replace(
+            '#(<br />\n)?<ul class="pager">.+</ul>#sU',
+            '',
+            $wiki->Format($wiki->page["body"])
+        );
     }
-    // we remove the pager from the display
-    $content = preg_replace(
-        '#(<br />\n)?<ul class="pager">.+</ul>#sU',
-        '',
-        $wiki->Format($wiki->page["body"])
-    );
 
     $content = preg_replace('#(<br />\n){2,}#sU', "\n$1", $content);
     $content = preg_replace('#<br />\n(<h\d)#sU', "\n$1", $content);

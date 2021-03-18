@@ -8,45 +8,46 @@ global $wiki;
 
 $publication = null;
 
+$entryManager = $wiki->services->get(EntryManager::class);
+$entryController = $wiki->services->get(EntryController::class);
+
 /**
  * We print bazar list results
  */
 if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarliste') {
-  // we assemble bazar pages
-  preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
-  list(, $formId) = $matches;
+    // we assemble bazar pages
+    preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
+    list(, $formId) = $matches;
 
-  $query = isset($_GET['query']) ? $_GET['query'] : '';
-  $entryManager = $wiki->services->get(EntryManager::class);
-  $entryController = $wiki->services->get(EntryController::class);
+    $query = isset($_GET['query']) ? $_GET['query'] : '';
 
-  $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
+    $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
 
-  $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
-    return $html . $entryController->view($fiche);
-  }, '');
+    $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
+        return $html . $entryController->view($fiche);
+    }, '');
 
-  // we gather a few things from
-  if (isset($_GET['template-page'])) {
-    $templatePage = $wiki->services->get(PageManager::class)->getOne($_GET['template-page']);
+    // we gather a few things from
+    if (isset($_GET['template-page'])) {
+        $templatePage = $wiki->services->get(PageManager::class)->getOne($_GET['template-page']);
 
-    if ($templatePage) {
-      // we inherit from template page user-defined styles
-      if (isset($templatePage['metadatas']['theme'])) {
-        $wiki->config['favorite_theme'] = $templatePage['metadatas']['theme'];
-      }
-      if (isset($templatePage['metadatas']['style'])) {
-        $wiki->config['favorite_style'] = $templatePage['metadatas']['style'];
-      }
+        if ($templatePage) {
+            // we inherit from template page user-defined styles
+            if (isset($templatePage['metadatas']['theme'])) {
+                $wiki->config['favorite_theme'] = $templatePage['metadatas']['theme'];
+            }
+            if (isset($templatePage['metadatas']['style'])) {
+                $wiki->config['favorite_style'] = $templatePage['metadatas']['style'];
+            }
 
-      // {{bazar2publication templatepage="MyPage"}} + {{publication-template}} in MyPage
-      if (preg_match('#{{\s*publication-template\s*}}#siU', $templatePage['body'])) {
-        $content = preg_replace('#<!--publication-template-placeholder-->#siU', $content, $wiki->Format($templatePage['body']));
-      }
+            // {{bazar2publication templatepage="MyPage"}} + {{publication-template}} in MyPage
+            if (preg_match('#{{\s*publication-template\s*}}#siU', $templatePage['body'])) {
+                $content = preg_replace('#<!--publication-template-placeholder-->#siU', $content, $wiki->Format($templatePage['body']));
+            }
+        }
     }
-  }
 
-  $publication = array(
+    $publication = array(
     'metadatas' => isset($templatePage) ? $templatePage['metadatas'] : array(),
     'content' => $content
   );
@@ -56,20 +57,25 @@ if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarli
  * We print a Wiki page which has been created as an ebook
  */
 elseif ($wiki->HasAccess('read')) {
-  // we remove the pager from the display
-  $content = preg_replace(
-      '#(<br />\n)?<ul class="pager">.+</ul>#sU',
-      '',
-      $wiki->Format($wiki->page["body"])
-  );
+    // if page is a bazar entry format the json into html
+    if ($entryManager->isEntry($wiki->GetPageTag())) {
+        $content = $entryController->view($this->GetPageTag(), 0);
+    } else {
+        // we remove the pager from the display
+        $content = preg_replace(
+            '#(<br />\n)?<ul class="pager">.+</ul>#sU',
+            '',
+            $wiki->Format($wiki->page["body"])
+        );
+    }
 
-  $content = preg_replace('#(<br />\n){2,}#sU', "\n$1", $content);
-  $content = preg_replace('#<br />\n(<h\d)#sU', "\n$1", $content);
+    $content = preg_replace('#(<br />\n){2,}#sU', "\n$1", $content);
+    $content = preg_replace('#<br />\n(<h\d)#sU', "\n$1", $content);
 
-  $publication = array(
-    'metadatas' => $wiki->page['metadatas'],
-    'content' => $content
-  );
+    $publication = array(
+      'metadatas' => $wiki->page['metadatas'],
+      'content' => $content
+    );
 }
 
 /**
@@ -114,14 +120,14 @@ if ($publication) {
     $coverImage = '';
 
     if ($metadatas['publication-cover-image']) {
-      // use an external image
-      if (preg_match('#^(https?://|//|/)#iU', $metadatas['publication-cover-image'])) {
-        $coverImage = '<figure class="attached_file attached_file--external cover"><img src="'. $metadatas['publication-cover-image'] .'" alt="" class="img-responsive"></figure>';
-      }
-      // use a wiki attachment
-      else {
-        $coverImage = $wiki->Format('{{ attach file="'. $metadatas['publication-cover-image'] .'" desc=" " size="original" class="cover"}}');
-      }
+        // use an external image
+        if (preg_match('#^(https?://|//|/)#iU', $metadatas['publication-cover-image'])) {
+            $coverImage = '<figure class="attached_file attached_file--external cover"><img src="'. $metadatas['publication-cover-image'] .'" alt="" class="img-responsive"></figure>';
+        }
+        // use a wiki attachment
+        else {
+            $coverImage = $wiki->Format('{{ attach file="'. $metadatas['publication-cover-image'] .'" desc=" " size="original" class="cover"}}');
+        }
     }
 
     // build the preview/printing page

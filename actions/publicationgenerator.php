@@ -223,7 +223,7 @@ if (isset($_POST["page"])) {
         }
 
 		// So far everything is OK
-		if ($_POST['outputformat'] == 'Ebook') {  // We want to produce an ebook (default behaviour)
+		if (strtolower($_POST['outputformat']) == 'ebook') {  // We want to produce an ebook (default behaviour)
 			do { // use of a do-while loop in order to allow for breaks (in case of errors specific to ebooks)
 			  if (isset($_POST["publication-cover-image"]) && $_POST["publication-cover-image"] !== '' && preg_match("/.(jpe?g|png|svg)$/i", $_POST["publication-cover-image"]) != 1) {
 					// there is no publication-cover-image

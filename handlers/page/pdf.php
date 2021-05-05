@@ -14,21 +14,21 @@ if (!defined("WIKINI_VERSION")) {
 }
 
 if (!is_executable($this->config['htmltopdf_path'])) {
-  echo $this->Header()."\n";
-  echo '<div class="alert alert-danger alert-error">'
+    echo $this->Header()."\n";
+    echo '<div class="alert alert-danger alert-error">'
     ._t('PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH').' : '
     .$this->config['htmltopdf_path'].'<br />'
     ._t('PUBLICATION_DID_YOU_INSTALL_CHROMIUM_OR_SET_UP_PATH')
     .'.</div>'."\n";
-  echo $this->Footer()."\n";
-  exit(1);
+    echo $this->Footer()."\n";
+    exit(1);
 }
 
 if (!empty($_GET['url']) && !in_array(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST), $this->config['htmltopdf_service_authorized_domains'])) {
-  echo $this->Header()."\n";
-  echo '<div class="alert alert-danger alert-error">'._t('PUBLICATION_DOMAIN_NOT_AUTORIZED').' : '.$domain.'</div>'."\n";
-  echo $this->Footer()."\n";
-  exit(1);
+    echo $this->Header()."\n";
+    echo '<div class="alert alert-danger alert-error">'._t('PUBLICATION_DOMAIN_NOT_AUTORIZED').' : '.$domain.'</div>'."\n";
+    echo $this->Footer()."\n";
+    exit(1);
 }
 
 $url = str_replace(array('/wakka.php?wiki=', '/?'), '', $this->config['base_url']);
@@ -38,36 +38,38 @@ $pagedjs_hash = sha1(json_encode(array_merge([
 ])));
 
 if (!empty($_GET['url'])) {
-  $fullFilename = '/tmp/page.pdf';
-  $pageTag = isset($_GET['urlPageTag']) ? $_GET['urlPageTag'] : 'publication';
-  $sourceUrl = $_GET['url'];
-  $hash = substr(sha1($pagedjs_hash . strtolower($_SERVER['QUERY_STRING'])), 0, 10);
+    $fullFilename = '/tmp/page.pdf';
+    $pageTag = isset($_GET['urlPageTag']) ? $_GET['urlPageTag'] : 'publication';
+    $sourceUrl = $_GET['url'];
+    $hash = substr(sha1($pagedjs_hash . strtolower($_SERVER['QUERY_STRING'])), 0, 10);
 } else {
-  $pageTag = $this->GetPageTag();
-  $pdfTag = $this->MiniHref('pdf', $pageTag);
-  $sourceUrl = $this->href('preview', $pageTag, preg_replace('#^'. $pdfTag .'&?#', '', $_SERVER['QUERY_STRING']), false);
-  $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
-    $this->page,
-    ['query_string' => strtolower($_SERVER['QUERY_STRING'])]
-  ))), 0, 10);
+    $pageTag = $this->GetPageTag();
+    $pdfTag = $this->MiniHref('pdf', $pageTag);
+    $sourceUrl = $this->href('preview', $pageTag, preg_replace('#^'. $pdfTag .'&?#', '', $_SERVER['QUERY_STRING']), false);
+    $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
+        $this->page,
+        ['query_string' => strtolower($_SERVER['QUERY_STRING'])]
+    ))), 0, 10);
 
-  // In case we are behind a proxy (like a Docker container)
-  // It allows us to properly load the document from within the container itself
-  if ($this->config['htmltopdf_base_url']) {
-    $sourceUrl = str_replace($this->config['base_url'], $this->config['htmltopdf_base_url'], $sourceUrl);
-  }
+    // In case we are behind a proxy (like a Docker container)
+    // It allows us to properly load the document from within the container itself
+    if ($this->config['htmltopdf_base_url']) {
+        $sourceUrl = str_replace($this->config['base_url'], $this->config['htmltopdf_base_url'], $sourceUrl);
+    }
 }
 
-$dlFilename = sprintf('%s-%s.pdf',
-  $pageTag,
-  $hash
+$dlFilename = sprintf(
+    '%s-%s.pdf',
+    $pageTag,
+    $hash
 );
 
-$fullFilename = sprintf('%s/yeswiki/%s-%s-%s.pdf',
-  sys_get_temp_dir(),
-  $pageTag,
-  'publication',
-  $hash
+$fullFilename = sprintf(
+    '%s/yeswiki/%s-%s-%s.pdf',
+    sys_get_temp_dir(),
+    $pageTag,
+    'publication',
+    $hash
 );
 
 
@@ -79,45 +81,43 @@ $DEBUG = $this->GetConfigValue('debug')==='yes';
 if (($this->UserIsAdmin() && isset($_GET['print-debug']))
 || !$file_exists
 || ($file_exists && isset($_GET['refresh']) && $_GET['refresh']==1)) {
-  if (!empty($this->config['htmltopdf_service_url'])) {
-      $url = $this->config['htmltopdf_service_url'].'&urlPageTag='.$this->GetPageTag().'&url='.urlencode($sourceUrl);
-      header('Location: '.$url);
-      exit;
-  } else {
-      try {
-        $browserFactory = new HeadlessChromium\BrowserFactory($this->config['htmltopdf_path']);
-        $browser = $browserFactory->createBrowser($this->config['htmltopdf_options']);
+    if (!empty($this->config['htmltopdf_service_url'])) {
+        $url = $this->config['htmltopdf_service_url'].'&urlPageTag='.$this->GetPageTag().'&url='.urlencode($sourceUrl);
+        header('Location: '.$url);
+        exit;
+    } else {
+        try {
+            $browserFactory = new HeadlessChromium\BrowserFactory($this->config['htmltopdf_path']);
+            $browser = $browserFactory->createBrowser($this->config['htmltopdf_options']);
 
-        $page = $browser->createPage();
-        $page->navigate($sourceUrl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
+            $page = $browser->createPage();
+            $page->navigate($sourceUrl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
 
-        $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue(20000);
+            $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue(20000);
 
-        // now generate PDF
-        $page->pdf(array(
+            // now generate PDF
+            $page->pdf(array(
           'printBackground' => true,
           'displayHeaderFooter' => true,
           'preferCSSPageSize' => true
         ))->saveToFile($fullFilename);
 
-        $browser->close();
-      }
-      catch (Exception $e) {
+            $browser->close();
+        } catch (Exception $e) {
+            echo $this->Header()."\n";
+            echo '<div class="alert alert-danger alert-error">'.$e->getMessage().'</div>'."\n";
 
-        echo $this->Header()."\n";
-        echo '<div class="alert alert-danger alert-error">'.$e->getMessage().'</div>'."\n";
+            if (($e instanceof HeadlessChromium\Exception\OperationTimedOut) === false) {
+                $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
+                echo '<pre><code lang="html">'. htmlentities($html) .'</code></pre>';
+            }
 
-        if (($e instanceof HeadlessChromium\Exception\OperationTimedOut) === false) {
-          $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
-          echo '<pre><code lang="html">'. htmlentities($html) .'</code></pre>';
+            echo $this->Footer()."\n";
+
+            $browser->close();
+            exit(1);
         }
-
-        echo $this->Footer()."\n";
-
-        $browser->close();
-        exit(1);
-      }
-  }
+    }
 }
 
 if (file_exists($fullFilename)) {
@@ -145,4 +145,3 @@ if (file_exists($fullFilename)) {
     }
     echo $this->Footer()."\n";
 }
-

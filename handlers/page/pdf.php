@@ -13,7 +13,7 @@ if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
 }
 
-if (!is_executable($this->config['htmltopdf_path'])) {
+if (!is_executable($this->config['htmltopdf_path']) && empty($this->config['htmltopdf_service_url'])) {
     echo $this->Header()."\n";
     echo '<div class="alert alert-danger alert-error">'
     ._t('PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH').' : '
@@ -24,7 +24,7 @@ if (!is_executable($this->config['htmltopdf_path'])) {
     exit(1);
 }
 
-if (!empty($_GET['url']) && !in_array(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST), $this->config['htmltopdf_service_authorized_domains'])) {
+if (!empty($_GET['url']) && !in_array(parse_url($_SERVER['HTTP_REFERER']??'', PHP_URL_HOST), $this->config['htmltopdf_service_authorized_domains'])) {
     echo $this->Header()."\n";
     echo '<div class="alert alert-danger alert-error">'._t('PUBLICATION_DOMAIN_NOT_AUTORIZED').' : '.$domain.'</div>'."\n";
     echo $this->Footer()."\n";

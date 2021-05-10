@@ -285,6 +285,7 @@
 /* Unfold panels and other collapsed content */
 .yeswiki-publication .collapse {
   display: block;
+  height:100%!important;
 }
 
 /* Wells content is partially lost if a page break happens inside it */

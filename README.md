@@ -97,7 +97,7 @@ L'extension publication ajoute deux actions à votre wiki.
 | ---                       | ---                                           |
 | `{{publicationgenerator}}`| Interface de sélection du contenu de la publication et de création du document imprimable (cf. [Action `{{publicationgenerator}}`](#action-publicationgenerator)) |
 | `{{publicationlist}}`           | Liste des ebooks générés et imprimables (cf. [Action `{{publicationlist}}`](#action-publicationlist)) |
-| `{{bazar2publication}}`   | Liste des ebooks générés et imprimables (cf. [Action `{{bazar2publication}}`](#action-bazar2publication)) |
+| `{{bazar2publication}}`   | Exporte les résultats d'une sélection de fiches Bazar en PDF (cf. [Action `{{bazar2publication}}`](#action-bazar2publication)) |
 | `{{blankpage}}`           | Insère une page vide à l'impression. |
 | `{{pagebreak}}`           | Crée un saut de page à l'impression. |
 | `{{publication-template}}`| Combiné avec `{{bazar2publication templatepage="…"}}`, signale l'emplacement réservé à l'injection de contenus. |

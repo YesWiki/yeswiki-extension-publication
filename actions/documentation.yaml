@@ -111,6 +111,15 @@ actions:
         hint: _t(AB_publication_publicationgenerator_template_hint)
         type: text
         advanced: true
+  publicationlist:
+    label: _t(AB_publication_publicationlist_label)
+    properties:
+      pagenameprefix:
+        label: _t(AB_publication_publicationlist_pagenameprefix_label)
+        type: text
+        advanced: true
+        
+      
 
 
 

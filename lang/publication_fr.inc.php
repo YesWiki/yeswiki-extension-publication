@@ -127,5 +127,7 @@ $GLOBALS['translations'] = array_merge(
         'AB_publication_publicationgenerator_chapterpages_hint' => 'Format: PageTag1,PageTag2,PageTag3',
         'AB_publication_publicationgenerator_template_label' => 'template',
         'AB_publication_publicationgenerator_template_hint' => 'ex: exportpages_table.tpl.html',
+        'AB_publication_publicationlist_label' => 'Liste des publications',
+        'AB_publication_publicationlist_pagenameprefix_label' => 'prefix de page',
     )
 );

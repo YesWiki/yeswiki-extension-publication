@@ -1,0 +1,127 @@
+label: _t(AB_publication_label)
+position: 1500
+previewHeight: 300px
+onlyForAdmins: true
+actions:
+  bazar2publication:
+    label: _t(AB_publication_bazar2publication_label)
+    hint: _t(AB_publication_bazar2publication_hint)
+    properties:
+      title:
+        label: _t(AB_publication_bazar2publication_title_label)
+        type: text
+      icon:
+        label: _t(AB_publication_bazar2publication_icon_label)
+        type: icon
+      class:
+        label: _t(AB_publication_bazar2publication_class_label)
+        type: text
+      templatepage:
+        label: _t(AB_publication_bazar2publication_templatepage_label)
+        type: page-list
+  blankpage:
+    label: _t(AB_publication_blanckpage_label)
+    hint: _t(AB_publication_blanckpage_hint)
+  pagebreak:
+    label: _t(AB_publication_pagebreak_label)
+    hint: _t(AB_publication_pagebreak_hint)
+  publication-template:
+    label: _t(AB_publication_publication_template_label)
+    hint: _t(AB_publication_publication_template_hint)
+  publicationgenerator:
+    label: _t(AB_publication_publicationgenerator_label)
+    hint: _t(AB_publication_publicationgenerator_hint)
+    properties:
+      outputformat:
+        label: _t(AB_publication_publicationgenerator_outputformat_label)
+        type: list
+        default: ebook
+        options:
+          ebook: _t(AB_publication_publicationgenerator_outputformat_ebook)
+          newsletter: _t(AB_publication_publicationgenerator_outputformat_newsletter)
+      formid:
+        label: _t(AB_publication_publicationgenerator_formid_label)
+        type: number
+        min: 1
+        showif:
+          outputformat: newsletter
+      groupselector:
+        label: _t(AB_publication_publicationgenerator_groupselector_label)
+        hint: _t(AB_publication_publicationgenerator_groupselector_hint)
+        type: text
+      titles:
+        label: _t(AB_publication_publicationgenerator_titles_label)
+        showif: groupselector
+        type: text
+      pagestart:
+        label: _t(AB_publication_publicationgenerator_pagestart_label)
+        hint: _t(AB_publication_publicationgenerator_pagestart_hint)
+        type: page-list
+      pageend:
+        label: _t(AB_publication_publicationgenerator_pageend_label)
+        hint: _t(AB_publication_publicationgenerator_pageend_hint)
+        type: page-list
+      pagenameprefix:
+        label: _t(AB_publication_publicationgenerator_pagenameprefix_label)
+        advanced: true
+        hint: _t(AB_publication_publicationgenerator_pagenameprefix_hint)
+        showif:
+          outputformat: ebook
+      readonly:
+        label: _t(AB_publication_publicationgenerator_readonly_label)
+        hint: _t(AB_publication_publicationgenerator_readonly_hint)
+        type: checkbox
+        default: false
+        showif:
+          outputformat: ebook
+      addinstalledpage:
+        label:  _t(AB_publication_publicationgenerator_addinstalledpage_label)
+        advanced: true
+        type: checkbox
+        default: 0
+        checkedvalue: 1
+        uncheckedvalue: 0
+      coverimage:
+        label: _t(AB_publication_publicationgenerator_coverimage_label)
+        hint: _t(AB_publication_publicationgenerator_coverimage_hint)
+        type: url
+        advanced: true
+      title:
+        label: _t(AB_publication_publicationgenerator_title_label)
+        hint: _t(AB_publication_publicationgenerator_title_hint)
+        type: text
+        advanced: true
+      desc:
+        label: _t(AB_publication_publicationgenerator_desc_label)
+        hint: _t(AB_publication_publicationgenerator_desc_hint)
+        type: text
+        advanced: true
+      author:
+        label: _t(AB_publication_publicationgenerator_author_label)
+        hint: _t(AB_publication_publicationgenerator_author_hint)
+        type: text
+        advanced: true
+      chapterpages:
+        label: _t(AB_publication_publicationgenerator_chapterpages_label)
+        hint: _t(AB_publication_publicationgenerator_chapterpages_hint)
+        type: text
+        advanced: true
+      template:
+        label: _t(AB_publication_publicationgenerator_template_label)
+        hint: _t(AB_publication_publicationgenerator_template_hint)
+        type: text
+        advanced: true
+  publicationlist:
+    label: _t(AB_publication_publicationlist_label)
+    properties:
+      pagenameprefix:
+        label: _t(AB_publication_publicationlist_pagenameprefix_label)
+        type: text
+        advanced: true
+        
+      
+
+
+
+
+

@@ -129,5 +129,8 @@ $GLOBALS['translations'] = array_merge(
         'AB_publication_publicationgenerator_template_hint' => 'ex: exportpages_table.tpl.html',
         'AB_publication_publicationlist_label' => 'Liste des publications',
         'AB_publication_publicationlist_pagenameprefix_label' => 'prefix de page',
+
+        // edit config
+        'EDIT_CONFIG_HINT_htmltopdf_service_url' => 'Adresse externe d\'un service chronium (exemple: https://example.org/yeswiki/?PagePrincipale/pdf)',
     )
 );

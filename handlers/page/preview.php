@@ -3,6 +3,7 @@
 use YesWiki\Bazar\Controller\EntryController;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Core\Service\PageManager;
+use YesWiki\Core\Service\TemplateEngine;
 
 global $wiki;
 
@@ -10,22 +11,41 @@ $publication = null;
 
 $entryManager = $wiki->services->get(EntryManager::class);
 $entryController = $wiki->services->get(EntryController::class);
+$templateEngine = $wiki->services->get(TemplateEngine::class);
 
 /**
  * We print bazar list results
  */
 if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarliste') {
     // we assemble bazar pages
-    preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
-    list(, $formId) = $matches;
-
-    $query = isset($_GET['query']) ? $_GET['query'] : '';
-
-    $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
-
-    $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
-        return $html . $entryController->view($fiche);
-    }, '');
+    $content = '';
+    $templateName = 'merged-entries.tpl.html';
+    if (!$templateEngine->hasTemplate('@bazar/'.$templateName)) {
+        // backward compatibilty
+        preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
+        list(, $formId) = $matches;
+    
+        $query = isset($_GET['query']) ? $_GET['query'] : '';
+    
+        $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
+    
+        $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
+            return $html . $entryController->view($fiche);
+        }, '');
+    } elseif (preg_match('/({{(bazarliste|bazarcarto|calendrier|map|gogomap)\s[^}]*}})/i', $wiki->page['body'], $matches)) {
+        $actionText = $matches[1];
+        $actionName = $matches[2];
+        $matches = [];
+        $params = [];
+        if (preg_match_all('/([a-zA-Z0-9_]*)=\"(.*)\"/U', $actionText, $matches)) {
+            foreach ($matches[0] as $id => $match) {
+                $params[$matches[1][$id]] = $matches[2][$id];
+            }
+            // redefine template
+            $params['template'] = $templateName;
+            $content = $this->Action($actionName, 0, $params);
+        }
+    }
 
     // we gather a few things from
     if (isset($_GET['template-page'])) {

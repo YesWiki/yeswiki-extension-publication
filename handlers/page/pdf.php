@@ -63,6 +63,10 @@ $dlFilename = sprintf(
     $hash
 );
 
+$dirname = sys_get_temp_dir()."/yeswiki/";
+if (!file_exists($dirname)) {
+    mkdir($dirname);
+}
 $fullFilename = sprintf(
     '%s/yeswiki/%s-%s-%s.pdf',
     sys_get_temp_dir(),

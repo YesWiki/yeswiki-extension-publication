@@ -83,7 +83,7 @@ if (($this->UserIsAdmin() && isset($_GET['print-debug']))
 || !$file_exists
 || ($file_exists && isset($_GET['refresh']) && $_GET['refresh']==1)) {
     if (!empty($this->config['htmltopdf_service_url'])) {
-        $url = $this->config['htmltopdf_service_url'].'&urlPageTag='.$this->GetPageTag().'&url='.urlencode($sourceUrl);
+        $url = $this->config['htmltopdf_service_url'].'&urlPageTag='.$this->GetPageTag().'&url='.urlencode($sourceUrl).'&hash='.$hash;
         header('Location: '.$url);
         exit;
     } else {

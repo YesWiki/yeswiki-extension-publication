@@ -38,7 +38,6 @@ $pagedjs_hash = sha1(json_encode(array_merge([
 ])));
 
 if (!empty($_GET['url'])) {
-    $fullFilename = '/tmp/page.pdf';
     $pageTag = isset($_GET['urlPageTag']) ? $_GET['urlPageTag'] : 'publication';
     $sourceUrl = $_GET['url'];
     $hash = substr(sha1($pagedjs_hash . strtolower($_SERVER['QUERY_STRING'])), 0, 10);
@@ -74,9 +73,7 @@ $fullFilename = sprintf(
 
 
 $file_exists = file_exists($fullFilename);
-$fileLastModifiedTime = $file_exists ? @filemtime($fullFilename) : 0;  // returns FALSE if file does not exist
 $output = array();
-$DEBUG = $this->GetConfigValue('debug')==='yes';
 
 if (($this->UserIsAdmin() && isset($_GET['print-debug']))
 || !$file_exists

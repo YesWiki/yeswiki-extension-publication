@@ -19,7 +19,7 @@ $templateEngine = $wiki->services->get(TemplateEngine::class);
 if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarliste') {
     // we assemble bazar pages
     $content = '';
-    $templateName = 'merged-entries.tpl.html';
+    $templateName = 'rendered-entries.tpl.html';
     if (!$templateEngine->hasTemplate('@bazar/'.$templateName)) {
         // backward compatibilty
         preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);

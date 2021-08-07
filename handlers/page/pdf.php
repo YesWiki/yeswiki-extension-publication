@@ -8,6 +8,8 @@ Copyright 2014 Outils-Réseaux
 
 */
 
+use YesWiki\Publication\Service\PdfHelper;
+
 // Verification de securite
 if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
@@ -45,9 +47,16 @@ if (!empty($_GET['url'])) {
     $pageTag = $this->GetPageTag();
     $pdfTag = $this->MiniHref('pdf', $pageTag);
     $sourceUrl = $this->href('preview', $pageTag, preg_replace('#^'. $pdfTag .'&?#', '', $_SERVER['QUERY_STRING']), false);
+    
+    $pdfHelper = $this->services->get(PdfHelper::class);
+
     $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
         $this->page,
-        ['query_string' => strtolower($_SERVER['QUERY_STRING'])]
+        ['query_string' => strtolower($_SERVER['QUERY_STRING']),
+        $pdfHelper->getDataToCheck(
+            $pageTag,
+            $_GET['via'] ?? null
+        ) ?? []]
     ))), 0, 10);
 
     // In case we are behind a proxy (like a Docker container)

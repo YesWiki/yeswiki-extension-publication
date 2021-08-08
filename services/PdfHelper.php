@@ -50,7 +50,6 @@ class PdfHelper
             $templatePath = $this->getTemplatePathFormFormId($formId);
             if (!empty($templatePath)) {
                 $return['template content'] = file_get_contents($templatePath);
-                echo 'pageTag : '.$pageTag.';template : '.$templatePath."\n";
             }
         } elseif ($via === 'bazarliste') {
             $page = $this->pageManager->getOne($pageTag);

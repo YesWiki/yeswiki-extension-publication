@@ -36,7 +36,19 @@ class PdfHelper
     }
 
     /**
-     * return content to add to sha1 formatted as array
+     * Check if the current page to export to pdf is :
+     *  - an entry
+     *  - a page called with $_GET['bazarliste']
+     *
+     * If an entry, get content from eventually associated template fiche-x.tpl.html
+     * If called by 'bazarliste', get content from eventually associated templates fiche-x.tpl.html
+     *  and date of the last modified entry.
+     *
+     * Return an array containing these data to gives that to sha1 function to obtain an hash depnding
+     * of templates content or date of latest entry.
+     *
+     * Aim : force generation of a new pdf file if the associated entry template or an entry of the forms were modified.
+     *
      * @param string $pageTag
      * @param null|string $get
      * @return array
@@ -87,6 +99,7 @@ class PdfHelper
 
     /**
      * rerieve fiche-X.tpl.html path and filename form formId
+     * TODO : update TemplateEngine with a new function that allow to extract that instead of the current function
      * @param string $formId
      * @return string|null $path
      */

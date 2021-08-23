@@ -47,7 +47,7 @@ class PdfHelper
         if ($this->entryManager->isEntry($pageTag)) {
             $entry = $this->entryManager->getOne($pageTag);
             $formId = $entry['id_typeannonce'];
-            $templatePath = $this->getTemplatePathFormFormId($formId);
+            $templatePath = $this->getTemplatePathFromFormId($formId);
             if (!empty($templatePath)) {
                 $return['template content'] = file_get_contents($templatePath);
             }
@@ -70,9 +70,10 @@ class PdfHelper
                         });
                     }
                     if (!empty($ids)) {
-                        $return['entries last-date'] = $this->getLastDateOfEntries($ids);
+                        $latestEntry = $this->getMostRecentEntry($ids);
+                        $return['entries last-date'] = $latestEntry['time'] ??  '';
                         foreach ($ids as $id) {
-                            $templatePath = $this->getTemplatePathFormFormId($id);
+                            $templatePath = $this->getTemplatePathFromFormId($id);
                             if (!empty($templatePath)) {
                                 $return['template fiche-'.$id] = file_get_contents($templatePath);
                             }
@@ -89,7 +90,7 @@ class PdfHelper
      * @param string $formId
      * @return string|null $path
      */
-    private function getTemplatePathFormFormId(string $formId): ?string
+    private function getTemplatePathFromFormId(string $formId): ?string
     {
         $templateFileName = 'fiche-'.trim($formId);
         if ($this->templateEngine->hasTemplate('@bazar/'.$templateFileName.'.tpl.html')) {
@@ -113,9 +114,9 @@ class PdfHelper
     /**
      * find date of last entry of the forms
      * @param array $formsIds
-     * @return string $date
+     * @return ?array $entry
      */
-    private function getLastDateOfEntries(array $formsIds): string
+    private function getMostRecentEntry(array $formsIds): ?array
     {
         $EntriesRequest =
             'SELECT DISTINCT resource FROM ' . $this->dbService->prefixTable('triples') .
@@ -140,8 +141,6 @@ class PdfHelper
         'ORDER BY time DESC '.
         'LIMIT 1';
 
-        $results = $this->dbService->loadAll($SQLRequest);
-
-        return !empty($results) ? $results[array_key_first($results)]['time'] : '';
+        return $results = $this->dbService->loadSingle($SQLRequest);
     }
 }

@@ -9,6 +9,9 @@ jobs:
     - name: Test and package the extension
       id: package
       uses: oncletom/yeswiki-build-repo@feature/action
+      with:
+        extension-name: yeswiki-extension-publication
+        extension-version: ${{ github.ref }}
 
     - name: Assess md5 and archive name
       run: |

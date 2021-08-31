@@ -1,4 +1,9 @@
-on: [push]
+name: Release
+
+on:
+  release:
+    types:
+      - published
 
 jobs:
   package:
@@ -18,7 +23,6 @@ jobs:
         echo "${{ steps.release.outputs.archive-name }} md5sum is ${{ steps.release.outputs.md5sum }}"
 
     - name: Upload zip file
-      if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -29,7 +33,6 @@ jobs:
         asset_content_type: application/zip
 
     - name: Upload md5 file
-      if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

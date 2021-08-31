@@ -8,6 +8,8 @@ Copyright 2014 Outils-Réseaux
 
 */
 
+use YesWiki\Publication\Service\PdfHelper;
+
 // Verification de securite
 if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
@@ -38,7 +40,6 @@ $pagedjs_hash = sha1(json_encode(array_merge([
 ])));
 
 if (!empty($_GET['url'])) {
-    $fullFilename = '/tmp/page.pdf';
     $pageTag = isset($_GET['urlPageTag']) ? $_GET['urlPageTag'] : 'publication';
     $sourceUrl = $_GET['url'];
     $hash = substr(sha1($pagedjs_hash . strtolower($_SERVER['QUERY_STRING'])), 0, 10);
@@ -46,9 +47,16 @@ if (!empty($_GET['url'])) {
     $pageTag = $this->GetPageTag();
     $pdfTag = $this->MiniHref('pdf', $pageTag);
     $sourceUrl = $this->href('preview', $pageTag, preg_replace('#^'. $pdfTag .'&?#', '', $_SERVER['QUERY_STRING']), false);
+    
+    $pdfHelper = $this->services->get(PdfHelper::class);
+
     $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
         $this->page,
-        ['query_string' => strtolower($_SERVER['QUERY_STRING'])]
+        ['query_string' => strtolower($_SERVER['QUERY_STRING']),
+        $pdfHelper->getPageEntriesContent(
+            $pageTag,
+            $_GET['via'] ?? null
+        ) ?? []]
     ))), 0, 10);
 
     // In case we are behind a proxy (like a Docker container)
@@ -64,6 +72,10 @@ $dlFilename = sprintf(
     $hash
 );
 
+$dirname = sys_get_temp_dir()."/yeswiki/";
+if (!file_exists($dirname)) {
+    mkdir($dirname);
+}
 $fullFilename = sprintf(
     '%s/yeswiki/%s-%s-%s.pdf',
     sys_get_temp_dir(),
@@ -74,15 +86,13 @@ $fullFilename = sprintf(
 
 
 $file_exists = file_exists($fullFilename);
-$fileLastModifiedTime = $file_exists ? @filemtime($fullFilename) : 0;  // returns FALSE if file does not exist
 $output = array();
-$DEBUG = $this->GetConfigValue('debug')==='yes';
 
 if (($this->UserIsAdmin() && isset($_GET['print-debug']))
 || !$file_exists
 || ($file_exists && isset($_GET['refresh']) && $_GET['refresh']==1)) {
     if (!empty($this->config['htmltopdf_service_url'])) {
-        $url = $this->config['htmltopdf_service_url'].'&urlPageTag='.$this->GetPageTag().'&url='.urlencode($sourceUrl);
+        $url = $this->config['htmltopdf_service_url'].'&urlPageTag='.$this->GetPageTag().'&url='.urlencode($sourceUrl).'&hash='.$hash;
         header('Location: '.$url);
         exit;
     } else {

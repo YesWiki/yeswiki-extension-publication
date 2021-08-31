@@ -38,3 +38,15 @@ parameters:
   # Use cases: reverse-proxy, within a YesWiki Docker container.
   htmltopdf_base_url: ~
   #htmltopdf_base_url: http://localhost:8000/?
+  #
+  # for edit config action
+  publication_editable_config_params:
+    - 'htmltopdf_service_url'
+
+services:
+  _defaults:
+    autowire: true
+    public: true
+
+  YesWiki\Publication\Service\:
+    resource: 'services/*'

@@ -53,7 +53,7 @@ class PdfHelper
      * @param null|string $get
      * @return array
      */
-    public function getDataToCheck(string $pageTag, ?string $via = null): array
+    public function getPageEntriesContent(string $pageTag, ?string $via = null): array
     {
         $return = [];
         if ($this->entryManager->isEntry($pageTag)) {

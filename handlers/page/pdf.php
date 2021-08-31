@@ -53,7 +53,7 @@ if (!empty($_GET['url'])) {
     $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
         $this->page,
         ['query_string' => strtolower($_SERVER['QUERY_STRING']),
-        $pdfHelper->getDataToCheck(
+        $pdfHelper->getPageEntriesContent(
             $pageTag,
             $_GET['via'] ?? null
         ) ?? []]

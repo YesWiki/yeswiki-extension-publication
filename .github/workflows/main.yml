@@ -1,6 +1,8 @@
 name: Release
 
 on:
+  push:
+  pull_request:
   release:
     types:
       - published
@@ -24,20 +26,22 @@ jobs:
 
     - name: Upload zip file
       uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      if: ${{ github.event_name == 'release' }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./dist/${{ steps.release.output.archive-name }}
-        asset_name: ${{ steps.release.output.archive-name }}
+        asset_path: ./dist/${{ steps.release.outputs.archive-name }}
+        asset_name: ${{ steps.release.outputs.archive-name }}
         asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload md5 file
       uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      if: ${{ github.event_name == 'release' }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./dist/${{ steps.release.output.archive-name }}.md5
-        asset_name: ${{ steps.release.output.archive-name }}.md5
+        asset_path: ./dist/${{ steps.release.outputs.archive-name }}.md5
+        asset_name: ${{ steps.release.outputs.archive-name }}.md5
         asset_content_type: text/plain
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

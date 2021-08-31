@@ -93,7 +93,7 @@ if (($this->UserIsAdmin() && isset($_GET['print-debug']))
             $page = $browser->createPage();
             $page->navigate($sourceUrl)->waitForNavigation(HeadlessChromium\Page::NETWORK_IDLE);
 
-            $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue(20000);
+            $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue($this->config['page_load_timeout']);
 
             // now generate PDF
             $page->pdf(array(

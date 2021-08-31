@@ -1,23 +1,36 @@
 parameters:
-  htmltopdf_path: '/usr/bin/chromium'  # MacOs: /Applications/Chromium.app/Contents/MacOS/Chromium
+  htmltopdf_path: '/usr/bin/chromium'   # MacOs: /Applications/Chromium.app/Contents/MacOS/Chromium
   htmltopdf_service_url: ''             # Should be a complete url like https://example.org/yeswiki/?PagePrincipale/pdf
-  # Advanced
+  # duration before considering the pageload completed (60000ms = 1 minute)
+  page_load_timeout: 60000
+  # for edit config action
+  publication_editable_config_params:
+    - 'htmltopdf_service_url'
+
+  # Advanced Configuration
   # Has to comply with HeadlessChromium::createBrowser() options
-  # see https://github.com/chrome-php/headless-chromium-php#options
+  # See https://github.com/chrome-php/headless-chromium-php#options
   htmltopdf_options:
     windowSize: [1440, 780]
     noSandbox: true
     headless: true
     userAgent: 'YesWiki/4.0'
+    # maximum time to wait for the browser to start, before navigating to a page
+    startupTimeout: 30
+    # maximum time in ms to wait for synchronous messages to send to the browser
+    sendSyncDefaultTimeout: 10000
     customFlags:
     - '--crash-dumps-dir=/tmp'
+    # uncomment to view browser logs in PHP/Apache logs
     # debugLogger: 'php://stdout'
+
+  # Advanced Configuration
   # if you want to propose this website as a service for other domains
   htmltopdf_service_authorized_domains:
   #  - 'example.org'
   #  - 'another-one.com'
 
-  # ADVANCED SETUP
+  # Advanced Configuration
   # Configure this when the HTTP server does not have access to the YesWiki via its public URL.
   #
   # Eg, if Docker/base_url is https://example.com/? and Apache runs as http://localhost:8000,
@@ -25,7 +38,3 @@ parameters:
   # Use cases: reverse-proxy, within a YesWiki Docker container.
   htmltopdf_base_url: ~
   #htmltopdf_base_url: http://localhost:8000/?
-  #
-  # for edit config action
-  publication_editable_config_params:
-    - 'htmltopdf_service_url'

@@ -8,7 +8,7 @@ jobs:
 
     - name: Test and package the extension
       id: package
-      uses: oncletom/yeswiki-build-repo@feature/action
+      uses: docker://ghcr.io/oncletom/yeswiki-build-repo
 
     - name: Assess md5 and archive name
       run: |

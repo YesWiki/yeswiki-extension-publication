@@ -3,9 +3,6 @@ parameters:
   htmltopdf_service_url: ''             # Should be a complete url like https://example.org/yeswiki/?PagePrincipale/pdf
   # duration before considering the pageload completed (60000ms = 1 minute)
   page_load_timeout: 60000
-  # for edit config action
-  publication_editable_config_params:
-    - 'htmltopdf_service_url'
 
   # Advanced Configuration
   # Has to comply with HeadlessChromium::createBrowser() options

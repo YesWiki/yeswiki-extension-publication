@@ -16,9 +16,6 @@ jobs:
     - name: Test and package the extension
       id: release
       uses: oncletom/yeswiki-release-action@v1
-      with:
-        extension-name: yeswiki-extension-publication
-        extension-version: ${{ github.ref }}
 
     - name: Assess md5 and archive name
       run: |

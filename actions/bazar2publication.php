@@ -6,8 +6,6 @@ if (!defined("WIKINI_VERSION")) {
 
 global $wiki;
 
-include_once 'includes/squelettephp.class.php';
-
 $wiki->addCssFile('tools/publication/presentation/styles/publication.css');
 $wiki->addJavascriptFile('tools/publication/presentation/actions/bazar2publication.js');
 
@@ -20,8 +18,6 @@ $options = array(
 
 $publicationTemplate = $wiki->getParameter('templatepage') ? $wiki->loadPage($wiki->getParameter('templatepage')) : null;
 
-$template = new SquelettePhp('bazar2publication.tpl.html', 'publication');
-
 $queries = $_GET;
 //remove wiki
 if (array_key_exists('wiki', $queries)) {
@@ -33,8 +29,8 @@ $href = $wiki->Href('pdf', null, $queries// merge GET with wiki and following pa
     'template-page' => $wiki->getParameter('templatepage'),
 ));
 
-echo $template->render(array(
+echo $wiki->render('@publication/bazar2publication.twig', [
   'href' => $href,
   'options' => $options,
   'templatePage' => $publicationTemplate,
-));
+]);

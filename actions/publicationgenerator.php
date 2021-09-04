@@ -93,10 +93,7 @@ if (!$chapterCoverPages) {
 }
 
 // app display template
-$template = $this->getParameter('template');
-if (empty($template)) {
-    $template = 'exportpages_table.tpl.html';
-}
+$template = $this->getParameter('template', 'exportpages_table');
 
 // titles for groups
 $titles = $this->getParameter('titles');
@@ -339,13 +336,10 @@ if (isset($_POST["page"])) {
         $selectedPages = array();
     }
 
-    include_once 'includes/squelettephp.class.php';
-    $exportTemplate = new SquelettePhp($template, 'publication');
-
     $this->AddJavascriptFile('tools/publication/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
     $this->AddJavascriptFile('tools/publication/presentation/actions/publicationgenerator.js');
 
-    $output .= $exportTemplate->render(array(
+    $output .= $this->render('@publication/'.$template.'.twig', [
       'messages' => $messages,
       'entries' => $results,
       'areParamsReadonly' => $areParamsReadonly,
@@ -353,7 +347,7 @@ if (isset($_POST["page"])) {
       'publicationEnd' => $this->loadPage($publicationEnd),
       'addInstalledPages' => $addInstalledPages,
       'installedPageNames' => $installedPageNames,
-      'default' => $default,
+      'defaults' => $default,
       'ebookPageName' => $ebookPageName,
       'metaDatas' => $this->page["metadatas"],
       'selectedPages' => $selectedPages,
@@ -361,7 +355,7 @@ if (isset($_POST["page"])) {
       'url' => $this->href('', $this->GetPageTag()),
       'name' => $name,
       'outputFormat' => $outputFormat,
-    ));
+    ]);
 }
 
 echo $output . "\n";

@@ -1,0 +1,56 @@
+<div class="alert alert-info">
+  <p>{{ _t('PUBLICATION_SHOW_NOTICE') }}</p>
+</div>
+
+<div class="row yw-publication__show">
+  <div class="col-sm-8">
+    <div class="thumbnail">
+      <div class="caption">
+        {% if metadata['publication-cover-image'] %}
+          <img class="pull-right img-cover img-thumbnail" alt="" src="{{ metadata['publication-cover-image'] | raw }}">
+        {% endif %}
+
+        <h3>{{ metadata['publication-title'] }}</h3>
+
+        <p class="clearfix">{{ metadata['publication-description'] }}</p>
+
+        {% if hasWriteAccess %}
+        <p class="text-muted">
+          <small>
+            {{ metadata['publication-page-format'] }}
+            {{ _t('PUBLICATION_EBOOK_ORIENTATION_%s' | format(metadata['publication-page-orientation']| upper)) }}
+          </small>
+        </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-4">
+    <div class="btn-group-vertical" role="group" aria-label="">
+      <a href="{{ url({ handler: 'pdf', tag: page['tag'] }) }}" download type="application/pdf" class="btn btn-primary">
+        <i class="fas fa-book"></i>
+        {{ _t('PUBLICATION_VIEW_PDF') }}
+      </a>
+
+      {% if hasWriteAccess %}
+      <a href="{{ url({ handler: 'preview', tag: page['tag'] }) }}" class="btn btn-info btn-secondary">
+        <i class="fas fa-book-reader"></i>
+        {{ _t('PUBLICATION_PREVIEW') }}
+      </a>
+      {% endif %}
+
+      <a href="{{ url({ handler: 'share', tag: page['tag'] }) }}" class="btn btn-info btn-secondary modalbox">
+        <i class="fas fa-share-alt"></i>
+        {{ _t('TEMPLATE_SHARE') }}
+      </a>
+
+      {% if hasDeleteAccess %}
+      <a href="{{ url({ handler: 'deletepage', tag: page['tag'] }) }}" class="btn btn-danger link-deletepage modalbox">
+        <i class="fas fa-trash"></i>
+        {{ _t('TEMPLATE_DELETE') }}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>

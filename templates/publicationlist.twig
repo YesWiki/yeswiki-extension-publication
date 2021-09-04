@@ -1,0 +1,65 @@
+{% if pages|length == 0 %}
+
+<div class="alert alert-info">
+  {{ _t('PUBLICATION_NO_EBOOK_FOUND') }}
+</div>
+{% endif %}
+
+<ul class="media-list">
+{% for page in pages %}
+  {% set metas = page._metas %}
+  <li class="media" style="margin-bottom: 2em;">
+    <div class="media-left">
+      <a href="{{ url({ tag: page['resource'] }) }}" class="">
+        <img src="{{ metas['publication-cover-image'] }}" alt="" class="media-object" width="128">
+      </a>
+    </div>
+
+    <div class="media-body">
+      <h4 class="media-heading">
+        <a href="{{ url({ tag: page['resource']}) }}">{{ metas['publication-title'] }}</a>
+      </h4>
+
+      <p>
+        {% if metas['publication-author'] %}
+        Par {{ metas['publication-author'] }}<br>
+        {% endif %}
+        {{ metas['publication-description'] }}
+      </p>
+
+      {% if hasWriteAccess %}
+      <p class="text-muted">
+        <small>
+          {{ metas['publication-page-format'] }}
+          {{ _t('PUBLICATION_EBOOK_ORIENTATION_%s' | format(metas['publication-page-orientation'] | upper)) }}
+        </small>
+      </p>
+      {% endif %}
+
+      <div class="btn-group" role="group" aria-label="">
+        <a class="btn btn-xs btn-primary" href="{{ url({ handler: 'pdf', tag: page['resource'] }) }}">
+          <i class="fas fa-book"></i>&nbsp;
+          {{ _t('PUBLICATION_VIEW_PDF') }}
+        </a>
+
+        <a class="btn btn-xs btn-info" href="{{ url({ handler: 'preview', tag: page['resource'] }) }}">
+          <i class="fas fa-book-reader"></i>&nbsp;
+          {{ _t('PUBLICATION_PREVIEW') }}
+        </a>
+
+        <a href="{{ url({ handler: 'share', tag: page['resource'] }) }}" class="btn btn-xs btn-info btn-secondary modalbox">
+          <i class="fas fa-share-alt"></i>&nbsp;
+          {{ _t('TEMPLATE_SHARE') }}
+        </a>
+
+        {% if hasDeleteAccess %}
+        <a class="btn btn-xs btn-danger btn-error modalbox" href="{{ url({ handler: 'deletepage', tag: page['resource'] }) }}">
+          <i class="fas fa-trash"></i>&nbsp;
+          {{ _t('PUBLICATION_DELETE') }}
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </li>
+{% endfor %}
+</ul>

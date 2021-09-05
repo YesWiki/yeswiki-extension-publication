@@ -58,7 +58,7 @@ $(document).ready(function () {
     });
 
     $('.select-all').on('click', function() {
-        $(this).parent().next('.list-entries-to-export').find('.select-page-item').click();
+        $(this).parent().next('.list-entries-to-export').find('.select-page-item:visible').click();
         return false;
     });
 

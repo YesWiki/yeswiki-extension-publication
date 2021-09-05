@@ -13,16 +13,16 @@
  */
 
 use YesWiki\Bazar\Service\EntryManager;
+use YesWiki\Publication\Service\Publication;
 
 if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
 }
 
 $entryManager = $this->services->get(EntryManager::class);
+$publicationService = $this->services->get(Publication::class);
 
 include_once 'tools/tags/libs/tags.functions.php';
-
-$this->addCssFile('tools/publication/presentation/styles/publication.css');
 
 // Format of the output. Either you want to generate an ebook or a newsletter
 // Default value is ebook
@@ -30,7 +30,7 @@ $name = _t('PUBLICATION_EBOOK');
 $outputFormat = $this->getParameter('outputformat', 'Ebook');
 $messages = [];
 
-if ($outputFormat === 'newsletter') {
+if (strcasecmp($outputFormat, 'newsletter') === 0) {
     $formId = $this->getParameter('formid'); // Bazar form used to store the newsletter
     if (empty($formId)) {
         exit(_t('PUBLICATION_MISSING_NEWSLETTER_FORM'));
@@ -60,23 +60,20 @@ $publicationEnd = $this->getParameter('pageend');
 
 // prefix for created pages
 // Only used when outputformat="ebook"
-$ebookPageNamePrefix = $this->getParameter('pagenameprefix', 'Ebook');
+$ebookPageNamePrefix = $this->getParameter('pagenameprefix', 'ebook');
 
 // include default pages in page listing ?
 $addInstalledPages = $this->getParameter('addinstalledpage');
 
-// default publication cover
-$default = [];
-$default['coverimage'] = $this->getParameter('coverimage');
-
-// default publication title
-$default['title'] = $this->getParameter('title');
-
-// default publication description
-$default['desc'] = $this->getParameter('desc');
-
-// default publication author
-$default['author'] = $this->getParameter('author');
+// defaults from the action
+$defaults = [
+  "publication-cover-image" => $this->getParameter('coverimage'),
+  "publication" => [
+    "title" => $this->getParameter('title'),
+    "description" => $this->getParameter('desc'),
+    "authors" => $this->getParameter('author') ?: $this->getParameter('authors'),
+  ]
+];
 
 // default added pages that can be used to separate content
 $chapterCoverPages = $this->getParameter('chapterpages');
@@ -91,9 +88,6 @@ if (!$chapterCoverPages) {
     }
     $chapterCoverPages = $a;
 }
-
-// app display template
-$template = $this->getParameter('template', 'exportpages_table');
 
 // titles for groups
 $titles = $this->getParameter('titles');
@@ -206,16 +200,22 @@ $output = '';
 
 // Handling of data submitted by the form
 // Page creation
-if (isset($_POST["page"])) {
-    do { // use of a do-while loop in order to allow for breaks (in case of errors)
+
+if (isset($_POST) && count($_POST)) {
+  do { // use of a do-while loop in order to allow for breaks (in case of errors)
         if (!isset($_POST['antispam']) || $_POST['antispam'] != 1) {
             // There may be a spamming problem
-            $output = '<div class="alert alert-danger">' . _t('PUBLICATION_SPAM_RISK') . '</div>' . "\n";
+            array_push($messages, array('danger', _t('PUBLICATION_SPAM_RISK')));
             break; // Stops the current do-while loop
         }
-        if (!isset($_POST["publication-title"]) || $_POST["publication-title"] == '') {
+        if (!isset($_POST["page"]) || count($_POST["page"]) === 0) {
+            // There is no page selected
+            array_push($messages, array('danger', _t('PUBLICATION_NO_PAGE_FOUND')));
+            break; // Stops the current do-while loop
+        }
+        if (!isset($_POST["publication"]["title"]) || trim($_POST["publication"]["title"]) === '') {
             // There is no publication-title
-            $output = '<div class="alert alert-danger">' . _t('PUBLICATION_NO_TITLE_FOUND') . '</div>' . "\n";
+            array_push($messages, array('danger', _t('PUBLICATION_NO_TITLE_FOUND')));
             break; // Stops the current do-while loop
         }
 
@@ -231,7 +231,7 @@ if (isset($_POST["page"])) {
                 if (isset($ebookPageName) && !empty($ebookPageName)) {
                     $pageName = $ebookPageName;
                 } else {
-                    $pageName = generatePageName($ebookPageNamePrefix . ' ' . $_POST["publication-title"]);
+                    $pageName = generatePageName($ebookPageNamePrefix . ' ' . $_POST["publication"]["title"]);
                 }
 
 
@@ -267,7 +267,7 @@ if (isset($_POST["page"])) {
                     $output = $this->Format('""<div class="alert alert-danger alert-error">' . _t('PUBLICATION_EBOOK_PAGE_CREATION_FAILED') . '.""' . "\n" . '{{button class="btn-primary" link="' . $this->GetPageTag() . '" text="' . _t('PUBLICATION_GOTO_EBOOK_CREATION_PAGE') . ' ' . $this->GetPageTag() . '"}}""</div>""' . "\n");
                 }
             } while (false); // end of ebook specific loop
-        } elseif (strcasecmp($outputFormat, 'newsletter') == 0) { // We want to produce a newsletter
+        } elseif (strcasecmp($outputFormat, 'newsletter') === 0) { // We want to produce a newsletter
             $fiche['id_typeannonce'] = $formId;
             $fiche['bf_titre'] = $_POST["publication-title"];
             $fiche['bf_description'] = $_POST["publication-description"];
@@ -296,66 +296,64 @@ if (isset($_POST["page"])) {
             array_push($messages, array('success', _t('PUBLICATION_NEWSLETTER_CREATED')));
         }
     } while (false); // End of global do-while loop
-} else { // Not isset($_POST["page"])
-    // recuperation des pages creees a l'installation
-    $installedPageNames = [];
-    if (!empty($addInstalledPages)) {
-        $d = dir("setup/doc/");
-        while ($doc = $d->read()) {
-            if ($doc == '.' || $doc == '..' || is_dir($doc) || substr($doc, -4) != '.txt') {
-                continue;
-            }
-
-            if ($doc == '_root_page.txt') {
-                $installedPageNames[$this->GetConfigValue("root_page")] = $this->GetConfigValue("root_page");
-            } else {
-                $pageName = substr($doc, 0, strpos($doc, '.txt'));
-                $installedPageNames[$pageName] = $pageName;
-            }
-        }
-    }
-
-    if (isset($this->page["metadatas"]["publication-title"])) {
-        $ebookPageName = $this->GetPageTag();
-        preg_match_all('/{{include page="(.*)".*}}/Ui', $this->page['body'], $matches);
-        $publicationStart = $matches[1][0];
-        $last = count($matches[1]) - 1;
-        $publicationEnd = $matches[1][$last];
-        unset($matches[1][0]);
-        unset($matches[1][$last]);
-        foreach ($matches[1] as $key => $value) {
-            $pagesFiltre = filter_by_value($results, 'tag', $value);
-            $selectedPages[] = array_shift($pagesFiltre);
-            $key = array_keys($pagesFiltre);
-            if ($key && isset($pages[$key[0]])) {
-                unset($pages[$key[0]]);
-            }
-        }
-    } else {
-        $ebookPageName = '';
-        $selectedPages = array();
-    }
-
-    $this->AddJavascriptFile('tools/publication/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
-    $this->AddJavascriptFile('tools/publication/presentation/actions/publicationgenerator.js');
-
-    $output .= $this->render('@publication/'.$template.'.twig', [
-      'messages' => $messages,
-      'entries' => $results,
-      'areParamsReadonly' => $areParamsReadonly,
-      'publicationStart' => $this->loadPage($publicationStart),
-      'publicationEnd' => $this->loadPage($publicationEnd),
-      'addInstalledPages' => $addInstalledPages,
-      'installedPageNames' => $installedPageNames,
-      'defaults' => $default,
-      'ebookPageName' => $ebookPageName,
-      'metaDatas' => $this->page["metadatas"],
-      'selectedPages' => $selectedPages,
-      'chapterCoverPages' => $chapterCoverPages,
-      'url' => $this->href('', $this->GetPageTag()),
-      'name' => $name,
-      'outputFormat' => $outputFormat,
-    ]);
 }
 
-echo $output . "\n";
+// recuperation des pages creees a l'installation
+$installedPageNames = [];
+if (!empty($addInstalledPages)) {
+    $d = dir("setup/doc/");
+    while ($doc = $d->read()) {
+        if ($doc == '.' || $doc == '..' || is_dir($doc) || substr($doc, -4) != '.txt') {
+            continue;
+        }
+
+        if ($doc == '_root_page.txt') {
+            $installedPageNames[$this->GetConfigValue("root_page")] = $this->GetConfigValue("root_page");
+        } else {
+            $pageName = substr($doc, 0, strpos($doc, '.txt'));
+            $installedPageNames[$pageName] = $pageName;
+        }
+    }
+}
+
+if (isset($this->page["metadatas"]["publication-title"])) {
+    $ebookPageName = $this->GetPageTag();
+    preg_match_all('/{{include page="(.*)".*}}/Ui', $this->page['body'], $matches);
+    $publicationStart = $matches[1][0];
+    $last = count($matches[1]) - 1;
+    $publicationEnd = $matches[1][$last];
+    unset($matches[1][0]);
+    unset($matches[1][$last]);
+    foreach ($matches[1] as $key => $value) {
+        $pagesFiltre = filter_by_value($results, 'tag', $value);
+        $selectedPages[] = array_shift($pagesFiltre);
+        $key = array_keys($pagesFiltre);
+        if ($key && isset($pages[$key[0]])) {
+            unset($pages[$key[0]]);
+        }
+    }
+} else {
+    $ebookPageName = '';
+    $selectedPages = array();
+}
+
+$this->addCssFile('tools/publication/presentation/styles/publication.css');
+$this->AddJavascriptFile('tools/publication/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
+$this->AddJavascriptFile('tools/publication/presentation/actions/publicationgenerator.js');
+
+echo $this->render('@publication/publicationgenerator.twig', [
+  'messages' => $messages,
+  'entries' => $results,
+  'areParamsReadonly' => $areParamsReadonly,
+  'publicationStart' => $this->loadPage($publicationStart),
+  'publicationEnd' => $this->loadPage($publicationEnd),
+  'addInstalledPages' => $addInstalledPages,
+  'installedPageNames' => $installedPageNames,
+  'ebookPageName' => $ebookPageName,
+  'metadatas' => $publicationService->getOptions($defaults, $_POST, $this->page["metadatas"] ?: []),
+  'selectedPages' => $selectedPages,
+  'chapterCoverPages' => $chapterCoverPages,
+  'url' => $this->href('', $this->GetPageTag()),
+  'name' => $name,
+  'outputFormat' => $outputFormat,
+]);

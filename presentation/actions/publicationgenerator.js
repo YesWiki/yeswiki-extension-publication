@@ -112,4 +112,16 @@ $(document).ready(function () {
         // Update the count
         filtercount.text(`Nombre de pages : ${count}`);
     });
+
+    /* Display ebook publication options (book, fanzine) */
+    $('[name="publication-mode"]').on('change', function (event) {
+      var mode = event.target.value
+      var $options = $('details.publication-options')
+
+      $options.not(`.options-${mode}`).attr('hidden', true)
+      $options.filter(`.options-${mode}`).removeAttr('hidden')
+    })
+
+    var mode = $('[name="publication-mode"][checked]').val()
+    $('details.publication-options').filter(`.options-${mode}`).removeAttr('hidden')
 });

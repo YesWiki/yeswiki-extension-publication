@@ -4,9 +4,11 @@ use YesWiki\Bazar\Controller\EntryController;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Core\Service\PageManager;
 use YesWiki\Core\Service\TemplateEngine;
+use YesWiki\Publication\Service\Publication;
 
 global $wiki;
 
+$publicationService = $this->services->get(Publication::class);
 $publication = null;
 
 $entryManager = $wiki->services->get(EntryManager::class);
@@ -14,37 +16,41 @@ $entryController = $wiki->services->get(EntryController::class);
 $templateEngine = $wiki->services->get(TemplateEngine::class);
 
 /**
- * We print bazar list results
+ * Print from {{ bazar2publication }} (dynamic results)
  */
 if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarliste') {
-    // we assemble bazar pages
-    $content = '';
-    $templateName = 'rendered-entries.tpl.html';
-    if (!$templateEngine->hasTemplate('@bazar/'.$templateName)) {
-        // backward compatibilty
-        preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
-        list(, $formId) = $matches;
+  // we assemble bazar pages
+  $content = '';
+  $templateName = 'rendered-entries.tpl.html';
+  if (!$templateEngine->hasTemplate('@bazar/'.$templateName)) {
+      // backward compatibilty
+      preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
+      list(, $formId) = $matches;
 
-        $query = isset($_GET['query']) ? $_GET['query'] : '';
+      $query = isset($_GET['query']) ? $_GET['query'] : '';
 
-        $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
+      $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
 
-        $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
-            return $html . $entryController->view($fiche);
-        }, '');
-    } elseif (preg_match('/({{(bazarliste|bazarcarto|calendrier|map|gogomap)\s[^}]*}})/i', $wiki->page['body'], $matches)) {
-        $actionText = $matches[1];
-        $actionName = $matches[2];
-        $matches = [];
-        $params = [];
-        if (preg_match_all('/([a-zA-Z0-9_]*)=\"(.*)\"/U', $actionText, $matches)) {
-            foreach ($matches[0] as $id => $match) {
-                $params[$matches[1][$id]] = $matches[2][$id];
-            }
-            // redefine template
-            $params['template'] = $templateName;
-            $content = $this->Action($actionName, 0, $params);
-        }
+      $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
+          return $html . $entryController->view($fiche);
+      }, '');
+  }
+  /**
+   * Print from page, but render its {{ bazar* }} elements
+   */
+  elseif (preg_match('/({{(bazarliste|bazarcarto|calendrier|map|gogomap)\s[^}]*}})/i', $wiki->page['body'], $matches)) {
+      $actionText = $matches[1];
+      $actionName = $matches[2];
+      $matches = [];
+      $params = [];
+      if (preg_match_all('/([a-zA-Z0-9_]*)=\"(.*)\"/U', $actionText, $matches)) {
+          foreach ($matches[0] as $id => $match) {
+              $params[$matches[1][$id]] = $matches[2][$id];
+          }
+          // redefine template
+          $params['template'] = $templateName;
+          $content = $this->Action($actionName, 0, $params);
+      }
     }
 
     // we gather a few things from
@@ -67,10 +73,10 @@ if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarli
         }
     }
 
-    $publication = array(
-    'metadatas' => isset($templatePage) ? $templatePage['metadatas'] : array(),
-    'content' => $content
-  );
+    $publication = [
+      'metadatas' => isset($templatePage) ? $templatePage['metadatas'] : array(),
+      'content' => $content
+    ];
 }
 
 /**
@@ -110,31 +116,31 @@ $publication['content'] = preg_replace('#<div class="clearfix"></div><div class=
  */
 
 if ($publication) {
+    // user  options
+    $metadatas = $publicationService->getOptions($publication['metadatas'] ?? [], isset($_GET['layout'])
+     ? [ "publication-fanzine" => ["layout" => $_GET['layout'] ] ]
+     : []
+    );
+
+    //
+    if (!$publicationService->isMode($metadatas['publication-mode'])) {
+      //TODO turn into template
+      return 'Mode inconnu';
+    }
+
     // Load the cascade of publication styles
     $cssFiles = array_merge(
+      glob('tools/publication/presentation/styles/print-layouts/'.$metadatas['publication-mode'].'.css'),
       glob('tools/publication/presentation/styles/*.css'),
       glob('themes/'.$wiki->config['favorite_theme'].'/tools/publication/*.css'),
+      glob('themes/'.$wiki->config['favorite_theme'].'/tools/publication/print-layouts/'.$metadatas['publication-mode'].'.css'),
       glob('custom/tools/publication/*.css'),
+      glob('custom/tools/publication/print-layouts/'.$metadatas['publication-mode'].'.css'),
     );
 
     array_map(function($file) use ($wiki) {
       $wiki->AddCSSFile($file);
     }, $cssFiles);
-
-    // user  options
-    $options = array(
-        "publication-hide-links-url" => '1',
-        "publication-cover-image" => '',
-        "publication-cover-page" => '0',
-        "publication-book-fold" => '0',
-        "publication-page-format" => 'A4',
-        "publication-page-orientation" => 'portrait',
-        "publication-pagination" => "bottom-center",
-        "publication-print-marks" => '0',
-    );
-
-    $metadatas = array_merge($options, $publication['metadatas'] ?? []);
-    $blankpage = $wiki->Format('{{blankpage}}');
 
     // cover image
     $coverImage = '';
@@ -150,8 +156,10 @@ if ($publication) {
         }
     }
 
+    $blankpage = $wiki->Format('{{blankpage}}');
+
     // build the preview/printing page
-    $output = $templateEngine->render('@publication/print-preview.twig', [
+    $output = $templateEngine->render('@publication/print-layouts/'.$metadatas['publication-mode'].'.twig', [
         "baseUrl" => $wiki->getBaseUrl(),
         "blankpage" => $blankpage,
         "content" => $publication['content'],
@@ -159,24 +167,9 @@ if ($publication) {
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
         "metadatas" => $metadatas,
         "styles" => $wiki->Format('{{linkstyle}}{{linkjavascript}}'),
-        "stylesModifiers" => [
-            "yeswiki-publication",
-            $wiki->config['debug'] === 'yes' ? 'debug' : '',
-            // could be chosen, when creating an eBook
-            "page-format--" . $metadatas['publication-page-format'],
-            // could be chosen when creating an eBook
-            "page-orientation--" . $metadatas['publication-page-orientation'],
-            // OPTION book-cover
-            $metadatas['publication-cover-page'] === '1' ? "book-cover" : '',
-            // OPTION book-fold
-            $metadatas['publication-book-fold'] === '1' ? "book-fold" : '',
-            // OPTION show-print-marks
-            $metadatas['publication-print-marks'] === '1' ? "show-print-marks" : '',
-            // OPTION show-print-marks
-            "page-number-position--" . $metadatas['publication-pagination'],
-            // OPTION hide-links-from-print
-            $metadatas['publication-hide-links-url'] === '1' ? "hide-links-url" : '',
-        ],
+        //
+        "initialPublicationState" => $publicationService->isPaged($metadatas['publication-mode']) ?: 'ready',
+        "stylesModifiers" => $publicationService->getStyles($metadatas, ['debug' => $wiki->config['debug']]),
     ]);
 
     // Insert a blank page after a cover page

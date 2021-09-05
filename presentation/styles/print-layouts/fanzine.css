@@ -1,0 +1,83 @@
+@page {
+  size: landscape;
+  margin: 0;
+  bleed: 0;
+}
+
+html.html-publication {
+  font-size: 55% !important;
+}
+
+body.publication--fanzine {
+  font-size: 1rem !important
+}
+
+/** SINGLE FILE */
+/* fanzine wrapper */
+.fanzine-single-page .fanzine {
+  width: 100vw;
+  height: calc(100vh - 2px);
+  display: grid;
+  gap: 1px;
+  background: lightgrey !important;
+  grid-template-areas:
+    "page-5 page-4 page-3 page-2"
+    "page-6 page-7 page-8 page-1";
+}
+
+  /* page */
+  .fanzine-single-page .fanzine > * {
+    background: white !important;
+    overflow: hidden;
+  }
+
+  .fanzine-single-page .fanzine > :nth-child(1) {
+    grid-area: page-1;
+  }
+  .fanzine-single-page .fanzine > :nth-child(2) {
+    grid-area: page-2;
+  }
+  .fanzine-single-page .fanzine > :nth-child(3) {
+    grid-area: page-3;
+  }
+  .fanzine-single-page .fanzine > :nth-child(4) {
+    grid-area: page-4;
+  }
+  .fanzine-single-page .fanzine > :nth-child(5) {
+    grid-area: page-5;
+  }
+  .fanzine-single-page .fanzine > :nth-child(6) {
+    grid-area: page-6;
+  }
+  .fanzine-single-page .fanzine > :nth-child(7) {
+    grid-area: page-7;
+  }
+  .fanzine-single-page .fanzine > :nth-child(8) {
+    grid-area: page-8;
+  }
+
+  .fanzine-single-page .fanzine > :nth-child(5),
+  .fanzine-single-page .fanzine > :nth-child(4),
+  .fanzine-single-page .fanzine > :nth-child(3),
+  .fanzine-single-page .fanzine > :nth-child(2) {
+    transform: rotate(180deg) translateX(-0.25px);
+  }
+
+/** */
+.fanzine-recto-folio .fanzine {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: lightgrey !important;
+}
+
+  .fanzine-recto-folio .fanzine > * {
+    background: white !important;
+    overflow: hidden;
+    height: calc(100vh - 2px);
+  }
+  .fanzine-recto-folio .fanzine > :nth-child(2n) {
+    page-break-after: always;
+  }
+
+

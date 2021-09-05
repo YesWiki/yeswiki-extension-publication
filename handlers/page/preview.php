@@ -133,7 +133,7 @@ if ($publication) {
         "publication-print-marks" => '0',
     );
 
-    $metadatas = array_merge($options, $publication['metadatas']);
+    $metadatas = array_merge($options, $publication['metadatas'] ?? []);
     $blankpage = $wiki->Format('{{blankpage}}');
 
     // cover image

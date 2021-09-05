@@ -1,0 +1,5 @@
+<div class="alert alert-info">
+  <p>{{ _t('PUBLICATION_SHOW_NOTICE') }}</p>
+</div>
+
+{% include '@publication/includes/publication.twig' with { 'metas': metadata, 'tag': page.resource } %}

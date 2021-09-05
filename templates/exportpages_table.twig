@@ -1,0 +1,275 @@
+{% if messages is not empty %}
+<section class="messages">
+  {% for message in messages %}
+  <div class="alert alert-{{ message[0] }}">
+    {{ message[1] }}
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+<div class="row row-fluid">
+	<div class="col-lg-4 export-table-container">
+		<h3>{{ _t('PUBLICATION_AVAILABLE_PAGES') }}</h3>
+		<div class="input-group input-prepend input-append">
+			<span class="input-group-addon add-on"><i class="fas fa-filter"></i></span>
+			<input class="form-control" type="text" id="filter" value="" placeholder="{{ _t('PUBLICATION_FILTER_PAGES') }}">
+			<span class="input-group-btn add-on">
+				<button class="btn btn-default btn-erase-filter" type="button" aria-label="Empty filter">
+          <i class="fas fa-times"></i>
+        </button>
+			</span>
+		</div><!-- /input-group -->
+    <span id="filter-count" class="help-block align-right"></span>
+
+  {% if chapterCoverPages is not empty %}
+  <section class="page-groups">
+    <h4>{{ _t('PUBLICATION_CHAPTERS') }}
+      <a class="pull-right btn btn-xs btn-success select-all" title="{{ _t('PUBLICATION_ADD_ALL') }}" href="#">
+        <i class="fas fa-plus"></i>
+        {{ _t('PUBLICATION_ADD_ALL') }}
+      </a>
+    </h4>
+    <ul class="list-entries-to-export group-chapters list-group">
+    </ul>
+  </section>
+  {% endif %}
+
+  {% for nb,form in entries %}
+  <section class="page-groups">
+    <h4>{{ form.name }}
+      <a class="pull-right btn-xs btn-success select-all" title="{{ _t('PUBLICATION_ADD_ALL') }}" href="#">
+        <i class="fas fa-plus"></i>
+        {{ _t('PUBLICATION_ADD_ALL') }}
+      </a>
+    </h4>
+    <ul class="list-entries-to-export group-{{ nb }} list-group">
+      {% for page in form['entries'] %}
+      {% if form['type'] == 'pages' %}
+      <li class="list-group-item">
+        <a class="pull-right btn btn-sm btn-success select-page-item" title="{{ _t('PUBLICATION_SELECT_PAGE') }} {{ page['tag'] }} {{ _t('PUBLICATION_FOR_THE_EBOOK') }}" href="#">
+          <i class="fas fa-plus"></i>
+        </a>
+        <a class="hide pull-right btn btn-danger remove-page-item" title="{{ _t('PUBLICATION_DELETE_PAGE') }} {{ page['tag'] }} {{ _t('PUBLICATION_FROM_THE_EBOOK') }}" href="#" data-group="{{ nb }}">
+          <i class="fas fa-trash"></i>
+        </a>
+        <span class="hide movable"><i class="fas fa-arrows-alt-v"></i></span>
+        <a class="btn btn-default btn-sm view-page-item modalbox" data-size="modal-lg" title="{{ _t('PUBLICATION_SEE_PAGE') }} {{ page['tag'] }}" href="{{ url({ handler: 'html', tag: page['tag'] }) }}">
+          <i class="fas fa-eye"></i>
+        </a>
+        <input type="hidden" name="page[]" value="{{ page['tag'] }}" />
+        <span class="page-label">{{ page['tag'] }}</span>
+      </li>
+      {% elseif form['type'] == 'bazar' %}
+      <li class="list-group-item">
+        <a class="pull-right btn btn-sm btn-success select-page-item" title="{{ _t('PUBLICATION_SELECT_PAGE') }} {{ page['id_fiche'] }} {{ _t('PUBLICATION_FOR_THE_EBOOK') }}" href="#">
+          <i class="fas fa-plus"></i>
+        </a>
+        <a class="hide pull-right btn btn-sm btn-danger remove-page-item" title="{{ _t('PUBLICATION_DELETE_PAGE') }} {{ page['id_fiche'] }} {{ _t('PUBLICATION_FROM_THE_EBOOK') }}" href="#" data-group="{{ nb }}">
+          <i class="fas fa-trash"></i>
+        </a>
+        <span class="hide movable"><i class="fas fa-arrows-alt-v"></i></span>
+        <a class="btn btn-default btn-sm view-page-item modalbox" data-size="modal-lg" title="{{ _t('PUBLICATION_SEE_PAGE') }} {{ page['id_fiche'] }}" href="{{ url({ handler: 'html', tag: page['id_fiche'] }) }}">
+          <i class="fas fa-eye"></i>
+        </a>
+        <input type="hidden" name="page[]" value="{{ page['id_fiche'] }}">
+        <span class="page-label">{{ page['bf_titre'] }}</span>
+      </li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+  </section>
+	{% endfor %}
+	</div><!-- /.col-lg-4.export-table-container -->
+
+	<div class="col-lg-8">
+    <button class="btn btn-primary btn-sm page-break pull-right" data-label="{{ _t('PUBLICATION_BLANK_PAGE') }}"
+      title="{{ _t('PUBLICATION_INSERT_BLANK_PAGE') }}">
+      <i class="fas fa-plus"></i>
+      {{ _t('PUBLICATION_INSERT_BLANK_PAGE') }}
+    </button>
+
+		<h3>{{ _t('PUBLICATION_YOUR') }} {{ name }}</h3>
+
+		<div class="well">
+			<form class="export-table-form" method="post" action="{{ url | raw }}">
+			  {% if publicationStart is not empty %}
+				<ul class="list-group">
+					<li class="list-group-item list-group-item-info">
+						<a class="btn btn-default btn-sm view-page-item modalbox" title="{{ _t('PUBLICATION_SEE_PAGE') }} {{ publicationStart }}" href="{{ url({ handler: 'html', tag: publicationStart['tag'] }) }}">
+							<i class="fas fa-eye"></i>
+						</a>
+						<input type="hidden" name="page[]" value="{{ publicationStart['tag'] }}?type=publication-start">
+            <span class="page-label">{{ _t('PUBLICATION_START_PAGE') }}</span>
+            <span class="page-label-suffix">({{ publicationStart['tag'] }})</span>
+					</li>
+				</ul>
+			  {% endif %}
+
+				<ul id="publication-selection-container" class="list-group">
+				{% if chapterCoverPages is not empty %}
+					{% for page in chapterCoverPages %}
+						<li class="list-group-item list-group-item-info">
+              {% if areParamsReadonly != true %}
+              <button class="hide pull-right btn btn-sm btn-success select-page-item"
+                title="{{ _t('PUBLICATION_SELECT_PAGE') }} {{ page['tag'] }} {{ _t('PUBLICATION_FOR_THE_EBOOK') }}" data-group="chapters">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button class="pull-right btn btn-danger btn-sm btn-danger remove-page-item"
+                title="{{ _t('PUBLICATION_DELETE_PAGE') }} {{ page['tag'] }} {{ _t('PUBLICATION_FROM_THE_EBOOK') }}" data-group="chapters">
+                <i class="fas fa-trash"></i>
+              </button>
+              {% endif %}
+
+							<span class="movable"><i class="fas fa-arrows-alt-v"></i></span>
+							<a class="btn btn-default btn-sm view-page-item modalbox" title="{{ _t('PUBLICATION_SEE_PAGE') }} {{ page['tag'] }}" href="{{ url({ handler: 'html', tag: page['tag'] }) }}">
+								<i class="fas fa-eye"></i>
+							</a>
+							<input type="hidden" name="page[]" value="{{ page['tag'] }}?class=publication-chapter" />
+              <span class="page-label">{{ page['tag'] }}</span>
+						</li>
+					{% endfor %}
+				{% else %}
+				{% for page in selectedPages %}
+					<li class="list-group-item">
+						<button class="pull-right btn btn-danger btn-xs btn-danger remove-page-item" title="{{ _t('PUBLICATION_DELETE_PAGE') }} {{ page['tag'] }} {{ _t('PUBLICATION_FROM_THE_EBOOK') }}">
+							<i class="fas fa-trash"></i>
+						</button>
+						<span class="movable"><i class="fas fa-arrows-alt-v"></i></span>
+						<a class="btn btn-default btn-sm view-page-item modalbox" title="{{ _t('PUBLICATION_SEE_PAGE') }} {{ page['tag'] }}" href="{{ url({ handler: 'html', tag: page['tag'] }) }}">
+							<i class="fas fa-eye"></i>
+						</a>
+						<input type="hidden" name="page[]" value="{{ page['tag'] }}" />
+            <span class="page-label">{{ page['tag'] }}</span>
+					</li>
+				{% endfor %}
+				{% endif %}
+        </ul>
+
+			{% if publicationEnd is not empty %}
+				<ul class="list-group">
+					<li class="list-group-item list-group-item-info">
+						<a class="btn btn-default btn-sm view-page-item modalbox" title="{{ _t('PUBLICATION_SEE_PAGE') }} PageEbookFin" href="{{ url({ handler: 'html', tag: publicationEnd['tag'] }) }}">
+							<i class="fas fa-eye"></i>
+						</a>
+						<input type="hidden" name="page[]" value="{{ publicationEnd['tag'] }}?type=publication-end" />
+            <span class="page-label">{{ _t('PUBLICATION_END_PAGE') }}</span>
+            <span class="page-label-suffix">({{ publicationEnd['tag'] }})</span>
+					</li>
+				</ul>
+      {% endif %}
+
+				<div class="form-group">
+					<label for="publication-title" class="control-label">{{ _t('PUBLICATION_EBOOK_TITLE') }}<span aria-label="{{ _t('PUBLICATION_MANDATORY_FIELD') }}">*</span></label>
+					<div class="controls">
+            {% if areParamsReadonly %}
+              <input type="hidden" required id="publication-title" name="publication-title" value="{{ metadatas['publication-title'] | default(defaults['title']) }}">
+            {% endif %}
+
+            <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="text" required="required" placeholder="{{ _t('PUBLICATION_EBOOK_TITLE') }}" id="publication-title" name="publication-title" value="{{ metadatas['publication-title'] | default(defaults['title']) }}">
+					</div>
+				</div>
+
+        <div class="form-group">
+          <label for="publication-description" class="control-label">{{ _t('PUBLICATION_EBOOK_DESC') }}</label>
+          <div class="controls">
+            {% if areParamsReadonly %}
+              <input type="hidden" required id="publication-description" name="publication-description" value="{{ metadatas['publication-description'] | default(defaults['desc']) }}">
+            {% endif %}
+
+            <textarea {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" placeholder="{{ _t('PUBLICATION_EBOOK_DESC') }}" id="publication-description" name="publication-description">{{ metadatas['publication-description'] | default(defaults['desc']) }}</textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="publication-author" class="control-label">{{ _t('PUBLICATION_EBOOK_AUTHOR') }}</label>
+          <div class="controls">
+            {% if areParamsReadonly %}
+              <input type="hidden" required id="publication-author" name="publication-author" value="{{ metadatas['publication-author'] | default(defaults['author']) }}">
+            {% endif %}
+
+            <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="text" placeholder="{{ _t('PUBLICATION_EXAMPLE_AUTHOR') }}" id="publication-author" name="publication-author" value="{{ metadatas['publication-author'] | default(defaults['author']) }}">
+          </div>
+        </div>
+
+				{% if outputFormat|lower == 'ebook' or defaults['coverimage'] is not empty %}
+				<div class="form-group">
+					<label for="publication-cover-image" class="control-label">{{ _t('PUBLICATION_EBOOK_COVER_IMAGE') }}</label>
+					<div class="controls">
+            {% if areParamsReadonly %}
+              <input type="hidden" required id="publication-cover-image" name="publication-cover-image" value="{{ metadatas['publication-cover-image'] | default(defaults['coverimage']) }}">
+            {% endif %}
+
+            <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="url" placeholder="http://" id="publication-cover-image" name="publication-cover-image" value="{{ metadatas['publication-cover-image'] | default(defaults['coverimage']) }}">
+					</div>
+				</div>
+        {% endif %}
+
+        <details>
+          <summary>{{ _t('PUBLICATION_MORE_OPTIONS') }}</summary>
+
+          <div class="form-row">
+            <div class="form-group">
+              <input type="checkbox" class="form-check-input" name="publication-cover-page" value="1" {{ publicationStart ? 'disabled' : 'checked' }} id="publication-cover-page">
+              <label for="publication-cover-page" class="control-label">{{ _t('PUBLICATION_EBOOK_COVER_PAGE') }}</label>
+              <small class="form-text text-muted">{{ publicationStart ? _t('PUBLICATION_EBOOK_COVER_PAGE_WITH_PUBLICATION_START_HELP') : _t('PUBLICATION_EBOOK_COVER_PAGE_HELP') }}</small>
+            </div>
+            <div class="form-group">
+              <input type="checkbox" class="form-check-input" name="publication-book-fold" value="1" id="publication-book-fold">
+              <label for="publication-book-fold" class="control-label">{{ _t('PUBLICATION_EBOOK_FOLD') }}</label>
+              <small class="form-text text-muted">{{ _t('PUBLICATION_EBOOK_FOLD_HELP') }}</small>
+            </div>
+            <div class="form-group">
+              <input type="checkbox" class="form-check-input" name="publication-print-marks" value="1" id="publication-print-marks">
+              <label for="publication-print-marks" class="control-label">{{ _t('PUBLICATION_EBOOK_DISPLAY_PRINT_MARKS') }}</label>
+              <small class="form-text text-muted">{{ _t('PUBLICATION_EBOOK_DISPLAY_PRINT_MARKS_HELP') }}</small>
+            </div>
+          </div>
+
+          <div class="form-row clearfix">
+            <div class="form-group col-md-6">
+              <label for="publication-page-format" class="control-label">{{ _t('PUBLICATION_EBOOK_FORMAT') }}</label>
+              <select class="form-control" name="publication-page-format" id="publication-page-format">
+                <option value="A3">A3</option>
+                <option value="A4" selected>A4</option>
+                <option value="A5">A5</option>
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="publication-page-orientation"
+                class="control-label">{{ _t('PUBLICATION_EBOOK_ORIENTATION') }}</label>
+              <select class="form-control" name="publication-page-orientation">
+                <option value="portrait" selected>{{ _t('PUBLICATION_EBOOK_ORIENTATION_PORTRAIT') }}</option>
+                <option value="landscape">{{ _t('PUBLICATION_EBOOK_ORIENTATION_LANDSCAPE') }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="d-block" for="publication-pagination--bottom-center">{{ _t('PUBLICATION_PAGINATION_POSITION') }}</label>
+
+            <label class="radio-inline">
+              <input type="radio" id="publication-pagination--none" name="publication-pagination" value="none">
+              {{ _t('PUBLICATION_PAGINATION_NONE') }}
+            </label>
+            <label class="radio-inline">
+              <input type="radio" id="publication-pagination--bottom-center" name="publication-pagination" value="bottom-center" checked>
+              {{ _t('PUBLICATION_PAGINATION_BOTTOM_CENTER') }}
+            </label>
+            <label class="radio-inline">
+              <input type="radio" id="publication-pagination--bottom-sides" name="publication-pagination" value="bottom-sides">
+              {{ _t('PUBLICATION_PAGINATION_BOTTOM_SIDES') }}
+            </label>
+          </div>
+        </details>
+
+				{% if ebookPageName is not empty %}
+          <input name="ebookpagename" value="{{ ebookPageName }}">
+        {% endif %}
+				<br />
+				<input type="hidden" value="{{ outputFormat }}" name="outputformat">
+				<input type="submit" value="{{ _t('PUBLICATION_GENERATE') }} {{ name }}" class="btn btn-block btn-lg btn-primary">
+			</form>
+		</div>
+	</div> <!-- /.col-lg-8. publication-selection-container -->
+</div> <!-- /.row -->

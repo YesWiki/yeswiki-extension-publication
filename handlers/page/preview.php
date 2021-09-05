@@ -24,11 +24,11 @@ if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarli
         // backward compatibilty
         preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
         list(, $formId) = $matches;
-    
+
         $query = isset($_GET['query']) ? $_GET['query'] : '';
-    
+
         $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
-    
+
         $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
             return $html . $entryController->view($fiche);
         }, '');
@@ -110,16 +110,16 @@ $publication['content'] = preg_replace('#<div class="clearfix"></div><div class=
  */
 
 if ($publication) {
-    include_once 'includes/squelettephp.class.php';
-    $exportTemplate = new SquelettePhp('print-preview.tpl.html', 'publication');
-    $publicationStyle = preg_replace('#^(.+)\.(.+)$#siU', '$1.publication.$2', $wiki->config['favorite_style']);
+    // Load the cascade of publication styles
+    $cssFiles = array_merge(
+      glob('tools/publication/presentation/styles/*.css'),
+      glob('themes/'.$wiki->config['favorite_theme'].'/tools/publication/*.css'),
+      glob('custom/tools/publication/*.css'),
+    );
 
-    //
-    $wiki->AddCSSFile('tools/publication/presentation/styles/base.css');
-    $wiki->AddCSSFile('tools/publication/presentation/styles/preview.css');
-    $wiki->AddCSSFile('custom/tools/publication/print.css');
-    $wiki->AddCSSFile('themes/'.$wiki->config['favorite_theme'].'/tools/publication/print.css');
-    $wiki->AddCSSFile('themes/'.$wiki->config['favorite_theme'].'/styles/'.$publicationStyle);
+    array_map(function($file) use ($wiki) {
+      $wiki->AddCSSFile($file);
+    }, $cssFiles);
 
     // user  options
     $options = array(
@@ -151,7 +151,7 @@ if ($publication) {
     }
 
     // build the preview/printing page
-    $output = $exportTemplate->render(array(
+    $output = $templateEngine->render('@publication/print-preview.twig', [
         "baseUrl" => $wiki->getBaseUrl(),
         "blankpage" => $blankpage,
         "content" => $publication['content'],
@@ -159,7 +159,7 @@ if ($publication) {
         "siteTitle" => $wiki->GetConfigValue('wakka_name'),
         "metadatas" => $metadatas,
         "styles" => $wiki->Format('{{linkstyle}}{{linkjavascript}}'),
-        "stylesModifiers" => array(
+        "stylesModifiers" => [
             "yeswiki-publication",
             $wiki->config['debug'] === 'yes' ? 'debug' : '',
             // could be chosen, when creating an eBook
@@ -176,8 +176,8 @@ if ($publication) {
             "page-number-position--" . $metadatas['publication-pagination'],
             // OPTION hide-links-from-print
             $metadatas['publication-hide-links-url'] === '1' ? "hide-links-url" : '',
-        ),
-    ));
+        ],
+    ]);
 
     // Insert a blank page after a cover page
     $output = preg_replace('#(<section class="publication-cover">.+</section>)(<div class="include)#siU', '$1' . $blankpage . '$2', $output);

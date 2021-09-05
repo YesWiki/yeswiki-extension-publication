@@ -37,7 +37,7 @@ if (!defined("WIKINI_VERSION")) {
     die ("acc&egrave;s direct interdit");
 }
 
-
+global $wiki;
 $ebookPageNamePrefix = $this->getParameter('pagenameprefix', 'Ebook');
 
 $output = '';
@@ -49,19 +49,14 @@ $sql .= ' WHERE property="http://outils-reseaux.org/_vocabulary/metadata"
 			AND resource LIKE "'.$ebookPageNamePrefix.'%" ';
 $sql .= ' ORDER BY resource ASC';
 
-$pages = $this->LoadAll($sql);
+$pages = array_map(function($page) use ($wiki) {
+  $metas = $wiki->GetMetadatas($page['resource']);
+  $page['_metas'] = $metas;
+  return $page;
+}, $wiki->LoadAll($sql));
 
-if (count($pages) > 0) {
-  include_once 'includes/squelettephp.class.php';
-  $template = new SquelettePhp('publicationlist.tpl.html', 'publication');
-
-  $output = $template->render(array(
-    'hasWriteAccess' => $this->HasAccess('write'),
-    'hasDeleteAccess' => $this->UserIsAdmin() || $this->UserIsOwner(),
-    'pages' => $pages,
-    'wiki' => $this,
-  ));
-}
-else $output .= '<div class="alert alert-info">'._t('PUBLICATION_NO_EBOOK_FOUND').'</div>';
-
-echo $output."\n";
+echo $wiki->render('@publication/publicationlist.twig', [
+  'hasWriteAccess' => $this->HasAccess('write'),
+  'hasDeleteAccess' => $this->UserIsAdmin() || $this->UserIsOwner(),
+  'pages' => $pages,
+]);

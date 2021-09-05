@@ -47,7 +47,7 @@ if (!empty($_GET['url'])) {
     $pageTag = $this->GetPageTag();
     $pdfTag = $this->MiniHref('pdf', $pageTag);
     $sourceUrl = $this->href('preview', $pageTag, preg_replace('#^'. $pdfTag .'&?#', '', $_SERVER['QUERY_STRING']), false);
-    
+
     $pdfHelper = $this->services->get(PdfHelper::class);
 
     $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
@@ -107,14 +107,15 @@ if (($this->UserIsAdmin() && isset($_GET['print-debug']))
 
             // now generate PDF
             $page->pdf(array(
-          'printBackground' => true,
-          'displayHeaderFooter' => true,
-          'preferCSSPageSize' => true
-        ))->saveToFile($fullFilename);
+              'printBackground' => true,
+              'displayHeaderFooter' => true,
+              'preferCSSPageSize' => true
+            ))->saveToFile($fullFilename);
 
             $browser->close();
         } catch (Exception $e) {
             echo $this->Header()."\n";
+            echo '<div class="alert alert-info">'.$sourceUrl.'</div>'."\n";
             echo '<div class="alert alert-danger alert-error">'.$e->getMessage().'</div>'."\n";
 
             if (($e instanceof HeadlessChromium\Exception\OperationTimedOut) === false) {

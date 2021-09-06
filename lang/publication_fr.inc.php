@@ -140,6 +140,8 @@ $GLOBALS['translations'] = array_merge(
         'AB_publication_publicationlist_pagenameprefix_label' => 'prefix de page',
 
         // edit config
-        'EDIT_CONFIG_HINT_htmltopdf_service_url' => 'Adresse externe d\'un service chronium (exemple: https://example.org/yeswiki/?PagePrincipale/pdf)',
+        'EDIT_CONFIG_HINT_htmltopdf_path' => 'Chemin d\'accès serveur personnalisé à un Chrome/Chromium.',
+        'EDIT_CONFIG_HINT_htmltopdf_service_url' => 'Si Chrome/Chromium ne peut être installé sur votre machine, adresse d\'un YesWiki à qui déléguer le rendu PDF (exemple: https://example.org/yeswiki/?PagePrincipale/pdf)',
+        'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication'
     )
 );

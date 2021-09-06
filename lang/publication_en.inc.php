@@ -90,5 +90,10 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_NO_GENERATED_PDF_FILE_FOUND' => 'No pdf file was found.<br />Please check access rights on the "cache" folder.',
 		'PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH' => 'No executable file found on path',
 		'PUBLICATION_DID_YOU_INSTALL_CHROMIUM_OR_SET_UP_PATH' => 'Did you install Chromium on this server, or setup path to the program or url service (parameters "htmltopdf_path" or "htmltopdf_service_url" in the configuration file) ?',
-		 )
+
+    // edit config
+    'EDIT_CONFIG_HINT_htmltopdf_path' => 'Server custom filepath to Chrome/Chromium.',
+    'EDIT_CONFIG_HINT_htmltopdf_service_url' => 'If you are unable to install Chrome/Chromium on your server, YesWiki URL to delegate the PDF rendering (eg: https://example.org/yeswiki/?MainPage/pdf)',
+    'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication'
+    )
 );

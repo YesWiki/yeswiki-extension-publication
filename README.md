@@ -1,11 +1,11 @@
 # Extension YesWiki publication
 
-> Extension [YesWiki] qui génère des publications au format PDF à partir d'une sélection de [fiches Bazar][Bazar] et/ou de [pages de contenu][yeswiki-page].
+> Une extension [YesWiki] pour créer des documents imprimables (format PDF) à partir d'une sélection de [fiches Bazar][Bazar] et/ou de [pages de contenu][yeswiki-page].
 
 La mise en page est effectuée par [Paged.js](https://www.pagedjs.org/)
 ([documentation](https://www.pagedjs.org/documentation/)), et la capture PDF par un [navigateur dit "headless"][headless-browser] (par défaut [chromium](#pré-requis)).
 
-Les publications générées sont de type [ebook](#pour-générer-des-ebooks-téléchargeables) ou [newsletter](#pour-générer-des-newsletters).
+Les publications générées sont de type [livres/livrets](#pour-générer-des-livrets-téléchargeables), [fanzines](#pour-générer-des-livrets-téléchargeables) ou [newsletter](#pour-générer-des-newsletters).
 
 
 <table>
@@ -33,12 +33,23 @@ Les publications générées sont de type [ebook](#pour-générer-des-ebooks-té
     <th scope="col">Une page "publication", avec actions de téléchargement et prévisualisation (auteur·ices et admin)</th>
     <th scope="col">Bouton d'export à ajouter (<a href="#action-bazar2publication">action <code>{{bazar2publication}}</code></a>)</th>
   </tr>
+  <tr>
+    <td>
+      <img src="presentation/fanzine-layouts/single-page.svg" alt="">
+    </td>
+    <td>
+    </td>
+  </tr>
+  <tr>
+    <th scope="col">Exemple de pliage de fanzine</th>
+    <th scope="col"></th>
+  </tr>
 </table>
 
 ## Pré-requis technique
 
 Avoir installé [Chromium](https://www.chromium.org/Home) **sur
-le serveur** et connaitre le chemin d'accès vers l'exécutable.
+le serveur**. Éventuellement, connaître le chemin d'accès vers l'exécutable s'il est différent de `/usr/bin/chromium`.
 
 Pour installer Chrome sous Ubuntu/Debian :
 
@@ -59,11 +70,11 @@ L'action `{{publicationgenerator}}` prend en charge les étapes 1, 2 et 3.
 
 Le handler `/pdf` prend en charge l'étape 4.
 
-### Pour générer des ebooks téléchargeables
+### Pour générer des livrets téléchargeables
 
 Utiliser l'action `{{publicationgenerator}}`. Aucun paramètre n'est obligatoire.
 
-Chaque ebook généré sera enregistré sous la forme d'une page sur le wiki. Le nom de cette page sera constitué de la valeur du paramètre `pagenameprefix` suivie du titre de l'ebook.
+Chaque publication est générée sous forme d'une page wiki. Le nom de cette page sera constitué de la valeur du paramètre `pagenameprefix` suivie du titre de l'ebook (par défaut `Ebook`).
 
 On pourra utilement consulter la section [Action `{{publicationgenerator}}`](#action-publicationgenerator) ci-après.
 
@@ -88,6 +99,18 @@ Soit, au minimum : `{{publicationgenerator outputformat="newsletter" formid="<id
 Chaque newsletter générée sera enregistrée sous la forme d'une fiche bazar du formulaire \<id du formulaire> sur le wiki.
 
 On pourra utilement consulter la section [Action `{{publicationgenerator}}`](#action-publicationgenerator) ci-après.
+
+### Surcharger les styles d'impression par défaut
+
+Des styles d'impression par défaut sont ajoutés pour vous donner le moins de travail possible lors de la création d'une publication.
+Il y a plusieurs mécanismes pour **personnaliser vos styles d'impression** en créant des feuilles de styles (fichiers `.css`) :
+
+| Répertoire                                                  | Noms possibles            | À quoi ça s'applique ?
+| ---                                                         | ---                       | ---
+| `custom/tools/publication/*.css`                            | Peu importe               | Toute publication, peu importe le thème
+| `custom/tools/publication/print-layouts/*.css`              | `fanzine.css`, `book.css` | Seulement les fanzines, ou les livres/livrets, peu importe le thème
+| `themes/NOM_DU_THEME/tools/publication/*.css`               | Peu importe               | Toute publication, pour un thème donné
+| `themes/NOM_DU_THEME/tools/publication/print-layouts/*.css` | `fanzine.css`, `book.css` | Seulement les fanzines, ou les livres/livrets, pour un thème donné
 
 ## Actions YesWiki
 

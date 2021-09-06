@@ -7,13 +7,14 @@ use YesWiki\Publication\Service\PdfHelper;
 use YesWiki\Core\Service\DbService;
 use YesWiki\Core\Service\PageManager;
 use YesWiki\Core\Service\TemplateEngine;
-use YesWiki\Core\YesWikiLoader;
+use YesWiki\Test\Core\YesWikiTestCase;
 use YesWiki\Wiki;
 
-// TODO fix trouble to find file when symlink
-require_once 'includes/YesWikiLoader.php';
+require_once 'tests/YesWikiTestCase.php';
 
-class PdfHelperTest extends YesWikiLoader
+// TODO update tests with new pdfHelper
+
+class PdfHelperTest extends YesWikiTestCase 
 {
     /**
      * @covers PdfHelper::__construct
@@ -28,7 +29,7 @@ class PdfHelperTest extends YesWikiLoader
 
     /**
      * @depends testPdfHelperExisting
-     * @covers PdfHelper::getDataToCheck
+     * @covers PdfHelper::getPageEntriesContent
      * @dataProvider dataProvider
      * @param string $pageTagMode
      * @param string|null $via
@@ -38,7 +39,7 @@ class PdfHelperTest extends YesWikiLoader
      * @param bool $clean
      * @param Wiki $wiki
      */
-    public function testGetDataToCheck(string $pageTagMode, ?string $via, array $bazarlisteIds, bool $withTemplate, bool $clean, $expected, Wiki $wiki)
+    public function wiptestGetPageEntriesContent(string $pageTagMode, ?string $via, array $bazarlisteIds, bool $withTemplate, bool $clean, $expected, Wiki $wiki)
     {
         if ($pageTagMode === 'entry') {
             $pageTag = $this->getEntryPageName($withTemplate);
@@ -82,7 +83,7 @@ class PdfHelperTest extends YesWikiLoader
         }
         $pdfHelper = $wiki->services->get(PdfHelper::class);
         try {
-            $results = $pdfHelper->getDataToCheck($pageTag, $via);
+            $results = $pdfHelper->getPageEntriesContent($pageTag, $via);
         } finally {
             if (!empty($pageToDelete)) {
                 $this->deletePage($pageToDelete);

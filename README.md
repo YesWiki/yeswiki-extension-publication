@@ -294,7 +294,7 @@ Auteur·ices par défaut des publications à générer.
 Exemple  :
 
 ```
-{{publicationgenerator title="George Sand"}}
+{{publicationgenerator author="George Sand"}}
 ```
 
 #### **chapterpages**

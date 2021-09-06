@@ -279,18 +279,21 @@
           </div>
         </details>
 
-        <details class="publication-options options-fanzine" hidden>
+        <details class="publication-options options-fanzine" hidden open>
           <summary>{{ _t('PUBLICATION_MORE_OPTIONS') }}</summary>
 
           <div class="form-row">
             <label class="d-block" for="fanzine-layout--single-page">{{ _t('PUBLICATION_FANZINE_LAYOUT') }}</label>
 
-            <label class="radio">
+            <label class="radio pill">
+              <img src="tools/publication/presentation/fanzine-layouts/single-page.svg" alt="">
               <input type="radio" id="fanzine-layout--single-page" name="publication-fanzine[layout]" value="single-page" {{ metadatas['publication-fanzine']['layout'] == 'single-page' ? 'checked' }}>
               <span class="control-label">{{ _t('PUBLICATION_FANZINE_LAYOUT_SINGLE_PAGE') }}</span>
               <small class="form-text text-muted">{{ _t('PUBLICATION_FANZINE_LAYOUT_SINGLE_PAGE_HELP') }}</small>
             </label>
-            <label class="radio">
+
+            <label class="radio pill">
+              <img src="tools/publication/presentation/fanzine-layouts/recto-folio.svg" alt="">
               <input type="radio" id="fanzine-layout--bottom-sides" name="publication-fanzine[layout]" value="recto-folio" {{ metadatas['publication-fanzine']['layout'] == 'recto-folio' ? 'checked' }}>
               <span class="control-label">{{ _t('PUBLICATION_FANZINE_LAYOUT_RECTO_FOLIO') }}</span>
               <small class="form-text text-muted">{{ _t('PUBLICATION_FANZINE_LAYOUT_RECTO_FOLIO_HELP') }}</small>

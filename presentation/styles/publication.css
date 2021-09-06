@@ -12,6 +12,10 @@
   margin: 0;
 }
 
+.fanzine-layout.img-icon {
+  height: 2.5em;
+}
+
 .yw-publication__show .img-cover {
   object-fit: cover;
   height: 250px;
@@ -49,6 +53,17 @@
 }
 .export-table-form .text-muted {
   font-weight: normal;
+}
+
+.export-table-form .radio.pill {
+  border: 1px solid currentColor;
+  border-radius: var(--btn-border-radius);
+  cursor: pointer;
+}
+.export-table-form .radio.pill:has(:checked),
+.export-table-form .radio.pill:focus-within {
+  border-color: var(--link-color);
+  border-width: 3px;
 }
 
 .export-table-form .form-group.checkbox .control-label,

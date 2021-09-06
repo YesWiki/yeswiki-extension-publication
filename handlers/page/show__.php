@@ -1,26 +1,18 @@
 <?php
+
+use YesWiki\Publication\Service\Publication;
+
 global $wiki;
 
-if ($this->HasAccess('read') && isset($this->page['metadatas']['publication-title'])) {
-    // user  options
-    $options = array(
-        "publication-hide-links-url" => '1',
-        "publication-cover-page" => '0',
-        "publication-book-fold" => '0',
-        "publication-page-format" => 'A4',
-        "publication-page-orientation" => 'portrait',
-        "publication-pagination" => "bottom-center",
-        "publication-print-marks" => '0'
-    );
+if ($this->HasAccess('read') && (isset($this->page['metadatas']['publication-title']) || isset($this->page['metadatas']['publication']['title']))) {
+    $publicationService = $this->services->get(Publication::class);
+    $metadata = $publicationService->getOptions($wiki->page['metadatas']);
 
-    $metadata = array_merge($options, $wiki->page['metadatas']);
-
-    $output = $wiki->render('@publication/print-show.twig', [
+    $output = $wiki->render('@publication/show.twig', [
       'hasWriteAccess' => $wiki->HasAccess('write'),
       'hasDeleteAccess' => $wiki->UserIsAdmin() || $wiki->UserIsOwner(),
       'metadata' => $metadata,
-      'page' => $wiki->page,
-      'wiki' => $wiki,
+      'page' => $wiki->page
     ]);
 
     $plugin_output_new = preg_replace('#<div class="page".+<hr class="hr_clear" />#siU', '<div class="page" >'. $output .'<hr class="hr_clear" />', $plugin_output_new);

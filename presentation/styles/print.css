@@ -1,84 +1,4 @@
-@page {
-  size: 8.5in 11in;
-  margin: 20mm 25mm; /* marks: crop; */
-  @footnote {
-    margin: 0.6em 0 0 0;
-    padding: 0.3em 0 0 0;
-    max-height: 10em;
-  }
-  @top-center {
-    vertical-align: bottom;
-    padding-bottom: 10mm;
-    content: string(booktitle);
-  }
-}
-@page :left {
-  margin: 20mm 40mm 20mm 30mm;
-  @top-left {
-    vertical-align: bottom;
-    padding-bottom: 10mm;
-    content: string(page-number, first-except);
-    letter-spacing: 0.1em;
-    margin-left: -1em;
-    font-size: 0.9em;
-  }
-  @bottom-left-corner {
-    content: counter(page);
-  }
-}
-@page :right {
-  margin: 20mm 30mm 20mm 40mm;
-  @top-right {
-    vertical-align: bottom;
-    padding-bottom: 10mm;
-    content: string(page-number, first-except);
-    letter-spacing: 0.08em;
-    margin-right: -1em;
-    font-size: 0.9em;
-  }
-  @bottom-right-corner {
-    content: counter(page);
-  }
-  @top-center {
-    content: string(booktitle);
-  }
-}
-@page cover {
-  @top-center {
-    content: none;
-  }
-}
-@font-face {
-  font-family: "Stix";
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Stix";
-  font-weight: bold;
-  font-style: normal;
-}
-@font-face {
-  font-family: "Stix";
-  font-weight: normal;
-  font-style: italic;
-}
-@font-face {
-  font-family: "Stix";
-  font-weight: bold;
-  font-style: italic;
-}
-section:nth-child(1) h1 {
-  string-set: booktitle content(text);
-}
-section {
-  break-before: right;
-  break-after: always;
-}
 body {
-  font-size: 1em;
-  line-height: 1.33em;
-  font-family: "Stix", serif;
   font-variant-numeric: oldstyle-nums;
 }
 p {
@@ -89,26 +9,26 @@ p {
 header + p:first-line {
   text-transform: lowercase !important;
   font-variant: small-caps;
-  font-size: 1.1em;
+  font-size: 1.1rem;
 }
 p + p {
-  text-indent: 1.33em;
+  text-indent: 1.33rem;
 }
 .decoration-rw {
   text-align: center;
-  padding-top: 1em;
-  padding-bottom: 1em;
-  padding-left: 0em;
-  padding-right: 0em;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 0;
+  padding-right: 0;
 }
 .copyright-rw {
-  font-size: 0.8em;
-  line-height: 1em;
+  font-size: 0.8rem;
+  line-height: 1rem;
   text-align: left;
-  padding-top: 2em;
+  padding-top: 2rem;
 }
 .copyright-rw p {
-  margin-bottom: 1em;
+  margin-bottom: 1rem;
   text-indent: 0;
 }
 .dedication-rw p {
@@ -116,19 +36,20 @@ p + p {
   text-indent: 0;
 }
 .Dedication-rw {
-  margin-top: 3em;
+  margin-top: 3rem;
 }
 .leading-line-rw {
-  height: 1.33em;
+  height: 1.33rem;
 }
 .fp-rw {
   text-indent: 0;
 }
-h1 {
-  font-size: 1.5em;
-  line-height: 1.33em;
+h1,
+.BAZ_fiche_titre {
+  font-size: 1.5rem;
+  line-height: 1.33;
   text-align: center;
-  padding-bottom: 0em;
+  padding-bottom: 0;
   text-align: center;
   text-transform: uppercase;
   font-weight: normal;
@@ -136,10 +57,10 @@ h1 {
 }
 h2 {
   text-align: center;
-  font-size: 1.33em;
-  line-height: 1.2em;
+  font-size: 1.33rem;
+  line-height: 1.2rem;
   text-align: center;
-  padding-bottom: 0em;
+  padding-bottom: 0;
   text-align: center;
   text-transform: uppercase;
   font-weight: normal;
@@ -147,32 +68,32 @@ h2 {
 }
 .title-author-rw {
   text-align: center;
-  font-size: 1.5em;
+  font-size: 1.5rem;
   text-indent: 0;
 }
 .title-num-rw {
   text-align: center;
-  font-size: 1.5em;
+  font-size: 1.5rem;
   text-indent: 0;
-  margin-top: 1em;
-  margin-bottom: 1em;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 .title-sub-rw {
   text-align: center;
-  font-size: 1.5em;
+  font-size: 1.5rem;
   text-indent: 0;
 }
 .imprint-rw {
   text-align: center;
 }
 .extract-verse-rw {
-  margin-top: 1.33em;
-  margin-bottom: 1.33em;
+  margin-top: 1.33rem;
+  margin-bottom: 1.33rem;
   padding-left: 20pt;
 }
 .extract-rw {
-  margin-top: 1.33em;
-  margin-bottom: 1.33em;
+  margin-top: 1.33rem;
+  margin-bottom: 1.33rem;
   padding-left: 20pt;
 }
 .extract-verse-rw p {
@@ -181,8 +102,8 @@ h2 {
   margin-left: 20pt;
 }
 .epigraph-rw {
-  margin-top: 1.33em;
-  margin-bottom: 1.33em;
+  margin-top: 1.33rem;
+  margin-bottom: 1.33rem;
   padding-left: 20pt;
   padding-right: 20pt;
 }
@@ -190,15 +111,15 @@ h2 {
   font-size: 75%;
 }
 .block-rw {
-  margin-top: 1em;
-  margin-bottom: 1em;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
   margin-left: 20pt;
   margin-right: 20pt;
 }
 span.dropcap-rw {
   float: left;
-  font-size: 2.7em;
-  line-height: 0.87em;
+  font-size: 2.7rem;
+  line-height: 0.87rem;
 }
 .signature-rw {
   margin-left: 50%;
@@ -224,17 +145,17 @@ a {
 }
 #toc ol {
   list-style-type: none;
-  margin: 0 0 0 2em;
+  margin: 0 0 0 2rem;
   padding: 0 0 0 0;
 }
 #toc ol ol {
   list-style-type: none;
-  margin: 0 0 0 1em;
+  margin: 0 0 0 1rem;
   padding: 0 0 0 0;
 }
 #toc ol li {
-  margin: 0 0 0 0;
-  padding: 0 0 0 0;
+  margin: 0;
+  padding: 0;
 }
 #toc ol li a {
   text-decoration: none;
@@ -246,14 +167,14 @@ a {
 }
 .toc-short ol {
   list-style-type: none;
-  margin: 0 0 0 2em;
-  padding: 0 0 0 0;
+  margin: 0 0 0 2rem;
+  padding: 0;
 }
 #guide {
   display: none;
 }
 header {
-  padding: 3em 0 2em 0;
+  padding: 3rem 0 2rem 0;
 }
 header a {
   text-decoration: none;
@@ -270,32 +191,32 @@ img {
 .title-other-rw {
   text-align: center;
   text-indent: 0;
-  margin-top: 0.5em;
+  margin-top: 0.5rem;
 }
 .dateline-rw {
   text-align: left;
   text-indent: 0;
-  margin-top: 1.33em;
-  margin-bottom: 1.33em;
+  margin-top: 1.33rem;
+  margin-bottom: 1.33rem;
 }
 .frontmatter-rw h1 {
-  font-size: 1.5em;
+  font-size: 1.5rem;
 }
 .backmatter-rw h1 {
-  font-size: 1.5em;
+  font-size: 1.5rem;
 }
 .direction-rw {
   text-align: center;
   text-indent: 0;
   font-style: italic;
-  margin: 1em 0 1em 0;
+  margin: 1rem 0 1rem 0;
 }
 .source-rw {
-  margin-bottom: 0em;
+  margin-bottom: 0;
   text-align: right !important;
   font-variant: small-caps;
   text-transform: lowercase;
-  font-size: 1.1em;
+  font-size: 1.1rem;
   page-break-before: avoid;
 }
 div.block-rw {
@@ -313,8 +234,8 @@ div.block-rw {
   padding-top: 6px;
 }
 div.photo {
-  margin-top: 1em;
-  padding-top: 2em;
+  margin-top: 1rem;
+  padding-top: 2rem;
   text-align: center;
 }
 div.photo p {
@@ -324,19 +245,4 @@ div.photo p {
 }
 .-epub-media-overlay-active {
   background-color: #abc;
-}
-
-h1 {
-  page-break-before: always;
-}
-
-@media all and (orientation: portrait) {
-  p {
-    font-family: serif;
-  }
-}
-@media all and (orientation: landscape) {
-  p {
-    font-family: sans-serif;
-  }
 }

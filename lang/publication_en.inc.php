@@ -23,8 +23,8 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_DOWNLOAD' => 'Download',
 		'PUBLICATION_DOWNLOAD_PDF' => 'PDF',
 		'PUBLICATION_EBOOK' => 'Ebook',
-		'PUBLICATION_EBOOK_AUTHOR' => 'Author\'s first name',
-		'PUBLICATION_EBOOK_COVER_IMAGE' => 'Link to ebook cover image',
+		'PUBLICATION_EBOOK_AUTHOR' => 'Author(s)',
+		'PUBLICATION_EBOOK_COVER_IMAGE' => 'Link to cover image',
 		'PUBLICATION_EBOOK_COVER_PAGE' => 'Generate a cover page automatically',
     'PUBLICATION_EBOOK_COVER_PAGE_HELP' => 'It will reuse the aforementioned informations.',
     'PUBLICATION_EBOOK_COVER_PAGE_WITH_PUBLICATION_START_HELP' => 'This setting cannot be enabled because a first page has already been&nbsp;set.',
@@ -44,6 +44,11 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_END_PAGE' => 'End page',
 		'PUBLICATION_EXAMPLE_AUTHOR' => 'Ex: Victor Hugo',
 		'PUBLICATION_EXPORT_PAGES_INFO' => 'Select your ebook content buy clicking on ',
+    'PUBLICATION_FANZINE_LAYOUT' => 'Page folding',
+    'PUBLICATION_FANZINE_LAYOUT_SINGLE_PAGE' => 'Single sheet (recto only)',
+    'PUBLICATION_FANZINE_LAYOUT_SINGLE_PAGE_HELP' => '8 pages printed on a single sheet.',
+    'PUBLICATION_FANZINE_LAYOUT_RECTO_FOLIO' => 'Folio (recto only)',
+    'PUBLICATION_FANZINE_LAYOUT_RECTO_FOLIO_HELP' => '2 pages per sheet, folded together.',
 		'PUBLICATION_FILTER_PAGES' => 'Filter content',
 		'PUBLICATION_FOR_THE_EBOOK' => 'For ebook',
 		'PUBLICATION_FROM_THE_EBOOK' => 'From ebook',
@@ -53,6 +58,9 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_INSERT_BLANK_PAGE' => 'Insert blank page',
 		'PUBLICATION_MANDATORY_FIELD' => 'Mandatory field',
 		'PUBLICATION_MISSING_NEWSLETTER_FORM' => 'In order to produce a newsletter, you must indicate a form id (See readme.md file).',
+    'PUBLICATION_MODE' => 'Disposition',
+    'PUBLICATION_MODE_BOOK' => 'Book, booklet',
+    'PUBLICATION_MODE_FANZINE' => 'Fanzine',
 		'PUBLICATION_MORE_OPTIONS' => 'Other customization options',
 		'PUBLICATION_NEWSLETTER' => 'Newsletter',
 		'PUBLICATION_NEWSLETTER_CREATED' => 'The newsletter record has successfully been created',
@@ -60,6 +68,7 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_NO_DESC_FOUND' => 'ERROR : Description hasn\'t been filled in.',
 		'PUBLICATION_NO_EBOOK_FOUND' => 'No ebook found.',
 		'PUBLICATION_NO_IMAGE_FOUND' => 'ERROR : Link to cover image hasn\'t been filled in.',
+		'PUBLICATION_NO_PAGE_FOUND' => 'ERROR : Please select at least one page to create a publication.',
 		'PUBLICATION_NO_TITLE_FOUND' => 'ERROR : Publication title hasn\'t been filled in.',
 		'PUBLICATION_NOT_IMAGE_FILE' => 'ERREUR : Cover image doesn\'t seem to be a jpg file.',
 		'PUBLICATION_PAGINATION_POSITION' => 'Page number position',
@@ -81,5 +90,10 @@ $GLOBALS['translations'] = array_merge(
 		'PUBLICATION_NO_GENERATED_PDF_FILE_FOUND' => 'No pdf file was found.<br />Please check access rights on the "cache" folder.',
 		'PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH' => 'No executable file found on path',
 		'PUBLICATION_DID_YOU_INSTALL_CHROMIUM_OR_SET_UP_PATH' => 'Did you install Chromium on this server, or setup path to the program or url service (parameters "htmltopdf_path" or "htmltopdf_service_url" in the configuration file) ?',
-		 )
+
+    // edit config
+    'EDIT_CONFIG_HINT_htmltopdf_path' => 'Server custom filepath to Chrome/Chromium.',
+    'EDIT_CONFIG_HINT_htmltopdf_service_url' => 'If you are unable to install Chrome/Chromium on your server, YesWiki URL to delegate the PDF rendering (eg: https://example.org/yeswiki/?MainPage/pdf)',
+    'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication'
+    )
 );

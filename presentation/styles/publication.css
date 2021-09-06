@@ -12,6 +12,10 @@
   margin: 0;
 }
 
+.fanzine-layout.img-icon {
+  height: 2.5em;
+}
+
 .yw-publication__show .img-cover {
   object-fit: cover;
   height: 250px;
@@ -34,6 +38,39 @@
 
 .export-table-form .form-row {
   margin-bottom: 1em;
+}
+
+.export-table-form [type="checkbox"] + span,
+.export-table-form [type="radio"] + span {
+  height: 1.4rem;
+  padding-left: 1.4rem; /* same as height to be "square" */
+}
+
+.export-table-form .radio .control-label,
+.export-table-form .checkbox .control-label,
+.export-table-form .radio-inline .control-label {
+  font-weight: bold;
+}
+.export-table-form .text-muted {
+  font-weight: normal;
+}
+
+.export-table-form .radio.pill {
+  border: 1px solid currentColor;
+  border-radius: var(--btn-border-radius);
+  cursor: pointer;
+}
+.export-table-form .radio.pill:has(:checked),
+.export-table-form .radio.pill:focus-within {
+  border-color: var(--link-color);
+  border-width: 3px;
+}
+
+.export-table-form .form-group.checkbox .control-label,
+.export-table-form .form-group.checkbox .control-label + .form-text,
+.export-table-form .form-row .radio-inline {
+  padding-left: 0;
+  vertical-align: top;
 }
 
 /* we reduce spacing for rows without .col-* elements inside */

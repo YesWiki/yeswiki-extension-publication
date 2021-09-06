@@ -37,7 +37,7 @@
 
   {% for nb,form in entries %}
   <section class="page-groups">
-    <h4>{{ form.name }}
+    <h4>{{ form['name'] }}
       <a class="pull-right btn-xs btn-success select-all" title="{{ _t('PUBLICATION_ADD_ALL') }}" href="#">
         <i class="fas fa-plus"></i>
         {{ _t('PUBLICATION_ADD_ALL') }}
@@ -163,10 +163,10 @@
 					<label for="publication-title" class="control-label">{{ _t('PUBLICATION_EBOOK_TITLE') }}<span aria-label="{{ _t('PUBLICATION_MANDATORY_FIELD') }}">*</span></label>
 					<div class="controls">
             {% if areParamsReadonly %}
-              <input type="hidden" required id="publication-title" name="publication-title" value="{{ metadatas['publication-title'] | default(defaults['title']) }}">
+              <input type="hidden" required id="publication-title" name="publication[title]" value="{{ metadatas['publication-title'] }}">
             {% endif %}
 
-            <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="text" required="required" placeholder="{{ _t('PUBLICATION_EBOOK_TITLE') }}" id="publication-title" name="publication-title" value="{{ metadatas['publication-title'] | default(defaults['title']) }}">
+            <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="text" required="required" placeholder="{{ _t('PUBLICATION_EBOOK_TITLE') }}" id="publication-title" name="publication[title]" value="{{ metadatas['publication']['title'] }}">
 					</div>
 				</div>
 
@@ -174,21 +174,21 @@
           <label for="publication-description" class="control-label">{{ _t('PUBLICATION_EBOOK_DESC') }}</label>
           <div class="controls">
             {% if areParamsReadonly %}
-              <input type="hidden" required id="publication-description" name="publication-description" value="{{ metadatas['publication-description'] | default(defaults['desc']) }}">
+              <input type="hidden" id="publication-description" name="publication[description]" value="{{ metadatas['publication-description'] }}">
             {% endif %}
 
-            <textarea {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" placeholder="{{ _t('PUBLICATION_EBOOK_DESC') }}" id="publication-description" name="publication-description">{{ metadatas['publication-description'] | default(defaults['desc']) }}</textarea>
+            <textarea {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" placeholder="{{ _t('PUBLICATION_EBOOK_DESC') }}" id="publication-description" name="publication[description]">{{ metadatas['publication']['description'] }}</textarea>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="publication-author" class="control-label">{{ _t('PUBLICATION_EBOOK_AUTHOR') }}</label>
+          <label for="publication-authors" class="control-label">{{ _t('PUBLICATION_EBOOK_AUTHOR') }}</label>
           <div class="controls">
             {% if areParamsReadonly %}
-              <input type="hidden" required id="publication-author" name="publication-author" value="{{ metadatas['publication-author'] | default(defaults['author']) }}">
+              <input type="hidden" id="publication-authors" name="publication[authors]" value="{{ metadatas['publication-authors'] }}">
             {% endif %}
 
-            <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="text" placeholder="{{ _t('PUBLICATION_EXAMPLE_AUTHOR') }}" id="publication-author" name="publication-author" value="{{ metadatas['publication-author'] | default(defaults['author']) }}">
+            <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="text" placeholder="{{ _t('PUBLICATION_EXAMPLE_AUTHOR') }}" id="publication-authors" name="publication[authors]" value="{{ metadatas['publication']['authors'] }}">
           </div>
         </div>
 
@@ -197,30 +197,46 @@
 					<label for="publication-cover-image" class="control-label">{{ _t('PUBLICATION_EBOOK_COVER_IMAGE') }}</label>
 					<div class="controls">
             {% if areParamsReadonly %}
-              <input type="hidden" required id="publication-cover-image" name="publication-cover-image" value="{{ metadatas['publication-cover-image'] | default(defaults['coverimage']) }}">
+              <input type="hidden" required id="publication-cover-image" name="publication-cover-image" value="{{ metadatas['publication-cover-image'] }}">
             {% endif %}
 
-            <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="url" placeholder="http://" id="publication-cover-image" name="publication-cover-image" value="{{ metadatas['publication-cover-image'] | default(defaults['coverimage']) }}">
+            <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="url" placeholder="http://" id="publication-cover-image" name="publication-cover-image" value="{{ metadatas['publication-cover-image'] }}">
 					</div>
 				</div>
         {% endif %}
 
-        <details>
+        <div class="form-group">
+          <input type="checkbox" class="form-check-input" name="publication-cover-page" value="1" {{ publicationStart ? 'disabled' }} {{ metadatas['publication-cover-page'] == '1' ? 'checked' }} id="publication-cover-page">
+          <label for="publication-cover-page" class="control-label">{{ _t('PUBLICATION_EBOOK_COVER_PAGE') }}</label>
+          <small class="form-text text-muted">{{ publicationStart ? _t('PUBLICATION_EBOOK_COVER_PAGE_WITH_PUBLICATION_START_HELP') : _t('PUBLICATION_EBOOK_COVER_PAGE_HELP') }}</small>
+        </div>
+
+        {% if outputFormat|lower == 'ebook' %}
+        <div class="form-row">
+          <label class="d-block" for="publication-mode--book">{{ _t('PUBLICATION_MODE') }}</label>
+
+          <label class="radio-inline">
+            <input type="radio" id="publication-mode--book" name="publication-mode" value="book" {{ metadatas['publication-mode'] == 'book' ? 'checked' }}>
+            <span class="control-label">{{ _t('PUBLICATION_MODE_BOOK') }}</span>
+          </label>
+          <label class="radio-inline">
+            <input type="radio" id="publication-mode--fanzine" name="publication-mode" value="fanzine" {{ metadatas['publication-mode'] == 'fanzine' ? 'checked' }}>
+            <span class="control-label">{{ _t('PUBLICATION_MODE_FANZINE') }}</span>
+          </label>
+        </div>
+        {% endif %}
+
+        <details class="publication-options options-book" hidden>
           <summary>{{ _t('PUBLICATION_MORE_OPTIONS') }}</summary>
 
           <div class="form-row">
             <div class="form-group">
-              <input type="checkbox" class="form-check-input" name="publication-cover-page" value="1" {{ publicationStart ? 'disabled' : 'checked' }} id="publication-cover-page">
-              <label for="publication-cover-page" class="control-label">{{ _t('PUBLICATION_EBOOK_COVER_PAGE') }}</label>
-              <small class="form-text text-muted">{{ publicationStart ? _t('PUBLICATION_EBOOK_COVER_PAGE_WITH_PUBLICATION_START_HELP') : _t('PUBLICATION_EBOOK_COVER_PAGE_HELP') }}</small>
-            </div>
-            <div class="form-group">
-              <input type="checkbox" class="form-check-input" name="publication-book-fold" value="1" id="publication-book-fold">
+              <input type="checkbox" class="form-check-input" name="publication-book[print-fold]" value="1" id="publication-book-fold" {{ metadatas['publication-book']['print-fold'] == '1' ? 'checked' }}>
               <label for="publication-book-fold" class="control-label">{{ _t('PUBLICATION_EBOOK_FOLD') }}</label>
               <small class="form-text text-muted">{{ _t('PUBLICATION_EBOOK_FOLD_HELP') }}</small>
             </div>
             <div class="form-group">
-              <input type="checkbox" class="form-check-input" name="publication-print-marks" value="1" id="publication-print-marks">
+              <input type="checkbox" class="form-check-input" name="publication-book[print-marks]" value="1" id="publication-print-marks" {{ metadatas['publication-marks']['print-fold'] == '1' ? 'checked' }}>
               <label for="publication-print-marks" class="control-label">{{ _t('PUBLICATION_EBOOK_DISPLAY_PRINT_MARKS') }}</label>
               <small class="form-text text-muted">{{ _t('PUBLICATION_EBOOK_DISPLAY_PRINT_MARKS_HELP') }}</small>
             </div>
@@ -229,18 +245,18 @@
           <div class="form-row clearfix">
             <div class="form-group col-md-6">
               <label for="publication-page-format" class="control-label">{{ _t('PUBLICATION_EBOOK_FORMAT') }}</label>
-              <select class="form-control" name="publication-page-format" id="publication-page-format">
-                <option value="A3">A3</option>
-                <option value="A4" selected>A4</option>
-                <option value="A5">A5</option>
+              <select class="form-control" name="publication-book[page-format]" id="publication-page-format">
+                <option value="A3" {{ metadatas['publication-book']['page-format'] == 'A3' ? 'selected' }}>A3</option>
+                <option value="A4" {{ metadatas['publication-book']['page-format'] == 'A4' ? 'selected' }}>A4</option>
+                <option value="A5" {{ metadatas['publication-book']['page-format'] == 'A5' ? 'selected' }}>A5</option>
               </select>
             </div>
             <div class="form-group col-md-6">
               <label for="publication-page-orientation"
                 class="control-label">{{ _t('PUBLICATION_EBOOK_ORIENTATION') }}</label>
-              <select class="form-control" name="publication-page-orientation">
-                <option value="portrait" selected>{{ _t('PUBLICATION_EBOOK_ORIENTATION_PORTRAIT') }}</option>
-                <option value="landscape">{{ _t('PUBLICATION_EBOOK_ORIENTATION_LANDSCAPE') }}</option>
+              <select class="form-control" name="publication-book[page-orientation]">
+                <option value="portrait" {{ metadatas['publication-book']['page-orientation'] == 'portrait' ? 'selected' }}>{{ _t('PUBLICATION_EBOOK_ORIENTATION_PORTRAIT') }}</option>
+                <option value="landscape" {{ metadatas['publication-book']['page-orientation'] == 'landscape' ? 'selected' }}>{{ _t('PUBLICATION_EBOOK_ORIENTATION_LANDSCAPE') }}</option>
               </select>
             </div>
           </div>
@@ -249,16 +265,38 @@
             <label class="d-block" for="publication-pagination--bottom-center">{{ _t('PUBLICATION_PAGINATION_POSITION') }}</label>
 
             <label class="radio-inline">
-              <input type="radio" id="publication-pagination--none" name="publication-pagination" value="none">
-              {{ _t('PUBLICATION_PAGINATION_NONE') }}
+              <input type="radio" id="publication-pagination--none" name="publication-book[pagination]" value="none" {{ metadatas['publication-book']['pagination'] == 'none' ? 'checked' }}>
+              <span class="control-label">{{ _t('PUBLICATION_PAGINATION_NONE') }}</span>
             </label>
             <label class="radio-inline">
-              <input type="radio" id="publication-pagination--bottom-center" name="publication-pagination" value="bottom-center" checked>
-              {{ _t('PUBLICATION_PAGINATION_BOTTOM_CENTER') }}
+              <input type="radio" id="publication-pagination--bottom-center" name="publication-book[pagination]" value="bottom-center" {{ metadatas['publication-book']['pagination'] == 'bottom-center' ? 'checked' }}>
+              <span class="control-label">{{ _t('PUBLICATION_PAGINATION_BOTTOM_CENTER') }}</span>
             </label>
             <label class="radio-inline">
-              <input type="radio" id="publication-pagination--bottom-sides" name="publication-pagination" value="bottom-sides">
-              {{ _t('PUBLICATION_PAGINATION_BOTTOM_SIDES') }}
+              <input type="radio" id="publication-pagination--bottom-sides" name="publication-book[pagination]" value="bottom-sides" {{ metadatas['publication-book']['pagination'] == 'bottom-sides' ? 'checked' }}>
+              <span class="control-label">{{ _t('PUBLICATION_PAGINATION_BOTTOM_SIDES') }}</span>
+            </label>
+          </div>
+        </details>
+
+        <details class="publication-options options-fanzine" hidden open>
+          <summary>{{ _t('PUBLICATION_MORE_OPTIONS') }}</summary>
+
+          <div class="form-row">
+            <label class="d-block" for="fanzine-layout--single-page">{{ _t('PUBLICATION_FANZINE_LAYOUT') }}</label>
+
+            <label class="radio pill">
+              <img src="tools/publication/presentation/fanzine-layouts/single-page.svg" alt="">
+              <input type="radio" id="fanzine-layout--single-page" name="publication-fanzine[layout]" value="single-page" {{ metadatas['publication-fanzine']['layout'] == 'single-page' ? 'checked' }}>
+              <span class="control-label">{{ _t('PUBLICATION_FANZINE_LAYOUT_SINGLE_PAGE') }}</span>
+              <small class="form-text text-muted">{{ _t('PUBLICATION_FANZINE_LAYOUT_SINGLE_PAGE_HELP') }}</small>
+            </label>
+
+            <label class="radio pill">
+              <img src="tools/publication/presentation/fanzine-layouts/recto-folio.svg" alt="">
+              <input type="radio" id="fanzine-layout--bottom-sides" name="publication-fanzine[layout]" value="recto-folio" {{ metadatas['publication-fanzine']['layout'] == 'recto-folio' ? 'checked' }}>
+              <span class="control-label">{{ _t('PUBLICATION_FANZINE_LAYOUT_RECTO_FOLIO') }}</span>
+              <small class="form-text text-muted">{{ _t('PUBLICATION_FANZINE_LAYOUT_RECTO_FOLIO_HELP') }}</small>
             </label>
           </div>
         </details>

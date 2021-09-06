@@ -1,0 +1,94 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 74.67620751341724 40.70840787119857" width="224.02862254025172" height="122.1252236135957">
+  <g stroke-linecap="round" transform="translate(10 10) rotate(0 15.384615384615472 10.354203935599283)">
+    <path d="M1.36 1.18 L30.6 -1.56 L30.52 19.76 L-1.58 21.7" stroke="none" stroke-width="0" fill="#fff"></path>
+    <path d="M-0.41 -0.91 C9.54 -2.15, 20.03 0.38, 30.52 1.49 M0.98 0.13 C11.15 0.03, 23.96 -1.21, 30.98 -0.52 M30.7 -1.1 C30.84 8.37, 29.54 14.07, 30.41 22.2 M30.76 0.08 C30.19 4.73, 30.63 9.4, 30.4 20.58 M31.76 21.95 C23.02 19.68, 12.37 22.83, -1.99 20.44 M31.14 21.45 C22.83 20.49, 17.02 21.46, -0.96 21.13 M-0.68 19.95 C-0.21 14.42, 0.15 13.53, -1.89 -1.15 M0.08 21.69 C0.95 14.77, -1.02 7.16, -0.4 -0.78" stroke="#000000" stroke-width="1" fill="none"></path>
+  </g>
+  <g stroke-linecap="round" transform="translate(56.69767441860472 15.76744186046512) rotate(0 3.9892665474062596 5.819320214669052)">
+    <path d="M0 0 L7.98 0 L7.98 11.64 L0 11.64" stroke="none" stroke-width="0" fill="#fff"></path>
+    <path d="M0 0 C2.48 0, 4.96 0, 7.98 0 M0 0 C2.12 0, 4.24 0, 7.98 0 M7.98 0 C7.98 2.55, 7.98 5.11, 7.98 11.64 M7.98 0 C7.98 2.73, 7.98 5.46, 7.98 11.64 M7.98 11.64 C6.24 11.64, 4.49 11.64, 0 11.64 M7.98 11.64 C5.85 11.64, 3.73 11.64, 0 11.64 M0 11.64 C0 7.55, 0 3.46, 0 0 M0 11.64 C0 8.6, 0 5.55, 0 0" stroke="#000000" stroke-width="1" fill="none"></path>
+  </g>
+  <g stroke-linecap="round">
+    <g stroke-opacity="0.3" fill-opacity="0.3" transform="translate(10 18.92307692307692) rotate(0 14.846153846153925 0.30769230769231015)">
+      <path d="M0 0 C4.95 0.1, 24.74 0.51, 29.69 0.62 M0 0 C4.95 0.1, 24.74 0.51, 29.69 0.62" stroke="#000000" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+  <g stroke-linecap="round">
+    <g stroke-opacity="0.2" fill-opacity="0.2" transform="translate(16.90161001788897 10.38640429338102) rotate(0 0 9.769230769230763)">
+      <path d="M0 0 C0 3.26, 0 16.28, 0 19.54 M0 0 C0 3.26, 0 16.28, 0 19.54" stroke="#000000" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+  <g stroke-linecap="round">
+    <g stroke-opacity="0.2" fill-opacity="0.2" transform="translate(23.878354203935487 10.618962432915907) rotate(0 0 9.769230769230763)">
+      <path d="M0 0 C0 3.26, 0 16.28, 0 19.54 M0 0 C0 3.26, 0 16.28, 0 19.54" stroke="#000000" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+  <g stroke-linecap="round">
+    <g stroke-opacity="0.2" fill-opacity="0.2" transform="translate(31.55277280858695 10.386404293381041) rotate(0 0 9.769230769230766)">
+      <path d="M0 0 C0 3.26, 0 16.28, 0 19.54 M0 0 C0 3.26, 0 16.28, 0 19.54" stroke="#000000" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+  <g stroke-opacity="0.9" fill-opacity="0.9" transform="translate(11.72182468694109 20.00795070562507) rotate(0 1.773255813953483 3.94056847545221)">
+    <text x="1.7732558139534946" y="6.8811369509044225" font-family="monospace" font-size="6.304909560723536px" fill="#364fc7" text-anchor="middle" style="white-space: pre;" direction="ltr">6</text>
+  </g>
+  <g stroke-opacity="0.9" fill-opacity="0.9" transform="translate(18.466010733452777 20.240508845159958) rotate(0 2 4)">
+    <text x="2" y="7" font-family="monospace" font-size="6.304909560723536px" fill="#364fc7" text-anchor="middle" style="white-space: pre;" direction="ltr">7</text>
+  </g>
+  <g stroke-opacity="0.9" fill-opacity="0.9" transform="translate(26.140429338104013 20.00795070562507) rotate(0 2 4)">
+    <text x="2" y="7" font-family="monospace" font-size="6.304909560723536px" fill="#364fc7" text-anchor="middle" style="white-space: pre;" direction="ltr">8</text>
+  </g>
+  <g stroke-opacity="0.9" fill-opacity="0.9" transform="translate(34.04740608229008 20.240508845159958) rotate(0 2 4)">
+    <text x="2" y="7" font-family="monospace" font-size="6.304909560723536px" fill="#364fc7" text-anchor="middle" style="white-space: pre;" direction="ltr">1</text>
+  </g>
+  <g stroke-opacity="0.9" fill-opacity="0.9" transform="translate(58.8846153846157 16.93818326376462) rotate(0 2 4)">
+    <text x="2" y="7" font-family="monospace" font-size="6.304909560723536px" fill="#364fc7" text-anchor="middle" style="white-space: pre;" direction="ltr">1</text>
+  </g>
+  <g stroke-opacity="0.9" fill-opacity="0.9" transform="translate(33.34973166368536 10.938183263764607) rotate(180 2 4)">
+    <text x="2" y="7" font-family="monospace" font-size="6.304909560723536px" fill="#364fc7" text-anchor="middle" style="white-space: pre;" direction="ltr">2</text>
+  </g>
+  <g stroke-opacity="0.9" fill-opacity="0.9" transform="translate(25.67531305903435 10.47306698469486) rotate(180 2 4)">
+    <text x="2" y="7" font-family="monospace" font-size="6.304909560723536px" fill="#364fc7" text-anchor="middle" style="white-space: pre;" direction="ltr">3</text>
+  </g>
+  <g stroke-opacity="0.9" fill-opacity="0.9" transform="translate(18.698568872987607 10.473066984694839) rotate(180 2 4)">
+    <text x="2" y="7" font-family="monospace" font-size="6.304909560723536px" fill="#364fc7" text-anchor="middle" style="white-space: pre;" direction="ltr">4</text>
+  </g>
+  <g stroke-opacity="0.9" fill-opacity="0.9" transform="translate(11.954382826476149 10.473066984694839) rotate(180 2 4)">
+    <text x="2" y="7" font-family="monospace" font-size="6.304909560723536px" fill="#364fc7" text-anchor="middle" style="white-space: pre;" direction="ltr">5</text>
+  </g>
+  <g stroke-linecap="round">
+    <g stroke-opacity="0.7" fill-opacity="0.7" transform="translate(58.631932021467264 15.341559603187513) rotate(0 2.25 -0.5624999999999964)">
+      <path d="M0 0 C0.75 -0.19, 3.75 -0.94, 4.5 -1.12 M0 0 C0.75 -0.19, 3.75 -0.94, 4.5 -1.12" stroke="#000000" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+  <g stroke-linecap="round">
+    <g stroke-opacity="0.7" fill-opacity="0.7" transform="translate(57.006932021467264 15.341559603187513) rotate(0 2.1875 -1.1874999999999964)">
+      <path d="M0 0 C0.73 -0.4, 3.65 -1.98, 4.38 -2.37 M0 0 C0.73 -0.4, 3.65 -1.98, 4.38 -2.37" stroke="#000000" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+  <g stroke-linecap="round">
+    <g stroke-opacity="0.7" fill-opacity="0.7" transform="translate(63.381932021467264 13.96655960318752) rotate(0 0.125 0.75)">
+      <path d="M0 0 C0.04 0.25, 0.21 1.25, 0.25 1.5 M0 0 C0.04 0.25, 0.21 1.25, 0.25 1.5" stroke="#000000" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+  <g stroke-linecap="round">
+    <g stroke-opacity="0.7" fill-opacity="0.7" transform="translate(61.631932021467264 12.59155960318752) rotate(0 0.0625 0.8125)">
+      <path d="M0 0 C0.02 0.27, 0.1 1.35, 0.13 1.63 M0 0 C0.02 0.27, 0.1 1.35, 0.13 1.63" stroke="#000000" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+  <g stroke-linecap="round">
+    <g transform="translate(43.849673956951165 20.805269280606872) rotate(0 4.274193548387075 -0.08064516129032029)">
+      <path d="M0 0 C1.42 -0.03, 7.12 -0.13, 8.55 -0.16 M0 0 C1.42 -0.03, 7.12 -0.13, 8.55 -0.16" stroke="#364fc7" stroke-width="1" fill="none"></path>
+    </g>
+    <g transform="translate(43.849673956951165 20.805269280606872) rotate(0 4.274193548387075 -0.08064516129032029)">
+      <path d="M-0.08 -4.27 C-0.06 -3.31, -0.04 -2.35, 0 0 M-0.08 -4.27 C-0.05 -2.73, -0.02 -1.18, 0 0" stroke="#364fc7" stroke-width="1" fill="none"></path>
+    </g>
+    <g transform="translate(43.849673956951165 20.805269280606872) rotate(0 4.274193548387075 -0.08064516129032029)">
+      <path d="M0.08 4.27 C0.06 3.31, 0.04 2.35, 0 0 M0.08 4.27 C0.05 2.73, 0.02 1.18, 0 0" stroke="#364fc7" stroke-width="1" fill="none"></path>
+    </g>
+    <g transform="translate(43.849673956951165 20.805269280606872) rotate(0 4.274193548387075 -0.08064516129032029)">
+      <path d="M4.56 1.38 C5.46 1.03, 6.36 0.68, 8.55 -0.16 M4.56 1.38 C6 0.82, 7.45 0.26, 8.55 -0.16" stroke="#364fc7" stroke-width="1" fill="none"></path>
+    </g>
+    <g transform="translate(43.849673956951165 20.805269280606872) rotate(0 4.274193548387075 -0.08064516129032029)">
+      <path d="M4.5 -1.55 C5.42 -1.23, 6.33 -0.92, 8.55 -0.16 M4.5 -1.55 C5.97 -1.05, 7.43 -0.54, 8.55 -0.16" stroke="#364fc7" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+</svg>

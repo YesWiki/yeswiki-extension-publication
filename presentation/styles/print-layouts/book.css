@@ -1,3 +1,66 @@
+body {
+  font-size: 1rem;
+  line-height: 1.33;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 20mm 25mm; /* marks: crop; */
+
+  @footnote {
+    margin: 0.6rem 0 0 0;
+    padding: 0.3rem 0 0 0;
+    max-height: 10rem;
+  }
+  @top-center {
+    vertical-align: bottom;
+    padding-bottom: 10mm;
+    content: string(booktitle);
+  }
+}
+
+@page :left {
+  margin: 20mm 40mm 20mm 30mm;
+  @top-left {
+    vertical-align: bottom;
+    padding-bottom: 10mm;
+    content: string(page-number, first-except);
+    letter-spacing: 0.1rem;
+    margin-left: -1rem;
+    font-size: 0.9rem;
+  }
+  @bottom-left-corner {
+    content: counter(page);
+  }
+}
+
+@page :right {
+  margin: 20mm 30mm 20mm 40mm;
+  @top-right {
+    vertical-align: bottom;
+    padding-bottom: 10mm;
+    content: string(page-number, first-except);
+    letter-spacing: 0.08rem;
+    margin-right: -1rem;
+    font-size: 0.9rem;
+  }
+  @bottom-right-corner {
+    content: counter(page);
+  }
+  @top-center {
+    content: string(booktitle);
+  }
+}
+@page cover {
+  @top-center {
+    content: none;
+  }
+}
+
+section:nth-child(1) h1 {
+  string-set: booktitle content(text);
+}
+
 /**
  * Writing helpers
  */
@@ -336,4 +399,14 @@
 /* OPTION We remove link URLs from the print */
 .yeswiki-publication.hide-links-url a[href]::after{
   content: "";
+}
+
+/* */
+section {
+  break-before: right;
+  break-after: always;
+}
+
+h1 {
+  page-break-before: always;
 }

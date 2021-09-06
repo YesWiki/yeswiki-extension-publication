@@ -8,8 +8,6 @@
       "test": "exit 0"
     },
     "require": {
-        "chrome-php/chrome": "^0.9.0"
-    },
-    "require-dev": {
+        "chrome-php/chrome": "^1"
     }
 }

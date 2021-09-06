@@ -38,6 +38,7 @@ parameters:
   #
   # for edit config action
   publication_editable_config_params:
+    - 'htmltopdf_path'
     - 'htmltopdf_service_url'
 
 services:

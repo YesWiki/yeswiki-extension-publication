@@ -49,7 +49,7 @@ $output = '';
 // recuperation des pages wikis
 $sql = 'SELECT DISTINCT resource FROM '.$this->GetConfigValue('table_prefix').'triples';
 $sql .= ' WHERE property="http://outils-reseaux.org/_vocabulary/metadata"
-			AND value LIKE "%publication-title%" OR value LIKE "%\publication\":{\"title\":%"
+			AND (value LIKE "%publication-title%" OR value LIKE "%\publication\":{\"title\":%")
 			AND resource LIKE "'.$ebookPageNamePrefix.'%" ';
 $sql .= ' ORDER BY resource ASC';
 

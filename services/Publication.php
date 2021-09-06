@@ -113,6 +113,21 @@ class Publication {
     return $options;
   }
 
+  /**
+   * @example PageTag?type=publication-end
+   */
+  public function getIncludeActionFromPageTag ($tag) {
+    [$page, $qs] = array_pad(explode('?', $tag), 2, '');
+    parse_str($qs, $params);
+
+    return sprintf(
+      '{{include page="%s" class="%s"%s}}' . "\n",
+      $page,
+      trim(implode(' ', $params)),
+      isset($params['type']) ? ' type="'.$params['type'].'"' : ''
+    );
+  }
+
   public function getOptions(...$args) {
     $options = array_replace_recursive($this->defaultOptions, ...$args);
     return $this->convertToNewOptionsFormat($options);

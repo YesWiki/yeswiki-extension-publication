@@ -60,7 +60,7 @@ $publicationEnd = $this->getParameter('pageend');
 
 // prefix for created pages
 // Only used when outputformat="ebook"
-$ebookPageNamePrefix = $this->getParameter('pagenameprefix', 'ebook');
+$ebookPageNamePrefix = $this->getParameter('pagenameprefix', 'Ebook');
 
 // include default pages in page listing ?
 $addInstalledPages = $this->getParameter('addinstalledpage');
@@ -248,10 +248,8 @@ if (isset($_POST) && count($_POST)) {
                     // $page can be 'SomeTag' or 'SomeTag?parameter=value'
                     // the query string is used to parametrize book creation
                     else {
-                        list($page, $qs) = explode('?', $page);
-                        parse_str($qs, $qs);
-
-                        $output .= '{{include page="' . $page . '" class="'. trim(implode(' ', [$qs['type'], $qs['class']])) .'"}}' . "\n";
+                        $includeCode = $publicationService->getIncludeActionFromPageTag($page);
+                        $output .= $includeCode;
                     }
                 }
 
@@ -269,9 +267,9 @@ if (isset($_POST) && count($_POST)) {
             } while (false); // end of ebook specific loop
         } elseif (strcasecmp($outputFormat, 'newsletter') === 0) { // We want to produce a newsletter
             $fiche['id_typeannonce'] = $formId;
-            $fiche['bf_titre'] = $_POST["publication-title"];
-            $fiche['bf_description'] = $_POST["publication-description"];
-            $fiche['bf_author'] = $_POST["publication-author"];
+            $fiche['bf_titre'] = implode(' ', [$outputFormat, $_POST["publication"]["title"]]);
+            $fiche['bf_description'] = $_POST["publication"]["description"];
+            $fiche['bf_author'] = $_POST["publication"]["authors"];
             $fiche['bf_content'] = '';
 
             // Generate the content of the page body
@@ -285,11 +283,12 @@ if (isset($_POST) && count($_POST)) {
                 // we assume it is a page tag otherwise
                 // maybe we should also explicitly check it is a valid page tag instead?
                 else {
-                    $fiche['bf_content'] .= $this->Format('{{include page="' . $page . '" class=""}}' . "\n");
+                    $includeCode = $publicationService->getIncludeActionFromPageTag($page);
+                    $fiche['bf_content'] .= $this->Format($includeCode);
                 }
             }
 
-            $acceptedTags = '<h1><h2><h3><h4><h5><h6><hr><hr/><br><br/><span><blockquote><i><u><b><strong><ol><ul><li><small><div><p><a><table><tr><th><td><img><figure><caption><iframe>';
+            $acceptedTags = '<h1><h2><h3><h4><h5><h6><hr><hr/><br><br/><span><blockquote><i><u><b><strong><ol><ul><li><small><div><p><a><table><tr><th><td><img><figure><caption><iframe><style>';
             $fiche['bf_content'] = strip_tags($fiche['bf_content'], $acceptedTags);
             $fiche['antispam'] = 1;
             $fiche = $entryManager->create($formId, $fiche);

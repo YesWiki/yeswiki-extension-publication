@@ -100,18 +100,6 @@ Chaque newsletter générée sera enregistrée sous la forme d'une fiche bazar d
 
 On pourra utilement consulter la section [Action `{{publicationgenerator}}`](#action-publicationgenerator) ci-après.
 
-### Surcharger les styles d'impression par défaut
-
-Des styles d'impression par défaut sont ajoutés pour vous donner le moins de travail possible lors de la création d'une publication.
-Il y a plusieurs mécanismes pour **personnaliser vos styles d'impression** en créant des feuilles de styles (fichiers `.css`) :
-
-| Répertoire                                                  | Noms possibles            | À quoi ça s'applique ?
-| ---                                                         | ---                       | ---
-| `custom/tools/publication/*.css`                            | Peu importe               | Toute publication, peu importe le thème
-| `custom/tools/publication/print-layouts/*.css`              | `fanzine.css`, `book.css` | Seulement les fanzines, ou les livres/livrets, peu importe le thème
-| `themes/NOM_DU_THEME/tools/publication/*.css`               | Peu importe               | Toute publication, pour un thème donné
-| `themes/NOM_DU_THEME/tools/publication/print-layouts/*.css` | `fanzine.css`, `book.css` | Seulement les fanzines, ou les livres/livrets, pour un thème donné
-
 ## Actions YesWiki
 
 L'extension publication ajoute deux actions à votre wiki.
@@ -440,8 +428,21 @@ Ces fonctions sont accessibles depuis le sous-menu "partager" du bas de page.
  - `""<div class="no-print"> ""bla bla à supprimer à l'impression""</div>"" `
  - `""<div class="hide-print"> ""bla bla à supprimer à l'impression""</div>"" `
 
+### Surcharger les styles d'impression par défaut
+
+Des styles d'impression par défaut sont ajoutés pour vous donner le moins de travail possible lors de la création d'une publication.
+Il y a plusieurs mécanismes pour **personnaliser vos styles d'impression** en créant des feuilles de styles (fichiers `.css`) :
+
+| Répertoire                                                  | Noms possibles            | À quoi ça s'applique ?
+| ---                                                         | ---                       | ---
+| `custom/tools/publication/*.css`                            | Peu importe               | Toute publication, peu importe le thème
+| `custom/tools/publication/print-layouts/*.css`              | `fanzine.css`, `book.css` | Seulement les fanzines, ou les livres/livrets, peu importe le thème
+| `themes/NOM_DU_THEME/tools/publication/*.css`               | Peu importe               | Toute publication, pour un thème donné
+| `themes/NOM_DU_THEME/tools/publication/print-layouts/*.css` | `fanzine.css`, `book.css` | Seulement les fanzines, ou les livres/livrets, pour un thème donné
 
 ## Configuration serveur (`wakka.config.php`)
+
+**Remarque** : les réglages principaux sont exposés dans l'action `{{ editconfig }}`.
 
 Le fichier de configuration [`wakka.config.php`][wakka-config] accepte
 plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informatique.
@@ -496,10 +497,13 @@ La génération de PDF va échouer sur un environnement technique où YesWiki _e
 `htmltopdf_base_url` sera utilisée comme substitut pour accéder aus contenus du wiki (pages, images, vidéos, etc.).
 
 ```php
+// docker run -p 8000:80 …
 array(
-    'base_url' => 'https://example.com/?,
+    // URL exposée par le conteneur Docker (extérieur)
+    'base_url' => 'https://example.com:8000/?,
     ...
-    'htmltopdf_base_url' => 'http://localhost:8000',
+    // URL à l'intérieur du conteneur Docker (port interne)
+    'htmltopdf_base_url' => 'http://localhost:80/?',
 );
 ```
 

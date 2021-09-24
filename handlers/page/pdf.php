@@ -15,6 +15,7 @@ if (!defined("WIKINI_VERSION")) {
     die("acc&egrave;s direct interdit");
 }
 
+ob_start(); // to catch all message that could be put in first lines of pdf file
 if (!is_executable($this->config['htmltopdf_path']) && empty($this->config['htmltopdf_service_url'])) {
     echo $this->Header()."\n";
     echo '<div class="alert alert-danger alert-error">'
@@ -132,6 +133,7 @@ if (($this->UserIsAdmin() && isset($_GET['print-debug']))
 }
 
 if (file_exists($fullFilename)) {
+    ob_end_clean();
     $size = filesize($fullFilename);
     header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
     header("Content-type: application/force-download");
@@ -148,7 +150,9 @@ if (file_exists($fullFilename)) {
     header("Content-Description: File Transfer");
     header("Content-length: $size");
     readfile($fullFilename);
+    exit();
 } else {
+    ob_end_flush();
     echo $this->Header()."\n";
     echo '<div class="alert alert-danger alert-error">'._t('PUBLICATION_NO_GENERATED_PDF_FILE_FOUND').'</div>'."\n";
     if (count($output) > 0) {

@@ -1,0 +1,4 @@
+{# prepend publication button at the top of BAZ_actions_fiche part #}
+{{ include('tools/bazar/templates/entries/view.twig')
+    |replace({'<div class="BAZ_actions_fiche">':
+    '<div class="BAZ_actions_fiche">'~include('@bazar/entries/_publication_button.twig')})|raw }}

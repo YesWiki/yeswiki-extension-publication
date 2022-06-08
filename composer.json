@@ -8,6 +8,15 @@
       "test": "exit 0"
     },
     "require": {
-        "chrome-php/chrome": "^1"
-    }
+      "php": "^7.3 || ^8.0",
+      "ext-sockets": "*",
+      "chrome-php/chrome": "^1"
+    },
+    "config": {
+      "optimize-autoloader": true,
+      "platform": {
+          "php": "7.3.0"
+      },
+      "sort-packages": true
+  }
 }

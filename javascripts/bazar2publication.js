@@ -51,7 +51,7 @@ $(document).ready(function(){
       params.delete('query');
     }
     
-    let newUrl = decodeURIComponent(url).replace(/\/pdf=($|&|\?)/,'/pdf$1')
+    let newUrl = decodeURIComponent(url).replace(/(\/(?:pdf|preview))=($|&|\?)/,'$1$2');
     if ( wiki.isDebugEnabled) {
       console.debug('Updating url %s', newUrl)
     }
@@ -62,6 +62,7 @@ $(document).ready(function(){
   });
   $(document).on('click', 'a.bazar2publication-action', function(event) {
     updateLink($(this));
+    toastMessage(_t('PUBLICATION_PDF_GENERATION_LANCHED'),7000,'alert alert-primary');
     event.preventDefault()
 
     const $button = $(this)

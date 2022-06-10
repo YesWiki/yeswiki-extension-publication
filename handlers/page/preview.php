@@ -50,6 +50,10 @@ if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarli
             // redefine template
             $params['template'] = $templateName;
             $params['dynamic'] = false;
+            $params['search'] = false;
+            if (isset($params['groups'])){
+                unset($params['groups']);
+            }
             $content = $this->Action($actionName, 0, $params);
         }
     }

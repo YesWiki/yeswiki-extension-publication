@@ -102,6 +102,8 @@ return [
     'AB_publication_bazar2publication_icon_label' => 'Icône',
     'AB_publication_bazar2publication_class_label' => 'Classe',
     'AB_publication_bazar2publication_templatepage_label' => 'Page modèle',
+    'AB_publication_bazar2publication_exludedfields_label' => 'Champs à ne pas imprimer',
+    'AB_publication_bazar2publication_exludedfields_hint' => 'séparés par des virgules. ex : bf_ville,bf_tel (mettre ,, pour supprimer les labelhtml)',
     'AB_publication_publication_template_label' => 'Définir une page comme modèle de page',
     'AB_publication_publication_template_hint' => 'A ajouter dans une page modèle',
     'AB_publication_publicationgenerator_label' => 'Générateur de publication',

@@ -19,6 +19,11 @@ actions:
       templatepage:
         label: _t(AB_publication_bazar2publication_templatepage_label)
         type: page-list
+      excludedfields:
+        label: _t(AB_publication_bazar2publication_exludedfields_label)
+        hint: _t(AB_publication_bazar2publication_exludedfields_hint)
+        type: text
+        defaul: ''
   blankpage:
     label: _t(AB_publication_blanckpage_label)
     hint: _t(AB_publication_blanckpage_hint)

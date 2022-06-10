@@ -51,10 +51,11 @@ $(document).ready(function(){
       params.delete('query');
     }
     
+    let newUrl = decodeURIComponent(url).replace(/\/pdf=($|&|\?)/,'/pdf$1')
     if ( wiki.isDebugEnabled) {
-      console.debug('Updating url %s', url)
+      console.debug('Updating url %s', newUrl)
     }
-    $button.attr('href',url);
+    $button.attr('href',newUrl);
   }
   $(document).on('mousedown', 'a.bazar2publication-action', function(event) {
     updateLink($(this));

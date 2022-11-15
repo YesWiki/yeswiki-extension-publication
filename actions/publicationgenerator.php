@@ -222,11 +222,11 @@ if (isset($_POST) && count($_POST)) {
         // So far everything is OK
         if (strcasecmp($_POST['outputformat'], 'ebook') == 0) {  // We want to produce an ebook (default behaviour)
             do { // use of a do-while loop in order to allow for breaks (in case of errors specific to ebooks)
-              if (isset($_POST["publication-cover-image"]) && $_POST["publication-cover-image"] !== '' && preg_match("/.(jpe?g|png|svg)$/i", $_POST["publication-cover-image"]) != 1) {
-                  // there is no publication-cover-image
-                  $output = '<div class="alert alert-danger">' . _t('PUBLICATION_NOT_IMAGE_FILE') . '</div>' . "\n";
-                  break; // Stops the current do-while loop
-              }
+                if (isset($_POST["publication-cover-image"]) && $_POST["publication-cover-image"] !== '' && preg_match("/.(jpe?g|png|svg)$/i", $_POST["publication-cover-image"]) != 1) {
+                    // there is no publication-cover-image
+                    $output = '<div class="alert alert-danger">' . _t('PUBLICATION_NOT_IMAGE_FILE') . '</div>' . "\n";
+                    break; // Stops the current do-while loop
+                }
                 // So far everything is OK (regarding ebooks)
                 if (isset($ebookPageName) && !empty($ebookPageName)) {
                     $pageName = $ebookPageName;
@@ -337,7 +337,7 @@ if (isset($this->page["metadatas"]["publication-title"])) {
 }
 
 $this->addCssFile('tools/publication/presentation/styles/publication.css');
-$this->AddJavascriptFile('tools/publication/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
+$this->AddJavascriptFile('javascripts/vendor/jquery-ui-sortable/jquery-ui.min.js');
 $this->AddJavascriptFile('tools/publication/javascripts/publicationgenerator.js');
 
 echo $this->render('@publication/publicationgenerator.twig', [

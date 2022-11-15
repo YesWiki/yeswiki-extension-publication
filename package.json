@@ -5,7 +5,7 @@
   "description": "Crée un pdf à partir d'une sélection de pages YesWiki.",
   "main": "index.js",
   "scripts": {
-    "postinstall": "cp -f node_modules/pagedjs/dist/paged.* libs/vendor/pagedjs",
+    "postinstall": "(cp -f node_modules/pagedjs/dist/paged.esm.js javascripts/vendor/pagedjs/paged.esm.js || 1) && cp -f node_modules/pagedjs/LICENSE.md javascripts/vendor/pagedjs/LICENSE.md",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

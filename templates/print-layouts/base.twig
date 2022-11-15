@@ -24,9 +24,9 @@
 
     {% block js %}
 		<!-- Paged.js handles the printing layout -->
-		<script type="module" src="{{ baseUrl }}/tools/publication/presentation/browser/print.js"></script>
+		<script type="module" src="{{ baseUrl }}/tools/publication/javascripts/browser/print.js"></script>
     {% endblock %}
-    <script src="{{ baseUrl }}/tools/publication/presentation/browser/is-pdf-ready.js"></script>
+    <script src="{{ baseUrl }}/tools/publication/javascripts/browser/is-pdf-ready.js"></script>
   </head>
 
 	<body class="{{ stylesModifiers | join(' ') }}" data-publication="{{ initialPublicationState | default('awaiting-layout') }}">

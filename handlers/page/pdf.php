@@ -36,8 +36,8 @@ if (!empty($_GET['url']) && !in_array(parse_url($_SERVER['HTTP_REFERER']??'', PH
 
 $url = str_replace(array('/wakka.php?wiki=', '/?'), '', $this->config['base_url']);
 $pagedjs_hash = sha1(json_encode(array_merge([
-  file_get_contents(__DIR__ . '/../../presentation/browser/print.js'),
-  file_get_contents(__DIR__ . '/../../libs/vendor/pagedjs/paged.esm.js')
+  file_get_contents(__DIR__ . '/../../javascripts/browser/print.js'),
+  file_get_contents(__DIR__ . '/../../javascripts/vendor/pagedjs/paged.esm.js')
 ])));
 
 if (!empty($_GET['url'])) {

@@ -1,4 +1,4 @@
-import {Previewer, registerHandlers, Handler} from '../../libs/vendor/pagedjs/paged.esm.js'
+import {Previewer, registerHandlers, Handler} from '../../javascripts/vendor/pagedjs/paged.esm.js'
 
 /**
  * Returns true if the second array contains all the selectors of the first array

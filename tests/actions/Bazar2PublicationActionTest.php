@@ -36,6 +36,7 @@ class Bazar2PublicationActionTest extends YesWikiTestCase
 
         $exceptionThrown = false;
         try {
+            $GLOBALS['wiki'] = $wiki; // because global $wiki could not be defned because the main script is not index.php
             $output = $wiki->Format($yesWikiString);
         } catch (Exception $th) {
             $exceptionThrown = true;
@@ -56,11 +57,22 @@ class Bazar2PublicationActionTest extends YesWikiTestCase
 
     public function providerTestRun()
     {
-        // 'templatepage', 'templatepage alert displayed', 'exception thrown'
         return [
-            ['', false, false],
-            [' ', true, false],
-            ['PageTitre', false, false], // because PageTitre exists all the time
+            'default behaviour' => [
+                'templatepage'=>'',
+                'templatepage alert displayed' => false,
+                'exception thrown' => false
+            ],
+            'wrong template page' => [
+                'templatepage'=>' ',
+                'templatepage alert displayed' => true,
+                'exception thrown' => false
+            ],
+            'template from template Page' => [
+                'templatepage'=>'PageTitre',  // because PageTitre exists all the time
+                'templatepage alert displayed' => false,
+                'exception thrown' => false
+            ],
         ];
     }
 }

@@ -15,7 +15,7 @@ jobs:
 
     - name: Test and package the extension
       id: release
-      uses: oncletom/yeswiki-release-action@v1
+      uses: yeswiki/yeswiki-release-action@v1
 
     - name: Assess md5 and archive name
       run: |

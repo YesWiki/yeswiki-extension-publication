@@ -29,9 +29,6 @@ body {
     margin-left: -1rem;
     font-size: 0.9rem;
   }
-  @bottom-left-corner {
-    content: counter(page);
-  }
 }
 
 @page :right {
@@ -43,9 +40,6 @@ body {
     letter-spacing: 0.08rem;
     margin-right: -1rem;
     font-size: 0.9rem;
-  }
-  @bottom-right-corner {
-    content: counter(page);
   }
   @top-center {
     content: string(booktitle);

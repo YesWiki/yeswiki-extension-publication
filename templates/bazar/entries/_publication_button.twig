@@ -1,5 +1,6 @@
 <a class="btn btn-entry-action btn-sm btn-default"
     href="{{ entry['external-data'] ? entry.url ~ '/pdf' : url({ tag: entryId, handler: 'pdf' }) }}"
+    onclick="toastMessage(_t('PUBLICATION_PDF_GENERATION_LANCHED'),7000,'alert alert-primary');"
     title="{{ _t('PUBLICATION_EXPORT_PAGE_TO_PDF') }}">
     <i class="fas fa-book"></i>
     {{~ _t('PUBLICATION_DOWNLOAD_PDF') ~}}

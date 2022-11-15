@@ -202,7 +202,7 @@ $output = '';
 // Page creation
 
 if (isset($_POST) && count($_POST)) {
-  do { // use of a do-while loop in order to allow for breaks (in case of errors)
+    do { // use of a do-while loop in order to allow for breaks (in case of errors)
         if (!isset($_POST['antispam']) || $_POST['antispam'] != 1) {
             // There may be a spamming problem
             array_push($messages, array('danger', _t('PUBLICATION_SPAM_RISK')));
@@ -338,7 +338,7 @@ if (isset($this->page["metadatas"]["publication-title"])) {
 
 $this->addCssFile('tools/publication/presentation/styles/publication.css');
 $this->AddJavascriptFile('tools/publication/libs/vendor/jquery-ui-sortable/jquery-ui.min.js');
-$this->AddJavascriptFile('tools/publication/presentation/actions/publicationgenerator.js');
+$this->AddJavascriptFile('tools/publication/javascripts/publicationgenerator.js');
 
 echo $this->render('@publication/publicationgenerator.twig', [
   'messages' => $messages,

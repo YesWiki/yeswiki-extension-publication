@@ -1,7 +1,10 @@
+{{ include_css('tools/publication/presentation/styles/publication.css') }}
+{{ include_javascript('tools/publication/javascripts/bazar2publication.js') }}
+
 {% if options.templatepage and templatePage is empty %}
-<div class="alert alert-warning">
-  {{ _t('PUBLICATION_TEMPLATE_PAGE_NOT_FOUND') ~ options.templatepage }}
-</div>
+  <div class="alert alert-warning">
+    {{ _t('PUBLICATION_TEMPLATE_PAGE_NOT_FOUND') ~ options.templatepage }}
+  </div>
 {% endif %}
 
 <a download href="{{ href | raw}}" class="btn btn-primary bazar2publication-action hide-from-print {{ options.class }}">

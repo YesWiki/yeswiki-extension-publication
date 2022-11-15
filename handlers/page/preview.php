@@ -19,38 +19,43 @@ $templateEngine = $wiki->services->get(TemplateEngine::class);
  * Print from {{ bazar2publication }} (dynamic results)
  */
 if ($wiki->HasAccess('read') && isset($_GET['via']) && $_GET['via'] === 'bazarliste') {
-  // we assemble bazar pages
-  $content = '';
-  $templateName = 'rendered-entries.tpl.html';
-  if (!$templateEngine->hasTemplate('@bazar/'.$templateName)) {
-      // backward compatibilty
-      preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
-      list(, $formId) = $matches;
+    // we assemble bazar pages
+    $content = '';
+    $templateName = 'rendered-entries.tpl.html';
+    if (!$templateEngine->hasTemplate('@bazar/'.$templateName)) {
+        // backward compatibilty
+        preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $wiki->page['body'], $matches);
+        list(, $formId) = $matches;
 
-      $query = isset($_GET['query']) ? $_GET['query'] : '';
+        $query = isset($_GET['query']) ? $_GET['query'] : '';
 
-      $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
+        $results = $entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
 
-      $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
-          return $html . $entryController->view($fiche);
-      }, '');
-  }
-  /**
-   * Print from page, but render its {{ bazar* }} elements
-   */
-  elseif (preg_match('/({{(bazarliste|bazarcarto|calendrier|map|gogomap)\s[^}]*}})/i', $wiki->page['body'], $matches)) {
-      $actionText = $matches[1];
-      $actionName = $matches[2];
-      $matches = [];
-      $params = [];
-      if (preg_match_all('/([a-zA-Z0-9_]*)=\"(.*)\"/U', $actionText, $matches)) {
-          foreach ($matches[0] as $id => $match) {
-              $params[$matches[1][$id]] = $matches[2][$id];
-          }
-          // redefine template
-          $params['template'] = $templateName;
-          $content = $this->Action($actionName, 0, $params);
-      }
+        $content = array_reduce($results, function ($html, $fiche) use ($entryController) {
+            return $html . $entryController->view($fiche);
+        }, '');
+    }
+    /**
+     * Print from page, but render its {{ bazar* }} elements
+     */
+    elseif (preg_match('/({{(bazarliste|bazarcarto|calendrier|map|gogomap)\s[^}]*}})/i', $wiki->page['body'], $matches)) {
+        $actionText = $matches[1];
+        $actionName = $matches[2];
+        $matches = [];
+        $params = [];
+        if (preg_match_all('/([a-zA-Z0-9_]*)=\"(.*)\"/U', $actionText, $matches)) {
+            foreach ($matches[0] as $id => $match) {
+                $params[$matches[1][$id]] = $matches[2][$id];
+            }
+            // redefine template
+            $params['template'] = $templateName;
+            $params['dynamic'] = false;
+            $params['search'] = false;
+            if (isset($params['groups'])){
+                unset($params['groups']);
+            }
+            $content = $this->Action($actionName, 0, $params);
+        }
     }
 
     // we gather a few things from
@@ -117,29 +122,31 @@ $publication['content'] = preg_replace('#<div class="clearfix"></div><div class=
 
 if ($publication) {
     // user  options
-    $metadatas = $publicationService->getOptions($publication['metadatas'] ?? [], isset($_GET['layout'])
+    $metadatas = $publicationService->getOptions(
+        $publication['metadatas'] ?? [],
+        isset($_GET['layout'])
      ? [ "publication-fanzine" => ["layout" => $_GET['layout'] ] ]
      : []
     );
 
     //
     if (!$publicationService->isMode($metadatas['publication-mode'])) {
-      //TODO turn into template
-      return 'Mode inconnu';
+        //TODO turn into template
+        return 'Mode inconnu';
     }
 
     // Load the cascade of publication styles
     $cssFiles = array_merge(
-      glob('tools/publication/presentation/styles/print-layouts/'.$metadatas['publication-mode'].'.css'),
-      glob('tools/publication/presentation/styles/*.css'),
-      glob('themes/'.$wiki->config['favorite_theme'].'/tools/publication/*.css'),
-      glob('themes/'.$wiki->config['favorite_theme'].'/tools/publication/print-layouts/'.$metadatas['publication-mode'].'.css'),
-      glob('custom/tools/publication/*.css'),
-      glob('custom/tools/publication/print-layouts/'.$metadatas['publication-mode'].'.css'),
+        glob('tools/publication/presentation/styles/print-layouts/'.$metadatas['publication-mode'].'.css'),
+        glob('tools/publication/presentation/styles/*.css'),
+        glob('themes/'.$wiki->config['favorite_theme'].'/tools/publication/*.css'),
+        glob('themes/'.$wiki->config['favorite_theme'].'/tools/publication/print-layouts/'.$metadatas['publication-mode'].'.css'),
+        glob('custom/tools/publication/*.css'),
+        glob('custom/tools/publication/print-layouts/'.$metadatas['publication-mode'].'.css'),
     );
 
-    array_map(function($file) use ($wiki) {
-      $wiki->AddCSSFile($file);
+    array_map(function ($file) use ($wiki) {
+        $wiki->AddCSSFile($file);
     }, $cssFiles);
 
     // cover image

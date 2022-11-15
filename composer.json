@@ -5,9 +5,19 @@
     "license": "GPL-3.0",
     "minimum-stability": "stable",
     "scripts": {
-      "test": "exit 0"
+      "test": "exit 0",
+      "update-force-silent": "@composer update --ignore-platform-req=ext-sockets"
     },
     "require": {
-        "chrome-php/chrome": "^1"
+      "php": "^7.3 || ^8.0",
+      "ext-sockets": "*",
+      "chrome-php/chrome": "^1"
+    },
+    "config": {
+      "optimize-autoloader": true,
+      "platform": {
+          "php": "7.3.0"
+      },
+      "sort-packages": true
     }
 }

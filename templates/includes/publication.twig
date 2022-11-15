@@ -18,7 +18,7 @@
             {{ _t('PUBLICATION_EBOOK_ORIENTATION_%s' | format(metas['publication-book']['page-orientation']| upper)) }}
           {% elseif metas['publication-mode'] == 'fanzine' %}
             {{ _t('PUBLICATION_FANZINE_LAYOUT_%s' | format(metas['publication-fanzine']['layout'] | replace({'-': '_'}) | upper)) }}
-            <img src="tools/publication/presentation/fanzine-layouts/{{ metas['publication-fanzine']['layout'] }}.svg" alt="" class="fanzine-layout img-icon">
+            <img src="tools/publication/styles/fanzine-layouts/{{ metas['publication-fanzine']['layout'] }}.svg" alt="" class="fanzine-layout img-icon">
           {% endif %}
           </small>
         </p>

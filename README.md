@@ -35,7 +35,7 @@ Les publications générées sont de type [livres/livrets](#pour-générer-des-l
   </tr>
   <tr>
     <td>
-      <img src="presentation/fanzine-layouts/single-page.svg" alt="">
+      <img src="styles/fanzine-layouts/single-page.svg" alt="">
     </td>
     <td>
     </td>

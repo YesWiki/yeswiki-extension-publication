@@ -336,7 +336,7 @@ if (isset($this->page["metadatas"]["publication-title"])) {
     $selectedPages = array();
 }
 
-$this->addCssFile('tools/publication/presentation/styles/publication.css');
+$this->addCssFile('tools/publication/styles/publication.css');
 $this->AddJavascriptFile('javascripts/vendor/jquery-ui-sortable/jquery-ui.min.js');
 $this->AddJavascriptFile('tools/publication/javascripts/publicationgenerator.js');
 

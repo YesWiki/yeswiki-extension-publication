@@ -59,7 +59,7 @@ $pages = array_map(function($page) use ($wiki, $publicationService) {
   return $page;
 }, $wiki->LoadAll($sql));
 
-$this->addCssFile('tools/publication/presentation/styles/publication.css');
+$this->addCssFile('tools/publication/styles/publication.css');
 
 echo $wiki->render('@publication/publicationlist.twig', [
   'hasWriteAccess' => $this->HasAccess('write'),

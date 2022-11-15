@@ -137,8 +137,8 @@ if ($publication) {
 
     // Load the cascade of publication styles
     $cssFiles = array_merge(
-        glob('tools/publication/presentation/styles/print-layouts/'.$metadatas['publication-mode'].'.css'),
-        glob('tools/publication/presentation/styles/*.css'),
+        glob('tools/publication/styles/print-layouts/'.$metadatas['publication-mode'].'.css'),
+        glob('tools/publication/styles/*.css'),
         glob('themes/'.$wiki->config['favorite_theme'].'/tools/publication/*.css'),
         glob('themes/'.$wiki->config['favorite_theme'].'/tools/publication/print-layouts/'.$metadatas['publication-mode'].'.css'),
         glob('custom/tools/publication/*.css'),

@@ -11,10 +11,10 @@ Les publications générées sont de type [livres/livrets](#pour-générer-des-l
 <table>
   <tr>
     <td>
-      <img src="screenshot-edit.png" alt="">
+      <img src="docs/fr/images/screenshot-edit.png" alt="">
     </td>
     <td>
-      <img src="screenshot-preview.png" alt="">
+      <img src="docs/fr/images/screenshot-preview.png" alt="">
     </td>
   </tr>
   <tr>
@@ -23,10 +23,10 @@ Les publications générées sont de type [livres/livrets](#pour-générer-des-l
   </tr>
   <tr>
     <td>
-      <img src="screenshot-page-index.png" alt="">
+      <img src="docs/fr/images/screenshot-page-index.png" alt="">
     </td>
     <td>
-      <img src="screenshot-bazar-export.png" alt="">
+      <img src="docs/fr/images/screenshot-bazar-export.png" alt="">
     </td>
   </tr>
   <tr>

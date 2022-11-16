@@ -111,6 +111,13 @@ registerHandlers(class backgroundImageCover extends Handler {
       page.style.backgroundImage = `url(${node.dataset.backgroundImage})`
     }
   }
+
+  afterRendered(pages) {
+    if (browserPrintAfterRendered === true){
+      // print page with browser
+      window.print();
+    }
+  }
 })
 
 window.addEventListener('load', () => {

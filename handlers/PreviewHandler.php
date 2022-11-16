@@ -74,6 +74,7 @@ class PreviewHandler extends YesWikiHandler
             //
             "initialPublicationState" => $this->publicationService->isPaged($metadatas['publication-mode']) ?: 'ready',
             "stylesModifiers" => $this->publicationService->getStyles($metadatas, ['debug' => $this->wiki->config['debug']]),
+            'browserPrintAfterRendered' => filter_input(INPUT_GET, 'browserPrintAfterRendered', FILTER_VALIDATE_BOOLEAN) === true,
         ]);
 
         // Insert a blank page after a cover page

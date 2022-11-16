@@ -2,11 +2,13 @@
 
 namespace YesWiki\Publication\Service;
 
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Core\YesWikiController;
 use YesWiki\Core\Service\DbService;
 use YesWiki\Core\Service\PageManager;
 use YesWiki\Core\Service\TemplateEngine;
+use YesWiki\Wiki;
 
 class PdfHelper
 {
@@ -22,17 +24,23 @@ class PdfHelper
     protected $entryManager;
     protected $templateEngine;
     protected $pageManager;
+    protected $params;
+    protected $wiki;
 
     public function __construct(
         DbService $dbService,
         EntryManager $entryManager,
         TemplateEngine $templateEngine,
-        PageManager $pageManager
+        PageManager $pageManager,
+        ParameterBagInterface $params,
+        Wiki $wiki
     ) {
         $this->dbService = $dbService;
         $this->entryManager = $entryManager;
         $this->templateEngine = $templateEngine;
         $this->pageManager = $pageManager;
+        $this->params = $params;
+        $this->wiki = $wiki;
     }
 
     /**
@@ -113,7 +121,7 @@ class PdfHelper
         } else {
             $templateFileName = '';
         }
-        
+
         if (!empty($templateFileName)) {
             foreach (self::PATH_LIST as $path) {
                 if (file_exists($path.$templateFileName)) {
@@ -155,5 +163,80 @@ class PdfHelper
         'LIMIT 1';
 
         return $results = $this->dbService->loadSingle($SQLRequest);
+    }
+
+    /**
+     * getData to prepare export PDF
+     * @param array $get
+     * @param array $server
+     * @return array compact(['pageTag','sourceUrl','hash','dlFilename','fullFilename'])
+     */
+    public function getFullFileName(array $get, array $server): array
+    {
+        $pagedjs_hash = sha1(json_encode(array_merge([
+            file_get_contents('tools/publication/javascripts/browser/print.js'),
+            file_get_contents('tools/publication/javascripts/vendor/pagedjs/paged.esm.js')
+          ])));
+
+        list('pageTag'=>$pageTag, 'sourceUrl'=>$sourceUrl, 'hash'=>$hash) =
+            $this->getData($get, $server, $pagedjs_hash);
+
+        $dlFilename = sprintf(
+            '%s-%s.pdf',
+            $pageTag,
+            $hash
+        );
+        $dirname = sys_get_temp_dir()."/yeswiki/";
+        if (!file_exists($dirname)) {
+            mkdir($dirname);
+        }
+        $fullFilename = sprintf(
+            '%s/yeswiki/%s-%s-%s.pdf',
+            sys_get_temp_dir(),
+            $pageTag,
+            'publication',
+            $hash
+        );
+        return compact(['pageTag','sourceUrl','hash','dlFilename','fullFilename']);
+    }
+
+    /**
+     * getData to prepare export PDF
+     * @param array $get
+     * @param array $server
+     * @param string $pagedjs_hash
+     * @return array compact(['pageTag','sourceUrl','hash'])
+     */
+    protected function getData(array $get, array $server, string $pagedjs_hash): array
+    {
+        $pageTag = '';
+        $sourceUrl = '';
+        $hash = '';
+        if (!empty($get['url'])) {
+            $pageTag = isset($get['urlPageTag']) ? $get['urlPageTag'] : 'publication';
+            $sourceUrl = $get['url'];
+            $hash = substr(sha1($pagedjs_hash . strtolower($server['QUERY_STRING'])), 0, 10);
+        } else {
+            $pageTag = $this->wiki->GetPageTag();
+            $pdfTag = $this->wiki->MiniHref('pdf', $pageTag);
+            $sourceUrl = $this->wiki->href('preview', $pageTag, preg_replace('#^'. $pdfTag .'&?#', '', $server['QUERY_STRING']), false);
+
+
+            $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
+                $this->wiki->page,
+                ['query_string' => strtolower($server['QUERY_STRING']),
+                $this->getPageEntriesContent(
+                    $pageTag,
+                    $get['via'] ?? null
+                ) ?? []]
+            ))), 0, 10);
+
+            // In case we are behind a proxy (like a Docker container)
+            // It allows us to properly load the document from within the container itself
+            if ($this->params->get('htmltopdf_base_url')) {
+                $sourceUrl = str_replace($this->params->get('base_url'), $this->params->get('htmltopdf_base_url'), $sourceUrl);
+            }
+        }
+        return compact(['pageTag','sourceUrl','hash']);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace YesWiki\Test\Publication\Service;
 
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Publication\Service\PdfHelper;
 use YesWiki\Core\Service\DbService;
@@ -360,5 +361,95 @@ class PdfHelperTest extends YesWikiTestCase
         if (file_exists('custom/templates/bazar/'.$templateName)) {
             unlink('custom/templates/bazar/'.$templateName);
         }
+    }
+
+    /**
+     * @depends testPdfHelperExisting
+     * @covers PdfHelper::getFullFileName
+     * @dataProvider dataProviderGetFullFileName
+     * @param array $get
+     * @param array $server
+     * @param array $expected
+     * @param Wiki $wiki
+     */
+    public function testGetFullFileName(array $get, array $server, array $expected, Wiki $wiki)
+    {
+        $previousPage = $this->setRootPage($wiki);
+        $server['QUERY_STRING'] = str_replace(
+            '{{rootPageTag}}',
+            $wiki->tag,
+            $server['QUERY_STRING']
+        );
+        $results = $this->getService($wiki, PdfHelper::class)->getFullFileName($get, $server);
+        $hash = $results['hash'] ?? 'unset-hash';
+        $expected = array_map(function ($value) use ($wiki, $hash) {
+            return str_replace(
+                ['{{rootPageTag}}','{{hash}}'],
+                [$wiki->tag,$hash],
+                $value
+            );
+        }, $expected);
+        $this->setPage($wiki, $previousPage);
+        foreach ($expected as $key => $value) {
+            $this->assertArrayHasKey($key, $results);
+            if ($value == 'not empty') {
+                $this->assertNotEmpty($results[$key]);
+            } elseif (substr($value, 0, 7) == 'regexp:') {
+                $this->assertMatchesRegularExpression(substr($value, 7), $results[$key], "not waited value in 'results' for key $key, $value");
+            } else {
+                $this->assertSame($value, $results[$key], "not same value in 'results' for key $key, expected $value");
+            }
+        }
+    }
+
+    public function dataProviderGetFullFileName()
+    {
+        return [
+            'first test' => [
+                'get' => [],
+                'server' => [
+                    'QUERY_STRING' => '{{rootPageTag}}'
+                ],
+                'expected' => [
+                    'pageTag' => '{{rootPageTag}}',
+                    'dlFilename' => 'regexp:/^{{rootPageTag}}-{{hash}}\.pdf$/',
+                    'fullFilename' => 'regexp:/.+\/yeswiki\/{{rootPageTag}}-publication-{{hash}}\.pdf$/',
+                    'hash' => 'regexp:/^[A-Fa-f0-9]{10,}$/',
+                    'sourceUrl' => 'regexp:/^https?:\/\/.+\/\??{{rootPageTag}}\/preview.*$/'
+                ],
+            ],
+        ];
+    }
+
+    protected function setRootPage(Wiki $wiki): array
+    {
+        $previousPageTag = $wiki->tag;
+        $previousPageContent = $wiki->page;
+        $rootPageTag = $this->getParam($wiki, 'root_page');
+        $this->setPage($wiki, [
+            'tag'=>$rootPageTag,
+            'content' => $this->getService($wiki, PageManager::class)->getOne($rootPageTag)
+        ]);
+        return [
+            'tag'=>$previousPageTag,
+            'content'=>$previousPageContent
+        ];
+    }
+
+    protected function setPage(Wiki $wiki, array $pageInfo)
+    {
+        $wiki->tag = $pageInfo['tag'];
+        $wiki->page = $pageInfo['content'];
+    }
+
+    protected function getService(Wiki $wiki, string $className)
+    {
+        return $wiki->services->get($className);
+    }
+
+    protected function getParam(Wiki $wiki, string $name): ?string
+    {
+        $params = $this->getService($wiki, ParameterBagInterface::class);
+        return $params->get($name);
     }
 }

@@ -74,7 +74,7 @@ return [
     'PUBLICATION_PAGINATION_BOTTOM_CENTER' => 'En bas, au centre',
     'PUBLICATION_PAGINATION_BOTTOM_SIDES' => 'En bas, sur les côtés',
     'PUBLICATION_PAGINATION_NONE' => 'Aucun',
-    'PUBLICATION_PARAMETER_DEPRECATED' => 'Le paramètre <code>%s</code> a été remplacé par <code>%s</code>.',
+    'PUBLICATION_PARAMETER_DEPRECATED' => 'Le paramètre <code>%{oldName}</code> a été remplacé par <code>%{newName}</code>.',
     'PUBLICATION_PREVIEW' => 'Aperçu',
     'PUBLICATION_SEE_NEWSLETTER' => 'Voir la newsletter',
     'PUBLICATION_SEE_PAGE' => 'Voir la page',

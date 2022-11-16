@@ -137,7 +137,7 @@ return [
     'AB_publication_publicationgenerator_template_label' => 'template',
     'AB_publication_publicationgenerator_template_hint' => 'ex: exportpages_table.tpl.html',
     'AB_publication_publicationlist_label' => 'Liste des publications',
-    'AB_publication_publicationlist_pagenameprefix_label' => 'prefix de page',
+    'AB_publication_publicationlist_pagenameprefix_label' => 'préfixe de page',
 
     // edit config
     'EDIT_CONFIG_HINT_htmltopdf_path' => 'Chemin d\'accès serveur personnalisé à un Chrome/Chromium.',

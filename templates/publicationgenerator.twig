@@ -1,9 +1,11 @@
+{{ include_css('tools/publication/styles/publication.css') }}
+{{ include_javascript('javascripts/vendor/jquery-ui-sortable/jquery-ui.min.js') }}
+{{ include_javascript('tools/publication/javascripts/publicationgenerator.js') }}
+
 {% if messages is not empty %}
 <section class="messages">
   {% for message in messages %}
-  <div class="alert alert-{{ message[0] }}">
-    {{ message[1] }}
-  </div>
+    {{ include('@templates/alert-message.twig',message) }}
   {% endfor %}
 </section>
 {% endif %}

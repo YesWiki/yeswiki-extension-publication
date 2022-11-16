@@ -24,24 +24,24 @@ class ListContribAction extends YesWikiAction
         // get Service
         $this->pageManager = $this->getService(PageManager::class);
         // common
-        $anchor = str_replace('{field}',preg_quote($this->arguments['field'],'/'),self::FIELD_ANCHOR);
+        $anchor = str_replace('{field}', preg_quote($this->arguments['field'], '/'), self::FIELD_ANCHOR);
         $output = '';
 
         if (!empty($this->arguments['field'])) {
             $inclusions = $this->wiki->GetAllInclusions();
-            if (!empty($inclusions)){
+            if (!empty($inclusions)) {
                 $mainPageTag = array_pop($inclusions);
                 $mainPage = $this->pageManager->getOne($mainPageTag);
-                if (!empty($mainPage)){
+                if (!empty($mainPage)) {
                     $matches = [];
-                    if (preg_match_all(self::INCLUSION_ANCHOR, $mainPage['body'], $matches)){
+                    if (preg_match_all(self::INCLUSION_ANCHOR, $mainPage['body'], $matches)) {
                         $contributors = [];
                         foreach ($matches[1] as $pageTag) {
                             $page = $this->pageManager->getOne($pageTag);
-                            if (!empty($page)){
+                            if (!empty($page)) {
                                 $name = [];
-                                if (preg_match_all(self::FIELD_ANCHOR, $page['body'], $name)){
-                                    if (!empty($name[1][0])){
+                                if (preg_match_all($anchor, $page['body'], $name)) {
+                                    if (!empty($name[1][0])) {
                                         $v = ucwords(strtolower(trim(json_decode("\"{$name[1][0]}\""))));
                                         $v = str_replace(' Et ', ' et ', $v);
                                         $contributors[$v] = $v;
@@ -49,12 +49,12 @@ class ListContribAction extends YesWikiAction
                                 }
                             }
                         }
-                        if (!empty($contributors)){
+                        if (!empty($contributors)) {
                             ksort($contributors);
                             $output = '<ol>';
-                            $output .= implode('', array_map(function($c){
+                            $output .= implode('', array_map(function ($c) {
                                 return "<li>$c</li>";
-                            },$contributors));
+                            }, $contributors));
                             $output .= '</ol>';
                         }
                     }

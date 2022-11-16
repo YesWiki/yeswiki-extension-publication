@@ -24,30 +24,14 @@ class PdfHandler extends YesWikiHandler
             $this->checkPdfPath();
             $this->checkDomain($_GET ?? [], $_SERVER ?? []);
 
-            $pagedjs_hash = sha1(json_encode(array_merge([
-                file_get_contents('tools/publication/javascripts/browser/print.js'),
-                file_get_contents('tools/publication/javascripts/vendor/pagedjs/paged.esm.js')
-              ])));
-
-            list('pageTag'=>$pageTag, 'sourceUrl'=>$sourceUrl, 'hash'=>$hash) =
-                $this->getData($_GET ?? [], $_SERVER ?? [], $pagedjs_hash);
-
-            $dlFilename = sprintf(
-                '%s-%s.pdf',
-                $pageTag,
-                $hash
-            );
-            $dirname = sys_get_temp_dir()."/yeswiki/";
-            if (!file_exists($dirname)) {
-                mkdir($dirname);
-            }
-            $fullFilename = sprintf(
-                '%s/yeswiki/%s-%s-%s.pdf',
-                sys_get_temp_dir(),
-                $pageTag,
-                'publication',
-                $hash
-            );
+            list(
+                'pageTag'=>$pageTag,
+                'sourceUrl'=>$sourceUrl,
+                'hash'=>$hash,
+                'dlFilename'=>$dlFilename,
+                'fullFilename'=>$fullFilename
+            ) =
+                $this->pdfHelper->getFullFileName($_GET ?? [], $_SERVER ?? []);
             $file_exists = file_exists($fullFilename);
             if (($this->wiki->UserIsAdmin() && isset($_GET['print-debug']))
                     || !$file_exists
@@ -116,39 +100,6 @@ class PdfHandler extends YesWikiHandler
     protected function getBaseUrl(): string
     {
         return str_replace(array('/wakka.php?wiki=', '/?'), '', $this->params->get('base_url'));
-    }
-
-    protected function getData(array $get, array $server, string $pagedjs_hash): array
-    {
-        $pageTag = '';
-        $sourceUrl = '';
-        $hash = '';
-        if (!empty($get['url'])) {
-            $pageTag = isset($get['urlPageTag']) ? $get['urlPageTag'] : 'publication';
-            $sourceUrl = $get['url'];
-            $hash = substr(sha1($pagedjs_hash . strtolower($server['QUERY_STRING'])), 0, 10);
-        } else {
-            $pageTag = $this->wiki->GetPageTag();
-            $pdfTag = $this->wiki->MiniHref('pdf', $pageTag);
-            $sourceUrl = $this->wiki->href('preview', $pageTag, preg_replace('#^'. $pdfTag .'&?#', '', $server['QUERY_STRING']), false);
-
-
-            $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
-                $this->wiki->page,
-                ['query_string' => strtolower($server['QUERY_STRING']),
-                $this->pdfHelper->getPageEntriesContent(
-                    $pageTag,
-                    $get['via'] ?? null
-                ) ?? []]
-            ))), 0, 10);
-
-            // In case we are behind a proxy (like a Docker container)
-            // It allows us to properly load the document from within the container itself
-            if ($this->params->get('htmltopdf_base_url')) {
-                $sourceUrl = str_replace($this->params->get('base_url'), $this->params->get('htmltopdf_base_url'), $sourceUrl);
-            }
-        }
-        return compact(['pageTag','sourceUrl','hash']);
     }
 
     protected function redirectToPdfServiceIfNeeded(string $sourceUrl, string $hash)

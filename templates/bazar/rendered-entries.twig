@@ -1,0 +1,7 @@
+{% if param.entryController %}
+  {% for entry in fiches %}
+    {% if entry['external-data'] is empty %}
+      {{ attribute(param.entryController,'view',[entry.id_fiche])|raw }}
+    {% endif %}
+  {% endfor %}
+{% endif %}

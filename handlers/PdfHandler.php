@@ -59,7 +59,7 @@ class PdfHandler extends YesWikiHandler
      */
     protected function checkPdfPath()
     {
-        if (!is_executable($this->params->get('htmltopdf_path')) && empty($this->params->get('htmltopdf_service_url'))) {
+        if (!$this->pdfHelper->canExecChromium() && empty($this->params->get('htmltopdf_service_url'))) {
             throw new Exception(
                 _t('PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH').' : '
                   .$this->params->get('htmltopdf_path').'<br />'

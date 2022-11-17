@@ -2,6 +2,7 @@
 
 namespace YesWiki\Publication\Service;
 
+use Exception;
 use HeadlessChromium\BrowserFactory;
 use HeadlessChromium\Exception\OperationTimedOut;
 use HeadlessChromium\Page;
@@ -249,9 +250,11 @@ class PdfHelper
      * @param string $sourceUrl
      * @param string $fullFilename
      * @throws ExceptionWithHtml
+     * @throws Exception with code = 2
      */
     public function useBrowserToCreatePdfFromPage(string $sourceUrl, string $fullFilename)
     {
+        $this->assertCanExecChromium();
         try {
             $browserFactory = new BrowserFactory($this->params->get('htmltopdf_path'));
             $browser = $browserFactory->createBrowser($this->params->get('htmltopdf_options'));
@@ -276,5 +279,24 @@ class PdfHelper
             $browser->close();
             throw new ExceptionWithHtml($e->getMessage(), 0, $e, $html ?? '');
         }
+    }
+
+    /**
+     * check if chromium can be executed
+     * @throws Exception with code = 2
+     */
+    public function assertCanExecChromium()
+    {
+        if (!$this->canExecChromium()) {
+            throw new Exception("Path '{$this->params->get('htmltopdf_path')}' is not executable", 2);
+        }
+    }
+    /**
+     * check if chromium can be executed
+     * @return bool
+     */
+    public function canExecChromium(): bool
+    {
+        return !is_executable($this->params->get('htmltopdf_path'));
     }
 }

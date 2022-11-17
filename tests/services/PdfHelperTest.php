@@ -418,6 +418,37 @@ class PdfHelperTest extends YesWikiTestCase
                     'sourceUrl' => 'regexp:/^https?:\/\/.+\/\??{{rootPageTag}}\/preview.*$/'
                 ],
             ],
+            'test with url' => [
+                'get' => [
+                    'url' => 'http://localhost/?TesT/preview'
+                ],
+                'server' => [
+                    'QUERY_STRING' => '{{rootPageTag}}&url=http%3A%2F%2Flocalhost%2F%3FTesT%2Fpreview'
+                ],
+                'expected' => [
+                    'pageTag' => 'publication',
+                    'dlFilename' => 'regexp:/^publication-{{hash}}\.pdf$/',
+                    'fullFilename' => 'regexp:/.+\/yeswiki\/publication-publication-{{hash}}\.pdf$/',
+                    'hash' => 'regexp:/^[A-Fa-f0-9]{10,}$/',
+                    'sourceUrl' => 'regexp:/^http:\/\/localhost\/\?TesT\/preview$/'
+                ],
+            ],
+            'test with url and urlPageTag' => [
+                'get' => [
+                    'url' => 'http://localhost/?TesT/preview',
+                    'urlPageTag' => 'TesT'
+                ],
+                'server' => [
+                    'QUERY_STRING' => '{{rootPageTag}}&url=http%3A%2F%2Flocalhost%2F%3FTesT%2Fpreview&urlPageTag=TesT'
+                ],
+                'expected' => [
+                    'pageTag' => 'TesT',
+                    'dlFilename' => 'regexp:/^TesT-{{hash}}\.pdf$/',
+                    'fullFilename' => 'regexp:/.+\/yeswiki\/TesT-publication-{{hash}}\.pdf$/',
+                    'hash' => 'regexp:/^[A-Fa-f0-9]{10,}$/',
+                    'sourceUrl' => 'regexp:/^http:\/\/localhost\/\?TesT\/preview$/'
+                ],
+            ],
         ];
     }
 

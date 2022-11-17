@@ -14,7 +14,7 @@ require_once 'tests/YesWikiTestCase.php';
 
 // TODO update tests with new pdfHelper
 
-class PdfHelperTest extends YesWikiTestCase 
+class PdfHelperTest extends YesWikiTestCase
 {
     /**
      * @covers PdfHelper::__construct
@@ -39,7 +39,7 @@ class PdfHelperTest extends YesWikiTestCase
      * @param bool $clean
      * @param Wiki $wiki
      */
-    public function wiptestGetPageEntriesContent(string $pageTagMode, ?string $via, array $bazarlisteIds, bool $withTemplate, bool $clean, $expected, Wiki $wiki)
+    public function testGetPageEntriesContent(string $pageTagMode, ?string $via, array $bazarlisteIds, bool $withTemplate, bool $clean, $expected, Wiki $wiki)
     {
         if ($pageTagMode === 'entry') {
             $pageTag = $this->getEntryPageName($withTemplate);
@@ -47,14 +47,20 @@ class PdfHelperTest extends YesWikiTestCase
                 if (!empty($pageTag)) {
                     list($templateName, $templateContent) = $this->getCustomTemplate($pageTag, false);
                 }
-                if (empty($pageTag) || ($templateContent === '{{template not found}}')) {
-                    // create template for next tests
-                    $pageTag = $this->getEntryPageName(false);
-                    list($templateName, $templateContent) = $this->getCustomTemplate($pageTag, true);
-                } elseif ($templateContent === 'test') {
+                // do not use temporary template because it will not been registered by TemplateEngine
+                // if (empty($pageTag) || ($templateContent === '{{template not found}}')) {
+                //     // create template for next tests
+                //     $pageTag = $this->getEntryPageName(false);
+                //     list($templateName, $templateContent) = $this->getCustomTemplate($pageTag, true);
+                // }
+                if ($templateContent === 'test') {
                     $templatesNameToDelete[] = $templateName;
                 }
-                $expected["template content"] = $templateContent;
+                if ($templateContent == '{{template not found}}' && isset($expected["template content"])) {
+                    unset($expected["template content"]);
+                } else {
+                    $expected["template content"] = $templateContent;
+                }
             }
         } elseif ($pageTagMode === 'page') {
             if ($via === 'bazarliste') {
@@ -73,7 +79,7 @@ class PdfHelperTest extends YesWikiTestCase
                         $templatesNameToDelete[] = $templateName;
                     }
                 }
-                // }
+            // }
             } else {
                 $pageTag = $this->getPageTagWithoutBazar2Publication();
             }
@@ -98,7 +104,6 @@ class PdfHelperTest extends YesWikiTestCase
             $this->assertArrayHasKey('entries last-date', $results);
             $this->assertTrue(!empty($results['entries last-date']));
             $this->assertIsString($results['entries last-date']);
-            echo "\n\n".$results['entries last-date']."\n\n";
             foreach ($bazarlisteIds as $bazarlisteId) {
                 $this->assertArrayHasKey('template fiche-'.$bazarlisteId, $results);
                 $this->assertSame($expected['template fiche-'.$bazarlisteId], $results['template fiche-'.$bazarlisteId]);
@@ -112,17 +117,94 @@ class PdfHelperTest extends YesWikiTestCase
     {
         // pageTagMode ,via, bazarlisteIds, withTemplate, clean,expected
         return [
-            'page not entry' => ['page',null,[],false,false,[]],
-            'page not entry with via without template' => ['page','bazarliste',['3'],false,false,['entries last-date' => '{{date}}']],
-            'page not entry with via with template' => ['page','bazarliste',['1'],false,false,['entries last-date' => '{{date}}','template fiche-1' => '{{content}}']],
-            'page not entry with via 2 ids with template' => ['page','bazarliste',['1','3'],false,false,['entries last-date' => '{{date}}','template fiche-1' => '{{content}}']],
-            'page not entry with via 2 ids with templates' => ['page','bazarliste',['1','4'],false,true,['entries last-date' => '{{date}}','template fiche-1' => '{{content}}','template fiche-2' => '{{content}}']],
-            'not existing page' => ['no page',null,[],false,false,[]],
-            'not existing page with via' => ['no page','bazarliste',[],false,false,[]],
-            'entry without template' => ['entry',null,[],false,false,[]],
-            'entry with via without template' => ['entry','bazarliste',[],false,false,[]],
-            'entry with template' => ['entry',null,[],true,false,["template content"=>"{{content}}"]],
-            'entry with via with template' => ['entry','bazarliste',[],true,true,["template content"=>"{{content}}"]],
+            'page not entry' => [
+                'mode' => 'page',
+                'via' => null,
+                'bazarlisteIds' => [],
+                'withTemplate' => false,
+                'clean' => false,
+                'expected' => []
+            ],
+            'page not entry with via without template' => [
+                'mode' => 'page',
+                'via' => 'bazarliste',
+                'bazarlisteIds' => ['3'],
+                'withTemplate' => false,
+                'clean' => false,
+                'expected' => ['entries last-date' => '{{date}}']
+            ],
+            'page not entry with via with template' => [
+                'mode' => 'page',
+                'via' => 'bazarliste',
+                'bazarlisteIds' => ['1'],
+                'withTemplate' => true,
+                'clean' => true,
+                'expected' => ['entries last-date' => '{{date}}','template fiche-1' => '{{content}}']
+            ],
+            'page not entry with via 2 ids with template' => [
+                'mode' => 'page',
+                'via' => 'bazarliste',
+                'bazarlisteIds' => ['1','3'],
+                'withTemplate' => true,
+                'clean' => true,
+                'expected' => ['entries last-date' => '{{date}}','template fiche-1' => '{{content}}']
+            ],
+            'page not entry with via 2 ids with templates' => [
+                'mode' => 'page',
+                'via' => 'bazarliste',
+                'bazarlisteIds' => ['1','4'],
+                'withTemplate' => true,
+                'clean' => true,
+                'expected' => ['entries last-date' => '{{date}}','template fiche-1' => '{{content}}','template fiche-4' => '{{content}}']
+            ],
+            'not existing page' => [
+                'mode' => 'no page',
+                'via' => null,
+                'bazarlisteIds' => [],
+                'withTemplate' => false,
+                'clean' => false,
+                'expected' => []
+            ],
+            'not existing page with via' => [
+                'mode' => 'no page',
+                'via' => 'bazarliste',
+                'bazarlisteIds' => [],
+                'withTemplate' => false,
+                'clean' => false,
+                'expected' => []
+            ],
+            'entry without template' => [
+                'mode' => 'entry',
+                'via' => null,
+                'bazarlisteIds' => [],
+                'withTemplate' => false,
+                'clean' => false,
+                'expected' => []
+            ],
+            'entry with via without template' => [
+                'mode' => 'entry',
+                'via' => 'bazarliste',
+                'bazarlisteIds' => [],
+                'withTemplate' => false,
+                'clean' => false,
+                'expected' => []
+            ],
+            'entry with template' => [
+                'mode' => 'entry',
+                'via' => null,
+                'bazarlisteIds' => [],
+                'withTemplate' => true,
+                'clean' => true,
+                'expected' => ["template content"=>"{{content}}"]
+            ],
+            'entry with via with template' => [
+                'mode' => 'entry',
+                'via' => 'bazarliste',
+                'bazarlisteIds' => [],
+                'withTemplate' => true,
+                'clean' => true,
+                'expected' => ["template content"=>"{{content}}"]
+            ]
         ];
     }
 
@@ -141,7 +223,8 @@ class PdfHelperTest extends YesWikiTestCase
             $formId = $entry['id_typeannonce'];
             if (strval($formId) == strval(intval($formId))) {
                 $templateName = '@bazar/fiche-'.trim($formId).'.tpl.html';
-                if ($withTemplate == $templateEngine->hasTemplate($templateName)) {
+                $templateName2 = '@bazar/fiche-'.trim($formId).'.twig';
+                if ($withTemplate == ($templateEngine->hasTemplate($templateName) || $templateEngine->hasTemplate($templateName2))) {
                     return $tag;
                 }
             }
@@ -201,10 +284,10 @@ class PdfHelperTest extends YesWikiTestCase
         $charactersUpperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         do {
             $pageTag = '';
-            
+
             $index = rand(0, strlen($charactersUpperCase) - 1);
             $pageTag .= $charactersUpperCase[$index];
-    
+
             for ($i = 0; $i < 8; $i++) {
                 $index = rand(0, strlen($characters) - 1);
                 $pageTag .= $characters[$index];
@@ -268,7 +351,7 @@ class PdfHelperTest extends YesWikiTestCase
         file_put_contents('custom/templates/bazar/'.$templateName, $templateContent);
         return $templateContent;
     }
-    
+
     /**
      * @param string $templateName
      */

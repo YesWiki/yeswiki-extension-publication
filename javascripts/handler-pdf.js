@@ -51,6 +51,17 @@ let appParams = {
             let newUrl = wiki.url(`${wiki.pageTag}/preview`,{browserPrintAfterRendered:"1"});
             window.location = newUrl;
         },
+        renderDefaultError: function(error){
+            this.messageType = 'danger';
+            if (this.isAdmin){
+                this.message = this.t('errorforadmin',{error:error.toString()})
+            } else {
+                this.message = this.t('errorforuser')
+                setTimeout(this.printViaPreview,2000);
+            }
+            this.buttonAction = this.printViaPreview;
+            this.buttonTitle = this.t('printviapreview');
+        },
         t: function(text, replacements = {}){
             if (text in this.translations){
                 let message = this.translations[text]
@@ -72,17 +83,7 @@ let appParams = {
         });
         this.isAdmin = (baseEl.dataset.isAdmin === true || baseEl.dataset.isAdmin === "true");
         this.getUrlOfPdfService()
-          .catch((error)=>{
-            this.messageType = 'danger';
-            if (this.isAdmin){
-                this.message = this.t('errorforadmin',{error:error.toString()})
-            } else {
-                this.message = this.t('errorforuser')
-                setTimeout(this.printViaPreview,2000);
-            }
-            this.buttonAction = this.printViaPreview;
-            this.buttonTitle = this.t('printviapreview');
-          });
+          .catch(this.renderDefaultError);
     },
 };
 

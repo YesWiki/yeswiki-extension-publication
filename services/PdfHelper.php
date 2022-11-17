@@ -233,7 +233,7 @@ class PdfHelper
 
             // In case we are behind a proxy (like a Docker container)
             // It allows us to properly load the document from within the container itself
-            if ($this->params->get('htmltopdf_base_url')) {
+            if (!empty($this->params->get('htmltopdf_base_url'))) {
                 $sourceUrl = str_replace($this->params->get('base_url'), $this->params->get('htmltopdf_base_url'), $sourceUrl);
             }
         }

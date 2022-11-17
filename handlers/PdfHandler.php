@@ -3,10 +3,8 @@
 namespace YesWiki\Publication;
 
 use Exception;
-use HeadlessChromium\BrowserFactory;
-use HeadlessChromium\Exception\OperationTimedOut;
-use HeadlessChromium\Page;
 use YesWiki\Core\YesWikiHandler;
+use YesWiki\Publication\Exception\ExceptionWithHtml;
 use YesWiki\Publication\Service\PdfHelper;
 
 class PdfHandler extends YesWikiHandler
@@ -38,9 +36,12 @@ class PdfHandler extends YesWikiHandler
                     || ($file_exists && isset($_GET['refresh']) && $_GET['refresh']==1)
             ) {
                 $this->redirectToPdfServiceIfNeeded($sourceUrl, $hash);
-                $this->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename);
+                $this->pdfHelper->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename);
             }
             $this->returnFile($fullFilename, $dlFilename);
+        } catch (ExceptionWithHtml $ex) {
+            $output = $this->renderExceptionForBrowser($ex, $sourceUrl);
+            return $this->wiki->Header().$output.$this->wiki->Footer()."\n";
         } catch (Exception $th) {
             header('Access-Control-Allow-Origin: *');
             if ($th->getCode() == 1) {
@@ -48,8 +49,6 @@ class PdfHandler extends YesWikiHandler
                     'type' => 'danger',
                     'message' => $th->getMessage()
                 ]);
-            } elseif ($th->getCode() == 2) {
-                return $this->wiki->Header().$th->getMessage().$this->wiki->Footer()."\n";
             }
             throw $th;
         }
@@ -111,39 +110,9 @@ class PdfHandler extends YesWikiHandler
         }
     }
 
-    protected function useBrowserToCreatePdfFromPage(string $sourceUrl, string $fullFilename)
-    {
-        try {
-            $browserFactory = new BrowserFactory($this->params->get('htmltopdf_path'));
-            $browser = $browserFactory->createBrowser($this->params->get('htmltopdf_options'));
-
-            $page = $browser->createPage();
-            $page->navigate($sourceUrl)->waitForNavigation(Page::NETWORK_IDLE);
-
-            $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue($this->params->get('page_load_timeout'));
-
-            // now generate PDF
-            $page->pdf(array(
-              'printBackground' => true,
-              'displayHeaderFooter' => true,
-              'preferCSSPageSize' => true
-            ))->saveToFile($fullFilename);
-
-            $browser->close();
-        } catch (Exception $e) {
-            throw new Exception($this->renderExceptionForBrowser($e, $sourceUrl, $browser, $page), 2);
-        }
-    }
-
-    protected function renderExceptionForBrowser(Exception $e, string $sourceUrl, $browser, $page): string
+    protected function renderExceptionForBrowser(ExceptionWithHtml $e, string $sourceUrl): string
     {
         ob_end_clean();
-
-        if (($e instanceof OperationTimedOut) === false) {
-            $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
-        }
-
-        $browser->close();
         $output = $this->render('@templates/alert-message.twig', [
             'type' => 'info',
             'message' => $sourceUrl
@@ -152,6 +121,7 @@ class PdfHandler extends YesWikiHandler
             'type' => 'danger',
             'message' => $e->getMessage()
         ]);
+        $html = $e->getHtml();
         $output .= "\n<pre><code lang=\"html\">". (empty($html) ? '' : htmlentities($html)) ."</code></pre>\n";
 
         return $output ;

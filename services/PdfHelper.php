@@ -2,12 +2,16 @@
 
 namespace YesWiki\Publication\Service;
 
+use HeadlessChromium\BrowserFactory;
+use HeadlessChromium\Exception\OperationTimedOut;
+use HeadlessChromium\Page;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Core\YesWikiController;
 use YesWiki\Core\Service\DbService;
 use YesWiki\Core\Service\PageManager;
 use YesWiki\Core\Service\TemplateEngine;
+use YesWiki\Publication\Exception\ExceptionWithHtml;
 use YesWiki\Wiki;
 
 class PdfHelper
@@ -238,5 +242,39 @@ class PdfHelper
             }
         }
         return compact(['pageTag','sourceUrl','hash']);
+    }
+
+    /**
+     * generate the pdf file from content
+     * @param string $sourceUrl
+     * @param string $fullFilename
+     * @throws ExceptionWithHtml
+     */
+    public function useBrowserToCreatePdfFromPage(string $sourceUrl, string $fullFilename)
+    {
+        try {
+            $browserFactory = new BrowserFactory($this->params->get('htmltopdf_path'));
+            $browser = $browserFactory->createBrowser($this->params->get('htmltopdf_options'));
+
+            $page = $browser->createPage();
+            $page->navigate($sourceUrl)->waitForNavigation(Page::NETWORK_IDLE);
+
+            $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue($this->params->get('page_load_timeout'));
+
+            // now generate PDF
+            $page->pdf(array(
+              'printBackground' => true,
+              'displayHeaderFooter' => true,
+              'preferCSSPageSize' => true
+            ))->saveToFile($fullFilename);
+
+            $browser->close();
+        } catch (Exception $e) {
+            if (($e instanceof OperationTimedOut) === false) {
+                $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
+            }
+            $browser->close();
+            throw new ExceptionWithHtml($e->getMessage(), 0, $e, $html ?? '');
+        }
     }
 }

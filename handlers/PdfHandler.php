@@ -25,6 +25,8 @@ class PdfHandler extends YesWikiHandler
                 'urlPageTag' => $_GET['urlPageTag'],
                 'hash' => $_GET['hash'],
                 'fromOldPath' => '1',
+                'refresh' => $_GET['refresh'] ?? 0,
+                'forceNewFormat' => $_GET['forceNewFormat'] ?? 0
             ], false));
         }
 
@@ -45,6 +47,7 @@ class PdfHandler extends YesWikiHandler
                 'local' => $pdfHelper->canExecChromium() ? $this->wiki->href('', 'api/pdf/getPdf') : '',
                 'external' => empty($this->params->get('htmltopdf_service_url')) ? '' : $this->params->get('htmltopdf_service_url'),
             ],
+            'refresh' => in_array($_GET['refresh'], [1,"1",true,"true"], true),
         ]);
     }
 }

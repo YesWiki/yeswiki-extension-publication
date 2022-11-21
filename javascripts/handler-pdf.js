@@ -21,6 +21,7 @@ let appParams = {
             pageTag:'',
             pdfDownloaded: 0,
             pdfServiceContacted: 0, // 0 = waiting, 1 = running, 2 = success, 3 = error
+            refresh: false,
             sourceUrl: '',
             translations: {},
             urlOfPdfServiceGet: 0,
@@ -36,7 +37,7 @@ let appParams = {
     methods: {
         appendSourceUrl: function(serverUrl){
             let firstDelimiter = (serverUrl.includes('?')) ? '&' : '?';
-            return `${serverUrl}${firstDelimiter}urlPageTag=${encodeURI(this.pageTag)}&url=${encodeURI(this.sourceUrl)}&hash=${this.hash}`;
+            return `${serverUrl}${firstDelimiter}urlPageTag=${encodeURI(this.pageTag)}&url=${encodeURI(this.sourceUrl)}&hash=${this.hash}&forceNewFormat=1${this.refresh ? '&refresh=1':''}`;
         },
         checkUrls: async function (urls){
             this.urlsChecked = 1;

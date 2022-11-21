@@ -2,7 +2,14 @@
 {{ include_javascript('tools/publication/javascripts/handler-pdf.js',false,true) }}
 {{ include_css('tools/publication/styles/handler-pdf.css',) }}
 
-<div class="pdf-handler-container" data-is-admin="{{ (isAdmin == true)|json_encode }}" data-urls="{{ urls|json_encode }}" data-source-url="{{ sourceUrl }}" data-hash="{{ hash }}" data-page-tag="{{ pageTag }}">
+<div class="pdf-handler-container" 
+        data-is-admin="{{ (isAdmin == true)|json_encode }}" 
+        data-urls="{{ urls|json_encode }}" 
+        data-source-url="{{ sourceUrl }}" 
+        data-hash="{{ hash }}" 
+        data-page-tag="{{ pageTag }}"
+        data-refresh="{{ refresh|json_encode }}"
+    >
     <translations>
         <template #errorforadmin>{{ _t('PUBLICATION_ERROR_FOR_ADMIN') }}</template>
         <template #errorforexternalwithoutchromium>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_WITHOUT_CHROMIUM') }}</template>

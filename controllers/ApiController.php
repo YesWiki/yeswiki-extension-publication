@@ -46,6 +46,7 @@ class ApiController extends YesWikiController
         $cause = [];
         try {
             $isOld = !empty($_GET['fromOldPath']) && in_array($_GET['fromOldPath'], [1,"1",true,"true"], true);
+            $forceNewFormat = $isOld && !empty($_GET['forceNewFormat']) && in_array($_GET['forceNewFormat'], [1,"1",true,"true"], true);
             // check params
 
             if (empty($_GET['url']) || !is_string($_GET['url'])) {
@@ -80,13 +81,12 @@ class ApiController extends YesWikiController
 
 
             $file_exists = file_exists($fullFilename);
-            if (($this->wiki->UserIsAdmin() && isset($_GET['print-debug']))
-            || !$file_exists
+            if (!$file_exists
             || ($file_exists && $this->wiki->UserIsAdmin() && isset($_GET['refresh']) && $_GET['refresh']==1)
             ) {
                 $pdfHelper->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename);
             }
-            return $this->returnFile($fullFilename, $dlFilename, $isOld);
+            return $this->returnFile($fullFilename, $dlFilename, $isOld && !$forceNewFormat);
         } catch (Exception $ex) {
             if (in_array($ex->getCode(), [2,3], true)) {
                 if ($ex->getCode() == 2) {
@@ -98,7 +98,7 @@ class ApiController extends YesWikiController
                         $cause['pdfCreationErrorHTML'] = $ex->getHtml();
                     }
                 }
-                if ($isOld) {
+                if ($isOld && !$forceNewFormat) {
                     if (isset($cause['canExecChromium']) && $cause['canExecChromium'] === false) {
                         $output = $this->renderInSquelette('@templates/alert-message.twig', [
                             'type'=> 'danger',

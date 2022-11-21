@@ -92,7 +92,7 @@ return [
 
     // actions builber
     'AB_publication_label' => 'Publication',
-    'AB_publication_blanckpage_label' => 'INsert an empty page',
+    'AB_publication_blanckpage_label' => 'Insert an empty page',
     'AB_publication_blanckpage_hint' => 'To insert in content of a page, to insert empty page when generating a publication.',
     'AB_publication_pagebreak_label' => 'Insert a break page',
     'AB_publication_pagebreak_hint' => 'To insert in content of a page, to forece break page.',
@@ -146,4 +146,22 @@ return [
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_URL' => 'If you are unable to install Chrome/Chromium on your server, YesWiki URL to delegate the PDF rendering (eg: https://example.org/yeswiki/?MainPage/pdf)',
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_AUTHORIZED_DOMAINS' => 'Authorized domain list ([\'example.com\',\'yeswiki.net\'])',
     'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication',
+
+    // handlers/PdfHandler.pdf
+    'PUBLICATION_CHECK_URLS' => 'Checking addresses',
+    'PUBLICATION_CONTACT_SERVICE' => 'Contact pdf server',
+    'PUBLICATION_DOWNLOAD_PDF' => 'Pdf download',
+    'PUBLICATION_ERROR_FOR_ADMIN' => 'An error occured : \'{error}\'<br/>It is possible to click on the button bellow to print page with the browser.',
+    'PUBLICATION_ERROR_FOR_EXTERNAL_DOMAIN_NOT_AUTHORIZED' => 'The website uses an external url ({extUrl}) to generate pdfs but this external server does not allow generation of pdf for the current domain.<br/>Contatct the administrator of concerned service to ask to add the current domain (see help : {helpLink})',
+    'PUBLICATION_ERROR_FOR_EXTERNAL_NOT_CONFIGURED' => 'The website uses an external url ({extUrl}) to generate pdfs but this external server is not well configured (see help : {helpLink})',
+    'PUBLICATION_ERROR_FOR_EXTERNAL_URL_DOMAIN_CHECK' => 'The external url ({extUrl}) is not reachable :<br/><ul><li>because extension `publication` is not up-to-date on this external server,</li><li>or this url is not existing or is not an url to generate pdf,</li><li>or the external server has a missing or too restritive `Access-Control-Allow-Origin` http header.</li></ul>(see help : {helpLink})<br>Error : {error}',
+    'PUBLICATION_ERROR_FOR_EXTERNAL_WITHOUT_CHROMIUM' => 'Service available at external url ({url}) does not have the software `chromium` installed, and it is needed to its functionning (see help: {helpLink})',
+    'PUBLICATION_ERROR_FOR_URLS' => 'No pdf serviceis registered on this website.<br/>You can install `chromium` on this website,<br/>or ocnfiguring  `htmltopdf_service_url` in \'wakka.config.php\'.<br/>instructions are available in help {link}',
+    'PUBLICATION_ERROR_FOR_USER' => 'An error ocurred<br/>You can click on the button bellow to print page with your browser.<br/>Automatic redirection to print via this browser in few seconds.',
+    'PUBLICATION_ERROR_RELOADING' => 'This website uses an external service to print pdf. You will be redirected to this service.',
+    'PUBLICATION_GET_PDF_SERVICE_URL' => 'Get pdf server address',
+    'PUBLICATION_OPEN_DEFAULT_LINK' => 'Open external page for print',
+    'PUBLICATION_PDF_CREATION' => 'Create pdf of %{pageTag}\s page',
+    'PUBLICATION_PRINT_VIA_PREVIEW' => 'Print via browser',
+    'PUBLICATION_SAVE_FILE' => 'Save pdf',
 ];

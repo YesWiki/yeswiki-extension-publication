@@ -7,6 +7,7 @@ use HeadlessChromium\BrowserFactory;
 use HeadlessChromium\Exception\OperationTimedOut;
 use HeadlessChromium\Page;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Throwable;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Core\YesWikiController;
 use YesWiki\Core\Service\DbService;
@@ -178,13 +179,8 @@ class PdfHelper
      */
     public function getFullFileName(array $get, array $server): array
     {
-        $pagedjs_hash = sha1(json_encode(array_merge([
-            file_get_contents('tools/publication/javascripts/browser/print.js'),
-            file_get_contents('tools/publication/javascripts/vendor/pagedjs/paged.esm.js')
-          ])));
-
         list('pageTag'=>$pageTag, 'sourceUrl'=>$sourceUrl, 'hash'=>$hash) =
-            $this->getData($get, $server, $pagedjs_hash);
+            $this->getSourceUrl($get, $server);
 
         $dlFilename = sprintf(
             '%s-%s.pdf',
@@ -206,6 +202,33 @@ class PdfHelper
     }
 
     /**
+     * @param array $get
+     * @param array $server
+     * @return array compact(['pageTag','sourceUrl','hash',])
+     */
+    public function getSourceUrl(array $get, array $server): array
+    {
+        $data = [];
+        foreach (array_merge(
+            [
+                'tools/publication/javascripts/browser/print.js',
+                'tools/publication/javascripts/vendor/pagedjs/paged.esm.js',
+                'custom/templates/publication/print-layouts/base.twig',
+                'tools/publication/infos.json',
+            ],
+            glob('custom/tools/publication/*.css'),
+            glob('custom/tools/publication/print-layouts/*.css'),
+        ) as $path) {
+            if (file_exists($path)) {
+                $data[] = file_get_contents($path);
+            }
+        }
+        $pagedjs_hash = sha1(json_encode(array_merge($data)));
+
+        return $this->getData($get, $server, $pagedjs_hash);
+    }
+
+    /**
      * getData to prepare export PDF
      * @param array $get
      * @param array $server
@@ -218,8 +241,8 @@ class PdfHelper
         $sourceUrl = '';
         $hash = '';
         if (!empty($get['url'])) {
-            $pageTag = isset($get['urlPageTag']) ? $get['urlPageTag'] : 'publication';
-            $sourceUrl = $get['url'];
+            $pageTag = (isset($get['urlPageTag']) && is_string($get['urlPageTag'])) ? $get['urlPageTag'] : 'publication';
+            $sourceUrl = strval($get['url']);
             $hash = substr(sha1($pagedjs_hash . strtolower($server['QUERY_STRING'])), 0, 10);
         } else {
             $pageTag = $this->wiki->GetPageTag();
@@ -297,6 +320,29 @@ class PdfHelper
      */
     public function canExecChromium(): bool
     {
-        return !is_executable($this->params->get('htmltopdf_path'));
+        return is_executable($this->params->get('htmltopdf_path'));
+    }
+
+    /**
+     * check id Domain is authorized
+     * @param string $sourceUrl
+     * @return bool
+     */
+    public function checkDomain(string $sourceUrl): bool
+    {
+        try {
+            $currentDomain = parse_url($this->params->get('base_url'), PHP_URL_HOST);
+            $sourceDomain = parse_url($sourceUrl, PHP_URL_HOST);
+            $authorizedDomains = $this->params->get('htmltopdf_service_authorized_domains');
+            $authorizedDomains = is_array($authorizedDomains)
+                 ? array_filter(array_map('trim', array_filter($authorizedDomains, 'is_string')))
+                 : [];
+            return (
+                $sourceDomain === $currentDomain ||
+                (!empty($authorizedDomains) && in_array($sourceDomain, $authorizedDomains, true))
+            );
+        } catch (Throwable $th) {
+            return false;
+        }
     }
 }

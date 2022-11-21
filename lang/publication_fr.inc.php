@@ -148,12 +148,20 @@ return [
     'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication',
 
     // handlers/PdfHandler.pdf
-    'PUBLICATION_PDF_CREATION' => 'Création du pdf de la page %{pageTag}',
-    'PUBLICATION_GET_PDF_SERVICE_URL' => 'Récupération de l\'adresse du serveur pdf',
+    'PUBLICATION_CHECK_URLS' => 'Vérification des adresses',
     'PUBLICATION_CONTACT_SERVICE' => 'Contact du serveur pdf',
     'PUBLICATION_DOWNLOAD_PDF' => 'Téléchargement du pdf',
-    'PUBLICATION_SAVE_FILE' => 'Enregistrer le pdf',
     'PUBLICATION_ERROR_FOR_ADMIN' => 'Une erreur est survenue : \'{error}\'<br/>Vous pouvez cliquer sur le bouton ci-dessous pour imprimer la page avec votre navigateur.',
+    'PUBLICATION_ERROR_FOR_EXTERNAL_DOMAIN_NOT_AUTHORIZED' => 'Ce site utilise l\'url externe ({extUrl}) pour générer les pdfs mais il n\'autorise pas la génération de pdf pour votre domaine.<br/>Veuillez contacter l\'administrateur du site concerné pour ajouter votre domaine (voir aide : {helpLink})',
+    'PUBLICATION_ERROR_FOR_EXTERNAL_NOT_CONFIGURED' => 'Ce site utilise l\'url externe ({extUrl}) pour générer les pdfs mais ce site est mal configuré (voir aide : {helpLink})',
+    'PUBLICATION_ERROR_FOR_EXTERNAL_URL_DOMAIN_CHECK' => 'L\'url externe ({extUrl}) n\'est pas accessible :<br/><ul><li>soit par ce que l\'extension `publication` n\'est pas à jour sur ce site externe,</li><li>soit parce que cette url n\'existe pas ou n\'est pas une url pour générer les pdfs,</li><li>soit parce que le serveur concerné a une en-tête http `Access-Control-Allow-Origin` manquante ou trop restrictive.</li></ul>(voir aide : {helpLink})<br>Erreur : {error}',
+    'PUBLICATION_ERROR_FOR_EXTERNAL_WITHOUT_CHROMIUM' => 'Le service fourni par l\'url externe ({url}) ne dispose pas du logiciel `chromium` nécessaire à son fonctionnement(voir aide : {helpLink})',
+    'PUBLICATION_ERROR_FOR_URLS' => 'Aucun service pdf n\'est enregistré sur ce site.<br/>Vous pouvez installer `chromium` sur ce site,<br/>ou en configurant le paramètre `htmltopdf_service_url` dans \'wakka.config.php\'.<br/>les instructions sont disponibles dans l\'aide {link}',
     'PUBLICATION_ERROR_FOR_USER' => 'Une erreur est survenue<br/>Vous pouvez cliquer sur le bouton ci-dessous pour imprimer la page avec votre navigateur.<br/>Redirection automatique vers l\'impression via le navigateur dans quelques secondes.',
+    'PUBLICATION_ERROR_RELOADING' => 'Ce site utilise un service externe pour imprimer les pages. Vous allez être redirigé vers ce service.',
+    'PUBLICATION_GET_PDF_SERVICE_URL' => 'Récupération de l\'adresse du serveur pdf',
+    'PUBLICATION_OPEN_DEFAULT_LINK' => 'Ouvrir la page externe d\'impresssion',
+    'PUBLICATION_PDF_CREATION' => 'Création du pdf de la page %{pageTag}',
     'PUBLICATION_PRINT_VIA_PREVIEW' => 'Imprimer par le navigateur',
+    'PUBLICATION_SAVE_FILE' => 'Enregistrer le pdf',
 ];

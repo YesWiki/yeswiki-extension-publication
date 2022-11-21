@@ -1,0 +1,5 @@
+.pdf-handler-container .loading-cursor ,
+.pdf-handler-container .loading-cursor input[type="checkbox"][disabled],
+.pdf-handler-container .loading-cursor input[type="checkbox"] + span:not(.lever) {
+    cursor: wait;
+}

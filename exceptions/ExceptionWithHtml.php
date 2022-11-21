@@ -1,17 +1,17 @@
 <?php
 
-namespace YesWiki\Publication\Service;
+namespace YesWiki\Publication\Exception;
 
 use Exception;
 use Throwable;
 
 class ExceptionWithHtml extends Exception implements Throwable
 {
-    protected $thml;
+    protected $html;
 
     public function __construct($message = '', $code = 0, Throwable $previous = null, string $html)
     {
-        parent::construct($message, $code, $previous);
+        parent::__construct($message, $code, $previous);
         $this->html = $html;
     }
 

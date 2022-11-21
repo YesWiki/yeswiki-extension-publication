@@ -18,6 +18,14 @@ use YesWiki\Wiki;
 
 class PdfHelper
 {
+    public const SESSION_KEY = 'pdf';
+    public const SESSION_TIME_KEY = 0;
+    public const SESSION_FULLFILENAMEREADY = 1;
+    public const SESSION_FILE_STATUS = 2;
+    public const SESSION_BROWSER_READY = 3;
+    public const SESSION_PAGE_STATUS = 4;
+    public const SESSION_PDF_CREATED = 5;
+
     private const PATH_LIST = [
         'custom/templates/bazar/',
         'custom/templates/bazar/templates/',
@@ -243,7 +251,8 @@ class PdfHelper
         if (!empty($get['url'])) {
             $pageTag = (isset($get['urlPageTag']) && is_string($get['urlPageTag'])) ? $get['urlPageTag'] : 'publication';
             $sourceUrl = strval($get['url']);
-            $hash = substr(sha1($pagedjs_hash . strtolower($server['QUERY_STRING'])), 0, 10);
+            $queryString = preg_replace('/&uuid=[A-Za-z0-9\-]+(&|$)/', '$1', $server['QUERY_STRING'] ?? '');
+            $hash = substr(sha1($pagedjs_hash . strtolower($queryString)), 0, 10);
         } else {
             $pageTag = $this->wiki->GetPageTag();
             $pdfTag = $this->wiki->MiniHref('pdf', $pageTag);
@@ -272,27 +281,31 @@ class PdfHelper
      * generate the pdf file from content
      * @param string $sourceUrl
      * @param string $fullFilename
+     * @param string $uuid
      * @throws ExceptionWithHtml
      * @throws Exception with code = 2
      */
-    public function useBrowserToCreatePdfFromPage(string $sourceUrl, string $fullFilename)
+    public function useBrowserToCreatePdfFromPage(string $sourceUrl, string $fullFilename, string $uuid = '')
     {
         $this->assertCanExecChromium();
         try {
             $browserFactory = new BrowserFactory($this->params->get('htmltopdf_path'));
             $browser = $browserFactory->createBrowser($this->params->get('htmltopdf_options'));
+            $this->setValueInSession($uuid, PdfHelper::SESSION_BROWSER_READY, 1);
 
             $page = $browser->createPage();
-            $page->navigate($sourceUrl)->waitForNavigation(Page::NETWORK_IDLE);
 
+            $this->setValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 1);
             $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue($this->params->get('page_load_timeout'));
+            $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 2);
 
             // now generate PDF
             $page->pdf(array(
-              'printBackground' => true,
-              'displayHeaderFooter' => true,
-              'preferCSSPageSize' => true
-            ))->saveToFile($fullFilename);
+                'printBackground' => true,
+                'displayHeaderFooter' => true,
+                'preferCSSPageSize' => true
+                ))->saveToFile($fullFilename);
+            $this->setValueInSession($uuid, PdfHelper::SESSION_PDF_CREATED, 1);
 
             $browser->close();
         } catch (Exception $e) {
@@ -343,6 +356,76 @@ class PdfHelper
             );
         } catch (Throwable $th) {
             return false;
+        }
+    }
+
+    /**
+     * prepare session to store things
+     * @param string $newUuid
+     */
+    public function prepareSession(string $newUuid)
+    {
+        if (isset($_SESSION) && !empty($newUuid)) {
+            if (!isset($_SESSION[self::SESSION_KEY]) || !is_array($_SESSION[self::SESSION_KEY])) {
+                $_SESSION[self::SESSION_KEY] = [];
+            }
+            $limitTime = time() + 3600*2;
+            foreach ($_SESSION[self::SESSION_KEY] as $uuid => $data) {
+                if (empty($data[self::SESSION_TIME_KEY]) && $data[self::SESSION_TIME_KEY] < $limitTime) {
+                    unset($_SESSION[self::SESSION_KEY][$uuid]);
+                }
+            }
+            if (!empty($newUuid)) {
+                $_SESSION[self::SESSION_KEY][$newUuid] = [];
+                $_SESSION[self::SESSION_KEY][$newUuid][self::SESSION_TIME_KEY] = time();
+            }
+        }
+    }
+
+    /**
+     * set session value
+     * @param string $uuid
+     * @param $key
+     * @param $value
+     */
+    public function setValueInSession(string $newUuid, $key, $value)
+    {
+        if (isset($_SESSION) && !empty($newUuid) && !empty($_SESSION[self::SESSION_KEY][$newUuid])) {
+            $_SESSION[self::SESSION_KEY][$newUuid][$key] = $value;
+        }
+    }
+
+
+    /**
+     * set session value
+     * @param string $uuid
+     * @return mixed
+     */
+    public function getValueInSession(string $newUuid, $key)
+    {
+        return $_SESSION[self::SESSION_KEY][$newUuid][$key] ?? null;
+    }
+
+    /**
+     * set session values
+     * @param string $uuid
+     * @return array
+     */
+    public function getValuesInSession(string $uuid)
+    {
+        return $_SESSION[self::SESSION_KEY][$uuid] ?? [];
+    }
+
+    /**
+     * set session values
+     * @param string $uuid
+     * @param $key
+     * @param int $value
+     */
+    public function addValueInSession(string $newUuid, $key, int $value)
+    {
+        if (isset($_SESSION[self::SESSION_KEY][$newUuid][$key])) {
+            $_SESSION[self::SESSION_KEY][$newUuid][$key] = intval($_SESSION[self::SESSION_KEY][$newUuid][$key]) + $value;
         }
     }
 }

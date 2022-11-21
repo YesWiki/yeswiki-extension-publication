@@ -47,7 +47,7 @@ class PdfHandler extends YesWikiHandler
                 'local' => $pdfHelper->canExecChromium() ? $this->wiki->href('', 'api/pdf/getPdf') : '',
                 'external' => empty($this->params->get('htmltopdf_service_url')) ? '' : $this->params->get('htmltopdf_service_url'),
             ],
-            'refresh' => in_array($_GET['refresh'], [1,"1",true,"true"], true),
+            'refresh' => in_array($_GET['refresh'] ?? false, [1,"1",true,"true"], true),
         ]);
     }
 }

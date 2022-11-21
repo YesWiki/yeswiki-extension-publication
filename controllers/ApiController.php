@@ -15,12 +15,23 @@ use YesWiki\Publication\Service\PdfHelper;
 
 class ApiController extends YesWikiController
 {
+    protected $pdfHelper;
+    /**
+     * @Route("/api/pdf/getStatus/{uuid}",methods={"GET"}, options={"acl":{"public"}},priority=2)
+     */
+    public function getStatus($uuid)
+    {
+        $this->pdfHelper = $this->getService(PdfHelper::class);
+        $status = $this->pdfHelper->getValuesInSession($uuid);
+        return new ApiResponse($status, Response::HTTP_OK);
+    }
+
     /**
      * @Route("/api/pdf/getPdf",methods={"GET"}, options={"acl":{"public"}},priority=2)
      */
     public function getPdf()
     {
-        $pdfHelper = $this->getService(PdfHelper::class);
+        $this->pdfHelper = $this->getService(PdfHelper::class);
         ob_start();
 
         // if (!class_exists(ApiResponse::class)) {
@@ -47,6 +58,8 @@ class ApiController extends YesWikiController
         try {
             $isOld = !empty($_GET['fromOldPath']) && in_array($_GET['fromOldPath'], [1,"1",true,"true"], true);
             $forceNewFormat = $isOld && !empty($_GET['forceNewFormat']) && in_array($_GET['forceNewFormat'], [1,"1",true,"true"], true);
+            $uuid = (!empty($_GET['uuid']) && is_string($_GET['uuid'])) ? $_GET['uuid'] : '';
+
             // check params
 
             if (empty($_GET['url']) || !is_string($_GET['url'])) {
@@ -55,17 +68,19 @@ class ApiController extends YesWikiController
             }
 
             $cause['missingUrl'] = false;
-            if (!$pdfHelper->canExecChromium()) {
+            if (!$this->pdfHelper->canExecChromium()) {
                 $cause['canExecChromium'] = false;
                 throw new Exception("cannot Exec Chromium", 3);
             }
             $cause['canExecChromium'] = true;
 
-            if (!$pdfHelper->checkDomain($_GET['url'])) {
+            if (!$this->pdfHelper->checkDomain($_GET['url'])) {
                 $cause['domainAuthorized'] = false;
                 throw new Exception("domain not authorized", 3);
             }
             $cause['domainAuthorized'] = true;
+
+            $this->pdfHelper->prepareSession($uuid);
 
             list(
                 'pageTag'=>$pageTag,
@@ -74,19 +89,22 @@ class ApiController extends YesWikiController
                 'dlFilename'=>$dlFilename,
                 'fullFilename'=>$fullFilename
             ) =
-                $pdfHelper->getFullFileName(
+                $this->pdfHelper->getFullFileName(
                     $_GET ?? [],
                     $_SERVER ?? []
                 );
 
+            $this->pdfHelper->setValueInSession($uuid, PdfHelper::SESSION_FULLFILENAMEREADY, 1);
+
 
             $file_exists = file_exists($fullFilename);
+            $this->pdfHelper->setValueInSession($uuid, PdfHelper::SESSION_FILE_STATUS, $file_exists ? 1 : 0);
             if (!$file_exists
             || ($file_exists && $this->wiki->UserIsAdmin() && isset($_GET['refresh']) && $_GET['refresh']==1)
             ) {
-                $pdfHelper->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename);
+                $this->pdfHelper->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename, $uuid);
             }
-            return $this->returnFile($fullFilename, $dlFilename, $isOld && !$forceNewFormat);
+            return $this->returnFile($fullFilename, $dlFilename, $isOld && !$forceNewFormat, $uuid);
         } catch (Exception $ex) {
             if (in_array($ex->getCode(), [2,3], true)) {
                 if ($ex->getCode() == 2) {
@@ -139,16 +157,18 @@ class ApiController extends YesWikiController
      * @param string $fullFilename,
      * @param string $dlFilename
      * @param bool $oldMode
+     * @param string $uuid
      * @throws Exception
      * @return Response
      */
-    protected function returnFile(string $fullFilename, string $dlFilename, bool $oldMode = false): Response
+    protected function returnFile(string $fullFilename, string $dlFilename, bool $oldMode = false, string $uuid): Response
     {
         if (!file_exists($fullFilename)) {
             ob_end_flush();
             throw new Exception(_t('PUBLICATION_NO_GENERATED_PDF_FILE_FOUND'), 1);
         }
 
+        $this->pdfHelper->addValueInSession($uuid, PdfHelper::SESSION_FILE_STATUS, 2);
         if ($oldMode) {
             return $this->returnFileOldMode($fullFilename, $dlFilename);
         }

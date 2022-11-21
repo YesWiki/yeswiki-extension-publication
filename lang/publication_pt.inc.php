@@ -148,6 +148,7 @@ return [
     // handlers/PdfHandler.pdf
     // 'PUBLICATION_CHECK_URLS' => 'Vérification des adresses',
     // 'PUBLICATION_CONTACT_SERVICE' => 'Contact du serveur pdf',
+    // 'PUBLICATION_CREATING_PDF' => 'Pdf en cours de création',
     // 'PUBLICATION_DOWNLOAD_PDF' => 'Téléchargement du pdf',
     // 'PUBLICATION_ERROR_FOR_ADMIN' => 'Une erreur est survenue : \'{error}\'<br/>Vous pouvez cliquer sur le bouton ci-dessous pour imprimer la page avec votre navigateur.',
     // 'PUBLICATION_ERROR_FOR_EXTERNAL_DOMAIN_NOT_AUTHORIZED' => 'Ce site utilise l\'url externe ({extUrl}) pour générer les pdfs mais n\'autorise pas la génération de pdf pour votre domaine.<br/>Veuillez contacter l\'administrateur du site concerné pour ajouter votre domaine (voir aide : {helpLink})',
@@ -158,6 +159,8 @@ return [
     // 'PUBLICATION_ERROR_FOR_USER' => 'Une erreur est survenue<br/>Vous pouvez cliquer sur le bouton ci-dessous pour imprimer la page avec votre navigateur.<br/>Redirection automatique vers l\'impression via le navigateur dans quelques secondes.',
     // 'PUBLICATION_ERROR_RELOADING' => 'Ce site utilise un service externe pour imprimer les pages. Vous allez être redirigé vers ce service.',
     // 'PUBLICATION_GET_PDF_SERVICE_URL' => 'Récupération de l\'adresse du serveur pdf',
+    // 'PUBLICATION_LOADING_BROWSER' => 'Chargement du navigateur sur le serveur',
+    // 'PUBLICATION_LOADING_PAGE' => 'Chargement de la page sur le serveur',
     // 'PUBLICATION_OPEN_DEFAULT_LINK' => 'Ouvrir la page externe d\'impresssion',
     // 'PUBLICATION_PDF_CREATION' => 'Création du pdf de la page %{pageTag}',
     // 'PUBLICATION_PRINT_VIA_PREVIEW' => 'Imprimer par le navigateur',

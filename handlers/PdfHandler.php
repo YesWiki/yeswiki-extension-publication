@@ -142,7 +142,7 @@ class PdfHandler extends YesWikiHandler
     {
         $serviceUrl = $this->params->get('htmltopdf_service_url');
         if (!empty($serviceUrl)) {
-            $url = $serviceUrl.(strpos($serviceUrl, '?') === false ? '?' : '&').'urlPageTag='.$this->GetPageTag().'&url='.urlencode($sourceUrl).'&hash='.$hash;
+            $url = $serviceUrl.(strpos($serviceUrl, '?') === false ? '?' : '&').'urlPageTag='.$this->wiki->GetPageTag().'&url='.urlencode($sourceUrl).'&hash='.$hash;
             $this->wiki->Redirect($url);
         }
     }

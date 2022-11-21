@@ -40,6 +40,7 @@ parameters:
   publication_editable_config_params:
     - 'htmltopdf_path'
     - 'htmltopdf_service_url'
+    - 'htmltopdf_service_authorized_domains'
 
 services:
   _defaults:

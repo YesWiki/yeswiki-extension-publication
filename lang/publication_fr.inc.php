@@ -140,7 +140,8 @@ return [
     'AB_publication_publicationlist_pagenameprefix_label' => 'préfixe de page',
 
     // edit config
-    'EDIT_CONFIG_HINT_htmltopdf_path' => 'Chemin d\'accès serveur personnalisé à un Chrome/Chromium.',
-    'EDIT_CONFIG_HINT_htmltopdf_service_url' => 'Si Chrome/Chromium ne peut être installé sur votre machine, adresse d\'un YesWiki à qui déléguer le rendu PDF (exemple: https://example.org/yeswiki/?PagePrincipale/pdf)',
-    'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication'
+    'EDIT_CONFIG_HINT_HTMLTOPDF_PATH' => 'Chemin d\'accès serveur personnalisé à un Chrome/Chromium.',
+    'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_URL' => 'Si Chrome/Chromium ne peut être installé sur votre machine, adresse d\'un YesWiki à qui déléguer le rendu PDF (exemple: https://example.org/yeswiki/?PagePrincipale/pdf)',
+    'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_AUTHORIZED_DOMAINS' => 'Liste des domaines autorisés ([\'example.com\',\'yeswiki.net\'])',
+    'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication',
 ];

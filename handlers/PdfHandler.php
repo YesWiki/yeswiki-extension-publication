@@ -91,12 +91,25 @@ class PdfHandler extends YesWikiHandler
      */
     protected function checkDomain(array $get, array $server)
     {
-        if (!empty($get['url']) &&
-            !in_array(parse_url($server['HTTP_REFERER']??'', PHP_URL_HOST), $this->params->get('htmltopdf_service_authorized_domains'))) {
-            throw new Exception(
-                _t('PUBLICATION_DOMAIN_NOT_AUTORIZED').' : '.parse_url($server['HTTP_REFERER']??'', PHP_URL_HOST),
-                1
-            );
+        if (!empty($get['url'])) {
+            if (!is_string($get['url'])) {
+                throw new Exception(
+                    '`$_GET[\'url\']` should be a string',
+                    1
+                );
+            } elseif (!empty($this->params->get('htmltopdf_service_authorized_domains'))) {
+                if (!is_array($this->params->get('htmltopdf_service_authorized_domains'))) {
+                    throw new Exception(
+                        'param `htmltopdf_service_authorized_domains` should be an array',
+                        1
+                    );
+                } elseif (!in_array(parse_url($get['url'], PHP_URL_HOST), $this->params->get('htmltopdf_service_authorized_domains'))) {
+                    throw new Exception(
+                        _t('PUBLICATION_DOMAIN_NOT_AUTORIZED').' : '.parse_url($get['url'], PHP_URL_HOST),
+                        1
+                    );
+                }
+            }
         }
     }
 

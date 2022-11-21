@@ -146,4 +146,14 @@ return [
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_URL' => 'Si Chrome/Chromium ne peut être installé sur votre machine, adresse d\'un YesWiki à qui déléguer le rendu PDF (exemple: https://example.org/yeswiki/?PagePrincipale/pdf)',
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_AUTHORIZED_DOMAINS' => 'Liste des domaines autorisés ([\'example.com\',\'yeswiki.net\'])',
     'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication',
+
+    // handlers/PdfHandler.pdf
+    'PUBLICATION_PDF_CREATION' => 'Création du pdf de la page %{pageTag}',
+    'PUBLICATION_GET_PDF_SERVICE_URL' => 'Récupération de l\'adresse du serveur pdf',
+    'PUBLICATION_CONTACT_SERVICE' => 'Contact du serveur pdf',
+    'PUBLICATION_DOWNLOAD_PDF' => 'Téléchargement du pdf',
+    'PUBLICATION_SAVE_FILE' => 'Enregistrer le pdf',
+    'PUBLICATION_ERROR_FOR_ADMIN' => 'Une erreur est survenue : \'{error}\'<br/>Vous pouvez cliquer sur le bouton ci-dessous pour imprimer la page avec votre navigateur.',
+    'PUBLICATION_ERROR_FOR_USER' => 'Une erreur est survenue<br/>Vous pouvez cliquer sur le bouton ci-dessous pour imprimer la page avec votre navigateur.<br/>Redirection automatique vers l\'impression via le navigateur dans quelques secondes.',
+    'PUBLICATION_PRINT_VIA_PREVIEW' => 'Imprimer par le navigateur',
 ];

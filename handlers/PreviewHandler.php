@@ -170,7 +170,7 @@ class PreviewHandler extends YesWikiHandler
         elseif ($this->aclService->hasAccess('read')) {
             // if page is a bazar entry format the json into html
             if ($this->entryManager->isEntry($this->wiki->GetPageTag())) {
-                $content = $this->entryController->view($this->GetPageTag(), 0);
+                $content = $this->entryController->view($this->wiki->GetPageTag(), 0);
             } else {
                 // we remove the pager from the display
                 $content = preg_replace(

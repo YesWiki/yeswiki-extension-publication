@@ -293,6 +293,15 @@ let appParams = {
                     if ('domainAuthorized' in jsonContent.cause && jsonContent.cause.domainAuthorized === false){
                         return this.renderDomainNotAuthorized(url);
                     }
+                    if ('pdfCreationError' in jsonContent.cause && jsonContent.cause.pdfCreationError === true){
+                        if (this.isAdmin){
+                            console.log({htmlDuringError:jsonContent.cause.pdfCreationErrorHTML || ''})
+                        }
+                        return Promise.reject(this.t('errorforexternalwhilecreatingpdf',{
+                            url:url,
+                            error: jsonContent.cause.pdfCreationErrorMessage || 'unknown'
+                        }));
+                    }
                 }
                 return Promise.reject(`Unkown error json response when getting ${url}`);
             }
@@ -382,7 +391,7 @@ let appParams = {
                         : []
                     );
                 // contact established
-                if (this.pdfServiceContacted > 0 && jsonAsArray[0] > 0){
+                if (in_array(this.pdfServiceContacted,[1,3],true) && jsonAsArray[0] > 0){
                     if (this.pdfServiceContacted == 1){
                         this.pdfServiceContacted = 2;
                     }
@@ -395,7 +404,7 @@ let appParams = {
                             this.pageLoadedByBrowser = 3;
                             return null;
                         } else {
-                            if(jsonAsArray[4] === 3){
+                            if(jsonAsArray[4] === 7){
                                 this.pageLoadedByBrowser = 2;
                             } else if(this.pdfServiceContacted == 3){
                                 this.pageLoadedByBrowser = 3;
@@ -418,7 +427,7 @@ let appParams = {
                         this.browserLoaded = 1;
                     }
                 }
-                if (this.pdfServiceContacted != 3){
+                if (this.pdfServiceContacted < 2){
                     this.createupdateStatusTimerDirect(url);
                 }
                 

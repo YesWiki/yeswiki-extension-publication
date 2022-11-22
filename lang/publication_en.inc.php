@@ -160,6 +160,7 @@ return [
     'PUBLICATION_ERROR_FOR_URLS' => 'No pdf serviceis registered on this website.<br/>You can install `chromium` on this website,<br/>or ocnfiguring  `htmltopdf_service_url` in \'wakka.config.php\'.<br/>instructions are available in help {link}',
     'PUBLICATION_ERROR_FOR_USER' => 'An error ocurred<br/>You can click on the button bellow to print page with your browser.<br/>Automatic redirection to print via this browser in few seconds.',
     'PUBLICATION_ERROR_RELOADING' => 'This website uses an external service to print pdf. You will be redirected to this service.',
+    'PUBLICATION_ERROR_WHILE_GENERATING_PDF' => 'Error while generating pdf for \'{url}\' : {error}',
     'PUBLICATION_GET_PDF_SERVICE_URL' => 'Get pdf server address',
     'PUBLICATION_LOADING_BROWSER' => 'Loading browser on server',
     'PUBLICATION_LOADING_PAGE' => 'Loading page on server',

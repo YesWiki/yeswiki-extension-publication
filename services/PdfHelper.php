@@ -296,8 +296,11 @@ class PdfHelper
             $page = $browser->createPage();
 
             $this->setValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 1);
-            $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue($this->params->get('page_load_timeout'));
+            $page->navigate($sourceUrl)->waitForNavigation(Page::NETWORK_IDLE);
             $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 2);
+
+            $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue($this->params->get('page_load_timeout'));
+            $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 4);
 
             // now generate PDF
             $page->pdf(array(

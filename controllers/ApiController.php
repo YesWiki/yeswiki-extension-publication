@@ -106,15 +106,16 @@ class ApiController extends YesWikiController
             }
             return $this->returnFile($fullFilename, $dlFilename, $isOld && !$forceNewFormat, $uuid);
         } catch (Exception $ex) {
-            if (in_array($ex->getCode(), [2,3], true)) {
-                if ($ex->getCode() == 2) {
-                    $cause['canExecChromium'] = false;
-                }
+            if (in_array($ex->getCode(), [2,3], true) || $ex instanceof ExceptionWithHtml) {
                 if ($ex instanceof ExceptionWithHtml) {
                     $cause['pdfCreationError'] = true;
                     if ($this->wiki->userIsAdmin()) {
                         $cause['pdfCreationErrorHTML'] = $ex->getHtml();
+                        $cause['pdfCreationErrorMessage'] = $ex->getMessage();
                     }
+                }
+                if ($ex->getCode() == 2) {
+                    $cause['canExecChromium'] = false;
                 }
                 if ($isOld && !$forceNewFormat) {
                     if (isset($cause['canExecChromium']) && $cause['canExecChromium'] === false) {

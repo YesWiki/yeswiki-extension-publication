@@ -158,6 +158,7 @@ return [
     // 'PUBLICATION_ERROR_FOR_URLS' => 'Aucun service pdf n\'est enregistré sur ce site.<br/>Vous pouvez installer `chromium` sur ce site,<br/>ou en configurant le paramètre `htmltopdf_service_url` dans \'wakka.config.php\'.<br/>les instructions sont disponibles dans l\'aide {link}',
     // 'PUBLICATION_ERROR_FOR_USER' => 'Une erreur est survenue<br/>Vous pouvez cliquer sur le bouton ci-dessous pour imprimer la page avec votre navigateur.<br/>Redirection automatique vers l\'impression via le navigateur dans quelques secondes.',
     // 'PUBLICATION_ERROR_RELOADING' => 'Ce site utilise un service externe pour imprimer les pages. Vous allez être redirigé vers ce service.',
+    // 'PUBLICATION_ERROR_WHILE_GENERATING_PDF' => 'Erreur en générant le pdf pour \'{url}\' : {error}',
     // 'PUBLICATION_GET_PDF_SERVICE_URL' => 'Récupération de l\'adresse du serveur pdf',
     // 'PUBLICATION_LOADING_BROWSER' => 'Chargement du navigateur sur le serveur',
     // 'PUBLICATION_LOADING_PAGE' => 'Chargement de la page sur le serveur',

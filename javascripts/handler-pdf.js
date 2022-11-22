@@ -46,7 +46,7 @@ let appParams = {
             if (this.getUuid.length == 0){
                 this.uuid = this.getUuid();
             }
-            return `${serverUrl}${firstDelimiter}urlPageTag=${encodeURI(this.pageTag)}&url=${encodeURI(this.sourceUrl)}&hash=${this.hash}&uuid=${this.uuid}&forceNewFormat=1${this.refresh ? '&refresh=1':''}`;
+            return `${serverUrl}${firstDelimiter}urlPageTag=${encodeURIComponent(this.pageTag)}&url=${encodeURIComponent(this.sourceUrl)}&hash=${this.hash}&uuid=${this.uuid}&forceNewFormat=1${this.refresh ? '&refresh=1':''}`;
         },
         checkUrls: async function (urls){
             this.urlsChecked = 1;
@@ -408,7 +408,11 @@ let appParams = {
                 // do nothing if fetch error
                 return null;
             }
-        }
+        },
+        viewPreview: function(){
+            let newUrl = wiki.url(`${wiki.pageTag}/preview`);
+            window.open(newUrl);
+        },
     },
     mounted(){
         let baseEl = isVueJS3 ? this.$el.parentNode : this.$el;
@@ -420,6 +424,9 @@ let appParams = {
         this.pageTag = baseEl.dataset.pageTag ?? '';
         this.sourceUrl = baseEl.dataset.sourceUrl ?? '';
         this.finish = false;
+        this.buttonTitle = this.t('preview');
+        this.buttonType = 'info'
+        this.buttonAction = this.viewPreview;
         this.getUrlOfPdfService(baseEl)
           .then(this.checkUrls)
           .then(this.getPdf)

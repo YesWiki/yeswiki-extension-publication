@@ -161,7 +161,7 @@ class ApiController extends YesWikiController
      * @throws Exception
      * @return Response
      */
-    protected function returnFile(string $fullFilename, string $dlFilename, bool $oldMode = false, string $uuid): Response
+    protected function returnFile(string $fullFilename, string $dlFilename, bool $oldMode, string $uuid): Response
     {
         if (!file_exists($fullFilename)) {
             ob_end_flush();

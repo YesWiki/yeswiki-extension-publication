@@ -4,6 +4,7 @@ namespace YesWiki\Publication\Service;
 
 use Exception;
 use HeadlessChromium\BrowserFactory;
+use HeadlessChromium\Cookies\Cookie;
 use HeadlessChromium\Exception\OperationTimedOut;
 use HeadlessChromium\Page;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -282,11 +283,16 @@ class PdfHelper
      * @param string $sourceUrl
      * @param string $fullFilename
      * @param string $uuid
+     * @param array $cookies
      * @throws ExceptionWithHtml
      * @throws Exception with code = 2
      */
-    public function useBrowserToCreatePdfFromPage(string $sourceUrl, string $fullFilename, string $uuid = '')
-    {
+    public function useBrowserToCreatePdfFromPage(
+        string $sourceUrl,
+        string $fullFilename,
+        string $uuid = '',
+        array $cookies = []
+    ) {
         $this->assertCanExecChromium();
         try {
             $browserFactory = new BrowserFactory($this->params->get('htmltopdf_path'));
@@ -294,8 +300,32 @@ class PdfHelper
             $this->setValueInSession($uuid, PdfHelper::SESSION_BROWSER_READY, 1);
 
             $page = $browser->createPage();
-
             $this->setValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 1);
+
+            if (!empty($cookies)) {
+                $formattedCookies = [];
+                foreach ($cookies as $cookie) {
+                    $cookie = array_filter($cookie, function ($v, $k) {
+                        return in_array($k, ['domain','path','name','value'], true) && !empty($v) && is_string($v);
+                    }, ARRAY_FILTER_USE_BOTH);
+                    if (count($cookie) == 4) {
+                        $formattedCookies[] = new Cookie([
+                            'name' => $cookie['name'],
+                            'value' => $cookie['value'],
+                            'domain' => $cookie['domain'],
+                            'path' => $cookie['path'],
+                            'httponly' => true,
+                            'secure' => true,
+                            'samesite' => 'None',
+                            'expires' => time() + 600 // expires in 10 minutes
+                        ]);
+                    }
+                }
+                if (!empty($formattedCookies)) {
+                    $page->setCookies($formattedCookies)->await();
+                }
+            }
+
             $page->navigate($sourceUrl)->waitForNavigation(Page::NETWORK_IDLE);
             $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 2);
 
@@ -383,6 +413,12 @@ class PdfHelper
                 $_SESSION[self::SESSION_KEY][$newUuid][self::SESSION_TIME_KEY] = time();
             }
         }
+        session_write_close();
+    }
+
+    public function reopenSession()
+    {
+        session_start();
     }
 
     /**
@@ -393,9 +429,11 @@ class PdfHelper
      */
     public function setValueInSession(string $newUuid, $key, $value)
     {
+        session_start();
         if (isset($_SESSION) && !empty($newUuid) && !empty($_SESSION[self::SESSION_KEY][$newUuid])) {
             $_SESSION[self::SESSION_KEY][$newUuid][$key] = $value;
         }
+        session_write_close();
     }
 
 
@@ -404,9 +442,12 @@ class PdfHelper
      * @param string $uuid
      * @return mixed
      */
-    public function getValueInSession(string $newUuid, $key)
+    public function getValueInSession(string $uuid, $key)
     {
-        return $_SESSION[self::SESSION_KEY][$newUuid][$key] ?? null;
+        session_start();
+        $val = $_SESSION[self::SESSION_KEY][$uuid][$key] ?? null;
+        session_write_close();
+        return $val;
     }
 
     /**
@@ -416,7 +457,10 @@ class PdfHelper
      */
     public function getValuesInSession(string $uuid)
     {
-        return $_SESSION[self::SESSION_KEY][$uuid] ?? [];
+        session_start();
+        $values = $_SESSION[self::SESSION_KEY][$uuid] ?? [];
+        session_write_close();
+        return $values;
     }
 
     /**
@@ -425,10 +469,12 @@ class PdfHelper
      * @param $key
      * @param int $value
      */
-    public function addValueInSession(string $newUuid, $key, int $value)
+    public function addValueInSession(string $uuid, $key, int $value)
     {
-        if (isset($_SESSION[self::SESSION_KEY][$newUuid][$key])) {
-            $_SESSION[self::SESSION_KEY][$newUuid][$key] = intval($_SESSION[self::SESSION_KEY][$newUuid][$key]) + $value;
+        session_start();
+        if (isset($_SESSION[self::SESSION_KEY][$uuid][$key])) {
+            $_SESSION[self::SESSION_KEY][$uuid][$key] = intval($_SESSION[self::SESSION_KEY][$uuid][$key]) + $value;
         }
+        session_write_close();
     }
 }

@@ -26,6 +26,16 @@ class ApiController extends YesWikiController
         return new ApiResponse($status, Response::HTTP_OK);
     }
 
+        /**
+     * @Route("/api/pdf/getTmpCookie",methods={"GET"}, options={"acl":{"public","+"}},priority=2)
+     */
+    public function getTmpCookie()
+    {
+        $this->pdfHelper = $this->getService(PdfHelper::class);
+        $status = $this->pdfHelper->getValuesInSession($uuid);
+        return new ApiResponse($status, Response::HTTP_OK);
+    }
+
     /**
      * @Route("/api/pdf/getPdf",methods={"GET"}, options={"acl":{"public"}},priority=2)
      */
@@ -80,6 +90,10 @@ class ApiController extends YesWikiController
             }
             $cause['domainAuthorized'] = true;
 
+            $cookies = (!empty($_POST['coookiesToUse']) && is_array($_POST['coookiesToUse']))
+                ? array_filter($_POST['coookiesToUse'], 'is_string')
+                : [];
+
             $this->pdfHelper->prepareSession($uuid);
 
             list(
@@ -102,9 +116,11 @@ class ApiController extends YesWikiController
             if (!$file_exists
             || ($file_exists && $this->wiki->UserIsAdmin() && isset($_GET['refresh']) && $_GET['refresh']==1)
             ) {
-                $this->pdfHelper->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename, $uuid);
+                $this->pdfHelper->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename, $uuid, $cookies);
             }
-            return $this->returnFile($fullFilename, $dlFilename, $isOld && !$forceNewFormat, $uuid);
+            $response = $this->returnFile($fullFilename, $dlFilename, $isOld && !$forceNewFormat, $uuid);
+            $this->pdfHelper->reopenSession();
+            return $response;
         } catch (Exception $ex) {
             if (in_array($ex->getCode(), [2,3], true) || $ex instanceof ExceptionWithHtml) {
                 if ($ex instanceof ExceptionWithHtml) {

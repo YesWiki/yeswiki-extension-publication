@@ -16,6 +16,7 @@ let appParams = {
             creatingPdf: 0,
             downloadFileName: '',
             downloadLink: '',
+            finish: false,
             hash: '',
             isAdmin: null,
             message: '',
@@ -176,9 +177,7 @@ let appParams = {
                     let fileName = `${this.pageTag}-${this.hash}.pdf`;
                     return response.blob().then((blob)=>{
                         this.pdfDownloaded = 2;
-                        this.creatingPdf = 2;
-                        this.browserLoaded = 2;
-                        this.pageLoadedByBrowser = 2;
+                        this.updateVariables([1,1,1,1,7,1],false);
                         return {blob,fileName};
                     });
                 })
@@ -191,16 +190,7 @@ let appParams = {
                     if (this.pdfDownloaded > 0){
                         this.pdfDownloaded = 3;
                     }
-                    if (this.browserLoaded == 1){
-                        this.pdfServiceContacted = 3;
-                        this.browserLoaded = 3;
-                    }
-                    if (this.creatingPdf == 1){
-                        this.creatingPdf = 3;
-                    }
-                    if (this.pageLoadedByBrowser == 1){
-                        this.pageLoadedByBrowser = 3;
-                    }
+                    this.updateVariables([],true);
                     throw error;
                 });
         },
@@ -316,6 +306,7 @@ let appParams = {
             window.location = newUrl;
         },
         renderDefaultError: function(error){
+            this.finish = true;
             if (error.message === '===Do Nothing==='){
                 return;
             }
@@ -372,6 +363,18 @@ let appParams = {
                 return text;
             }
         },
+        updateVariables: function (data, setError){
+            let intSetError = setError === true;
+            if (Array.isArray(data)){
+                this.updateVariablesInternal('browserLoaded','pdfServiceContacted',data[3] || undefined, 1,intSetError);
+                this.updateVariablesInternal('pageLoadedByBrowser','browserLoaded',data[4] || undefined, 7,intSetError);
+                this.updateVariablesInternal('creatingPdf','pageLoadedByBrowser',data[5] || undefined, 1,intSetError);
+
+            }
+        },
+        updateVariablesInternal: function (name, previousName, value , waited,setError){
+            this[name] = this[name] == 2 ? 2 : ((this[name] == 1 && setError) ? 3 : (value === waited  ? 2 : (value === 0 ? 3 : (this[previousName] == 2 ? (setError ? 3 : 1) : 0)))); 
+        },
         updateStatus: async function(url){
             try {
                 let jsonResponse = await fetch(url)
@@ -391,43 +394,13 @@ let appParams = {
                         : []
                     );
                 // contact established
-                if (in_array(this.pdfServiceContacted,[1,3],true) && jsonAsArray[0] > 0){
-                    if (this.pdfServiceContacted == 1){
+                if (this.pdfServiceContacted> 0 && jsonAsArray[0] > 0){
+                    if (this.pdfServiceContacted == 1 && this.isAdmin){
                         this.pdfServiceContacted = 2;
                     }
-                    if (jsonAsArray[3] === 0){
-                        this.browserLoaded = 3;
-                        return null;
-                    } else if (jsonAsArray[3] === 1){
-                        this.browserLoaded = 2;
-                        if (jsonAsArray[4] === 0){
-                            this.pageLoadedByBrowser = 3;
-                            return null;
-                        } else {
-                            if(jsonAsArray[4] === 7){
-                                this.pageLoadedByBrowser = 2;
-                            } else if(this.pdfServiceContacted == 3){
-                                this.pageLoadedByBrowser = 3;
-                            } else {
-                                this.pageLoadedByBrowser = 1;
-                            }
-                            if (jsonAsArray[5] === 0){
-                                this.creatingPdf = 3;
-                                return null;
-                            } else if (jsonAsArray[5] === 1){
-                                this.creatingPdf = 2;
-                            } else if (this.pdfServiceContacted == 3){
-                                this.creatingPdf = 3;
-                                return null;
-                            } else {
-                                this.creatingPdf = 1;
-                            }
-                        }
-                    } else {
-                        this.browserLoaded = 1;
-                    }
+                    this.updateVariables(jsonAsArray,false);
                 }
-                if (this.pdfServiceContacted < 2){
+                if (!this.finish){
                     this.createupdateStatusTimerDirect(url);
                 }
                 
@@ -446,12 +419,14 @@ let appParams = {
         this.hash = baseEl.dataset.hash ?? '';
         this.pageTag = baseEl.dataset.pageTag ?? '';
         this.sourceUrl = baseEl.dataset.sourceUrl ?? '';
+        this.finish = false;
         this.getUrlOfPdfService(baseEl)
           .then(this.checkUrls)
           .then(this.getPdf)
           .then(({blob,fileName})=>{
             this.createPdfLink(blob,fileName);
             this.clickPdfLink();
+            this.finish = true;
           })
           .catch(this.renderDefaultError);
     },

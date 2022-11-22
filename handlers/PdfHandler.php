@@ -20,13 +20,11 @@ class PdfHandler extends YesWikiHandler
                 header('Access-Control-Allow-Origin: *');
                 header('Access-Control-Expose-Headers: Location, Slug, Accept, Content-Type');
             }
-            $this->wiki->redirect($this->wiki->href('', 'api/pdf/getPdf', [
-                'url' => $_GET['url'],
-                'urlPageTag' => $_GET['urlPageTag'],
-                'hash' => $_GET['hash'],
-                'fromOldPath' => '1',
-                'refresh' => $_GET['refresh'] ?? 0,
-                'forceNewFormat' => $_GET['forceNewFormat'] ?? 0
+            $filteredParams = array_filter($_GET, function ($v, $k) {
+                return in_array($k, ['url','urlPageTag','hash','refresh','forceNewFormat','via','template-page'], true) && is_scalar($v);
+            }, ARRAY_FILTER8USE_BOTH);
+            $this->wiki->redirect($this->wiki->href('', 'api/pdf/getPdf', $filteredParams + [
+                'fromOldPath' => '1'
             ], false));
         }
 

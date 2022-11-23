@@ -12,6 +12,7 @@ use YesWiki\Core\ApiResponse;
 use YesWiki\Core\YesWikiController;
 use YesWiki\Publication\Exception\ExceptionWithHtml;
 use YesWiki\Publication\Service\PdfHelper;
+use YesWiki\Publication\Service\SessionManager;
 
 class ApiController extends YesWikiController
 {
@@ -31,9 +32,7 @@ class ApiController extends YesWikiController
      */
     public function getTmpCookie()
     {
-        $this->pdfHelper = $this->getService(PdfHelper::class);
-        $status = $this->pdfHelper->getValuesInSession($uuid);
-        return new ApiResponse($status, Response::HTTP_OK);
+        return new ApiResponse([], Response::HTTP_OK);
     }
 
     /**
@@ -42,27 +41,8 @@ class ApiController extends YesWikiController
     public function getPdf()
     {
         $this->pdfHelper = $this->getService(PdfHelper::class);
+        $this->sessionManager = $this->getService(SessionManager::class);
         ob_start();
-
-        // if (!class_exists(ApiResponse::class)) {
-        //     // force load of ApiResponse for register_shutdown_function
-        //     include_once('includes/ApiResponse.php');
-        // }
-        // // register a shutdown
-        // $timeLimit = time();
-        // register_shutdown_function(function () use (&$timeLimit) {
-        //     if (connection_status() > 1 || (time()-$timeLimit) >= 0) {
-        //         $content = ob_get_contents();
-        //         ob_end_clean();
-        //         // timout
-        //         (new ApiResponse(['error'=>true,'reason'=>'timeout','content'=>$content], Response::HTTP_INTERNAL_SERVER_ERROR))->send();
-        //     }
-        // });
-
-        // $currentTimeout = 120; // sec
-        // $timeLimit = time()+$currentTimeout;
-        // set_time_limit($currentTimeout); // force timeout to detect it
-        // TODO : update regularly $timelimit no to block script
 
         $cause = [];
         try {
@@ -119,7 +99,7 @@ class ApiController extends YesWikiController
                 $this->pdfHelper->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename, $uuid, $cookies);
             }
             $response = $this->returnFile($fullFilename, $dlFilename, $isOld && !$forceNewFormat, $uuid);
-            $this->pdfHelper->reopenSession();
+            $this->sessionManager->reactivateSession();
             return $response;
         } catch (Exception $ex) {
             if (in_array($ex->getCode(), [2,3], true) || $ex instanceof ExceptionWithHtml) {

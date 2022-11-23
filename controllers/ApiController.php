@@ -98,7 +98,7 @@ class ApiController extends YesWikiController
             ) {
                 $this->pdfHelper->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename, $uuid, $cookies);
             }
-            $response = $this->returnFile($fullFilename, $dlFilename, $isOld && !$forceNewFormat, $uuid);
+            $response = $this->returnFile($fullFilename, $dlFilename, $isOld && !$forceNewFormat, $uuid, !empty($cookies));
             $this->sessionManager->reactivateSession();
             return $response;
         } catch (Exception $ex) {
@@ -155,10 +155,11 @@ class ApiController extends YesWikiController
      * @param string $dlFilename
      * @param bool $oldMode
      * @param string $uuid
+     * @param bool $deleteFileAfterSend
      * @throws Exception
      * @return Response
      */
-    protected function returnFile(string $fullFilename, string $dlFilename, bool $oldMode, string $uuid): Response
+    protected function returnFile(string $fullFilename, string $dlFilename, bool $oldMode, string $uuid, bool $deleteFileAfterSend): Response
     {
         if (!file_exists($fullFilename)) {
             ob_end_flush();
@@ -167,34 +168,38 @@ class ApiController extends YesWikiController
 
         $this->pdfHelper->addValueInSession($uuid, PdfHelper::SESSION_FILE_STATUS, 2);
         if ($oldMode) {
-            return $this->returnFileOldMode($fullFilename, $dlFilename);
+            $response = $this->returnFileOldMode($fullFilename, $dlFilename, $deleteFileAfterSend);
+        } else {
+            ob_end_clean();
+            $headers = [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Credentials' => 'true',
+                'Access-Control-Allow-Headers' => 'X-Requested-With, Location, Slug, Accept, Content-Type',
+                'Access-Control-Expose-Headers' => 'Location, Slug, Accept, Content-Type',
+                'Access-Control-Allow-Methods' => 'GET',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate', // HTTP/1.1
+                'Content-Type' => 'application/octet-stream',
+                'Content-Description' => 'File Transfer',
+            ];
+            $response =  new BinaryFileResponse(
+                $fullFilename,
+                Response::HTTP_OK,
+                $headers,
+                true, //public
+                null, //contentDisposition
+                false, // autoEtag
+                true // autoLastModified
+            );
+            try {
+                $response->setContentDisposition('attachment', $dlFilename);
+            } catch (Throwable $th) {
+                // fallback
+                $response->headers->set('Content-Disposition', 'attachment; filename="publication.pdf"');
+            }
         }
 
-        ob_end_clean();
-        $headers = [
-            'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Allow-Credentials' => 'true',
-            'Access-Control-Allow-Headers' => 'X-Requested-With, Location, Slug, Accept, Content-Type',
-            'Access-Control-Expose-Headers' => 'Location, Slug, Accept, Content-Type',
-            'Access-Control-Allow-Methods' => 'GET',
-            'Cache-Control' => 'no-store, no-cache, must-revalidate', // HTTP/1.1
-            'Content-Type' => 'application/octet-stream',
-            'Content-Description' => 'File Transfer',
-        ];
-        $response =  new BinaryFileResponse(
-            $fullFilename,
-            Response::HTTP_OK,
-            $headers,
-            true, //public
-            null, //contentDisposition
-            false, // autoEtag
-            true // autoLastModified
-        );
-        try {
-            $response->setContentDisposition('attachment', $dlFilename);
-        } catch (Throwable $th) {
-            // fallback
-            $response->headers->set('Content-Disposition', 'attachment; filename="publication.pdf"');
+        if ($deleteFileAfterSend) {
+            $response->deleteFileAfterSend(true);
         }
         return $response;
     }

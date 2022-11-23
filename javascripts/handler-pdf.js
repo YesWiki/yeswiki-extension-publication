@@ -423,7 +423,7 @@ let appParams = {
         this.hash = baseEl.dataset.hash ?? '';
         this.pageTag = baseEl.dataset.pageTag ?? '';
         this.sourceUrl = baseEl.dataset.sourceUrl ?? '';
-        this.finish = false;
+        this.refresh = (baseEl.dataset.refresh === true || baseEl.dataset.refresh === "true");
         this.buttonTitle = this.t('preview');
         this.buttonType = 'info'
         this.buttonAction = this.viewPreview;

@@ -15,6 +15,7 @@ use YesWiki\Core\Service\DbService;
 use YesWiki\Core\Service\PageManager;
 use YesWiki\Core\Service\TemplateEngine;
 use YesWiki\Publication\Exception\ExceptionWithHtml;
+use YesWiki\Publication\Service\SessionManager;
 use YesWiki\Wiki;
 
 class PdfHelper
@@ -40,6 +41,7 @@ class PdfHelper
     protected $templateEngine;
     protected $pageManager;
     protected $params;
+    protected $sessionManager;
     protected $wiki;
 
     public function __construct(
@@ -48,6 +50,7 @@ class PdfHelper
         TemplateEngine $templateEngine,
         PageManager $pageManager,
         ParameterBagInterface $params,
+        SessionManager $sessionManager,
         Wiki $wiki
     ) {
         $this->dbService = $dbService;
@@ -55,6 +58,7 @@ class PdfHelper
         $this->templateEngine = $templateEngine;
         $this->pageManager = $pageManager;
         $this->params = $params;
+        $this->sessionManager = $sessionManager;
         $this->wiki = $wiki;
     }
 
@@ -398,6 +402,7 @@ class PdfHelper
      */
     public function prepareSession(string $newUuid)
     {
+        $this->sessionManager->reactivateSession();
         if (isset($_SESSION) && !empty($newUuid)) {
             if (!isset($_SESSION[self::SESSION_KEY]) || !is_array($_SESSION[self::SESSION_KEY])) {
                 $_SESSION[self::SESSION_KEY] = [];
@@ -413,12 +418,7 @@ class PdfHelper
                 $_SESSION[self::SESSION_KEY][$newUuid][self::SESSION_TIME_KEY] = time();
             }
         }
-        session_write_close();
-    }
-
-    public function reopenSession()
-    {
-        session_start();
+        $this->sessionManager->safeCloseSession();
     }
 
     /**
@@ -429,11 +429,11 @@ class PdfHelper
      */
     public function setValueInSession(string $newUuid, $key, $value)
     {
-        session_start();
+        $this->sessionManager->reactivateSession();
         if (isset($_SESSION) && !empty($newUuid) && !empty($_SESSION[self::SESSION_KEY][$newUuid])) {
             $_SESSION[self::SESSION_KEY][$newUuid][$key] = $value;
         }
-        session_write_close();
+        $this->sessionManager->safeCloseSession();
     }
 
 
@@ -444,9 +444,9 @@ class PdfHelper
      */
     public function getValueInSession(string $uuid, $key)
     {
-        session_start();
+        $this->sessionManager->reactivateSession();
         $val = $_SESSION[self::SESSION_KEY][$uuid][$key] ?? null;
-        session_write_close();
+        $this->sessionManager->safeCloseSession(false);
         return $val;
     }
 
@@ -457,9 +457,9 @@ class PdfHelper
      */
     public function getValuesInSession(string $uuid)
     {
-        session_start();
+        $this->sessionManager->reactivateSession();
         $values = $_SESSION[self::SESSION_KEY][$uuid] ?? [];
-        session_write_close();
+        $this->sessionManager->safeCloseSession(false);
         return $values;
     }
 
@@ -471,10 +471,10 @@ class PdfHelper
      */
     public function addValueInSession(string $uuid, $key, int $value)
     {
-        session_start();
+        $this->sessionManager->reactivateSession();
         if (isset($_SESSION[self::SESSION_KEY][$uuid][$key])) {
             $_SESSION[self::SESSION_KEY][$uuid][$key] = intval($_SESSION[self::SESSION_KEY][$uuid][$key]) + $value;
         }
-        session_write_close();
+        $this->sessionManager->safeCloseSession();
     }
 }

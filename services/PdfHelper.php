@@ -257,16 +257,19 @@ class PdfHelper
             $pageTag = (isset($get['urlPageTag']) && is_string($get['urlPageTag'])) ? $get['urlPageTag'] : 'publication';
             $sourceUrl = strval($get['url']);
             $queryString = preg_replace('/&uuid=[A-Za-z0-9\-]+(&|$)/', '$1', $server['QUERY_STRING'] ?? '');
+            $queryString = preg_replace('/(?|&)refresh=[A-Za-z0-9\-]+(&|$)/', '$1', $queryString);
             $hash = substr(sha1($pagedjs_hash . strtolower($queryString)), 0, 10);
         } else {
             $pageTag = $this->wiki->GetPageTag();
             $pdfTag = $this->wiki->MiniHref('pdf', $pageTag);
-            $sourceUrl = $this->wiki->href('preview', $pageTag, preg_replace('#^'. $pdfTag .'&?#', '', $server['QUERY_STRING']), false);
+            $queryString = preg_replace('#^'. $pdfTag .'&?#', '', $server['QUERY_STRING'] ?? '');
+            $queryString = preg_replace('/refresh=[A-Za-z0-9\-]+(&|$)/', '', $queryString);
+            $sourceUrl = $this->wiki->href('preview', $pageTag, $queryString, false);
 
 
             $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
                 $this->wiki->page,
-                ['query_string' => strtolower($server['QUERY_STRING']),
+                ['query_string' => strtolower($queryString),
                 $this->getPageEntriesContent(
                     $pageTag,
                     $get['via'] ?? null

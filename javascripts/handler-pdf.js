@@ -330,7 +330,7 @@ let appParams = {
             }));
         },
         renderHelpUrlButton: function(){
-            let helpUrl = wiki.url('doc#/tools/publication/README?id=configuration-serveur-wakkaconfigphp');
+            let helpUrl = wiki.url('doc#/tools/publication/docs/README');
             let shortHelpUrl = wiki.url('doc#/tools/publication');
             return `<a href="${helpUrl}" class="btn btn-xs btn-info" target="blank">${shortHelpUrl}</a>`;
         },

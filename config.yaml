@@ -39,8 +39,11 @@ parameters:
   # for edit config action
   publication_editable_config_params:
     - 'htmltopdf_path'
-    - 'htmltopdf_service_url'
+    - 'htmltopdf_options':
+      - windowSize
+      - userAgent
     - 'htmltopdf_service_authorized_domains'
+    - 'htmltopdf_service_url'
 
 services:
   _defaults:

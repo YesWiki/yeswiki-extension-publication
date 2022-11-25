@@ -1,12 +1,23 @@
 # Extension YesWiki publication
 
-> Une extension [YesWiki] pour créer des documents imprimables (format PDF) à partir d'une sélection de [fiches Bazar][Bazar] et/ou de [pages de contenu][yeswiki-page].
+ - [English](#english)
+ - [Français](#extension-yesWiki-publication)
+
+----
+
+Une extension [YesWiki] pour créer des documents imprimables (format PDF) à partir d'une sélection de [fiches Bazar][Bazar] et/ou de [pages de contenu][yeswiki-page].
+
+----
+
+> **Cette page est une documentation technique**. Une documentation sur son usage est détaillée sur [cette page](https://yeswiki.net/?doc#/tools/publication/docs/fr/README.md) sur le site de YesWiki ou directement dans [votre YesWiki](/tools/publication/docs/fr/README.md) s'il est à jour.
+
+
+## Introduction 
 
 La mise en page est effectuée par [Paged.js](https://www.pagedjs.org/)
 ([documentation](https://www.pagedjs.org/documentation/)), et la capture PDF par un [navigateur dit "headless"][headless-browser] (par défaut [chromium](#pré-requis)).
 
 Les publications générées sont de type [livres/livrets](#pour-générer-des-livrets-téléchargeables), [fanzines](#pour-générer-des-livrets-téléchargeables) ou [newsletter](#pour-générer-des-newsletters).
-
 
 <table>
   <tr>
@@ -507,7 +518,26 @@ array(
 );
 ```
 
+## English
+
+A [YesWiki] extension to create printable documents (PDF format) from a selection of [Bazar entries][Bazar] and/or [content pages][yeswiki-page].
+
+----
+
+> **This page is a technical documentation**. Documentation n the usage of the extension is avaialable on [this page (fr)](https://yeswiki.net/?doc#/tools/publication/docs/fr/README.md) on the YesWiki website or directly into [your YesWiki (fr)](/tools/publication/docs/fr/README.md) if it is up-to-date.
+
+### Introduction 
+
+Pagination is done by [Paged.js](https://www.pagedjs.org/)
+([documentation](https://www.pagedjs.org/documentation/)), and PDF print by a ["headless" browser][headless-browser] by default [chromium](#pré-requis-techniques)).
+
+Generated publications are of type [books/booklets](#pour-générer-des-livrets-téléchargeables '(french)'), [fanzines](#pour-générer-des-livrets-téléchargeables '(french)') or [newsletter](#pour-générer-des-newsletters '(french)').
+
+### Installation
+
+See [dedicated documentation](docs/en/README.md)
+
 [YesWiki]: https://yeswiki.net/
-[Bazar]: https://yeswiki.net/?DocumentationBazaR
-[yeswiki-page]: https://yeswiki.net/?DocumentationEdition
+[Bazar]: https://yeswiki.net/?doc#/docs/users/fr/bazar
+[yeswiki-page]: https://yeswiki.net/?doc#/docs/users/fr/prise-en-main
 [headless-browser]: https://developers.google.com/web/updates/2017/04/headless-chrome

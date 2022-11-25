@@ -97,7 +97,7 @@ return [
     'AB_publication_pagebreak_label' => 'Insérer un saut de page',
     'AB_publication_pagebreak_hint' => 'À insérer dans une page de contenu, pour forcer le passage à la page suivante.',
     'AB_publication_bazar2publication_label' => 'Impression de résultats Bazar',
-    'AB_publication_bazar2publication_hint' => 'Bouton à positionner à côté d\'une action {{bazar}}.',
+    'AB_publication_bazar2publication_hint' => 'Bouton à positionner à côté d\'une action {{bazarliste}}.',
     'AB_publication_bazar2publication_title_label' => 'Titre',
     'AB_publication_bazar2publication_icon_label' => 'Icône',
     'AB_publication_bazar2publication_class_label' => 'Classe',
@@ -140,6 +140,8 @@ return [
     'AB_publication_publicationlist_pagenameprefix_label' => 'préfixe de page',
 
     // edit config
+    'EDIT_CONFIG_HINT_HTMLTOPDF_OPTIONS[USERAGENT]' => 'UserAgent utilisée par le navigateur',
+    'EDIT_CONFIG_HINT_HTMLTOPDF_OPTIONS[WINDOWSIZE]' => 'Taille de la fenêtre utilisée par le navigateur ([\'1440\',\'780\'])',
     'EDIT_CONFIG_HINT_HTMLTOPDF_PATH' => 'Chemin d\'accès serveur personnalisé à un Chrome/Chromium.',
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_URL' => 'Si Chrome/Chromium ne peut être installé sur votre machine, adresse d\'un YesWiki à qui déléguer le rendu PDF (exemple: https://example.org/yeswiki/?PagePrincipale/pdf)',
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_AUTHORIZED_DOMAINS' => 'Liste des domaines autorisés ([\'example.com\',\'yeswiki.net\'])',

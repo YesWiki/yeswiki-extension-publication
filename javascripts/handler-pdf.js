@@ -150,9 +150,11 @@ let appParams = {
         },
         createupdateStatusTimer: function(url,uuid){
             this.clearTimer();
-            let urlToFollow = this.getUrlToUpdateStatus(url,uuid);
-            if (urlToFollow.length > 0){
-                this.createupdateStatusTimerDirect(urlToFollow);
+            if (this.isAdmin){
+                let urlToFollow = this.getUrlToUpdateStatus(url,uuid);
+                if (urlToFollow.length > 0){
+                    this.createupdateStatusTimerDirect(urlToFollow);
+                }
             }
         },
         createupdateStatusTimerDirect: function(url){

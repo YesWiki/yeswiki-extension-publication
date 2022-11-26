@@ -303,8 +303,19 @@ class PdfHelper
         $this->assertCanExecChromium();
         try {
             $browserFactory = new BrowserFactory($this->params->get('htmltopdf_path'));
-            $browser = $browserFactory->createBrowser($this->params->get('htmltopdf_options'));
+            $options = $this->params->get('htmltopdf_options');
+            $browser = $browserFactory->createBrowser($options);
             $this->setValueInSession($uuid, PdfHelper::SESSION_BROWSER_READY, 1);
+
+            $timeout = (
+                empty($options['sendSyncDefaultTimeout']) || 
+                !is_scalar($options['sendSyncDefaultTimeout']) ||
+                intval($options['sendSyncDefaultTimeout']) < 10000 // in ms
+            ) ? 20 // in sec
+            : ceil(intval($options['sendSyncDefaultTimeout'])*2/1000); // in s 
+            // (twice to be sure that Browser manages timeout and not php)
+            set_time_limit($timeout);
+
 
             $page = $browser->createPage();
             $this->setValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 1);
@@ -338,6 +349,9 @@ class PdfHelper
 
             $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue($this->params->get('page_load_timeout'));
             $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 4);
+
+            // reset timer for time limit and give 30 sec more to render pdf
+            set_time_limit(30);
 
             // now generate PDF
             $page->pdf(array(

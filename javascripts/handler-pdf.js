@@ -20,6 +20,7 @@ let appParams = {
             finish: false,
             hash: '',
             isAdmin: null,
+            isIframe: null,
             message: '',
             messageType: 'danger',
             pageTag:'',
@@ -349,7 +350,7 @@ let appParams = {
         },
         returnToPage: function(){
             this.stopFetch();
-            window.location = wiki.url(wiki.pageTag);
+            window.location = wiki.url(wiki.pageTag+(this.isIframe ? '/iframe' : ''));
         },
         stopFetch: function(){
             if (this.abortController !== null){
@@ -445,6 +446,7 @@ let appParams = {
           return false;
         });
         this.isAdmin = (baseEl.dataset.isAdmin === true || baseEl.dataset.isAdmin === "true");
+        this.isIframe = (baseEl.dataset.isIframe === true || baseEl.dataset.isIframe === "true");
         this.hash = baseEl.dataset.hash ?? '';
         this.pageTag = baseEl.dataset.pageTag ?? '';
         this.sourceUrl = baseEl.dataset.sourceUrl ?? '';

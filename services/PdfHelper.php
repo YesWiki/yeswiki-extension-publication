@@ -261,7 +261,7 @@ class PdfHelper
             $hash = substr(sha1($pagedjs_hash . strtolower($queryString)), 0, 10);
         } else {
             $pageTag = $this->wiki->GetPageTag();
-            $pdfTag = $this->wiki->MiniHref('pdf', $pageTag);
+            $pdfTag = $this->wiki->MiniHref('pdf'.testUrlInIframe(), $pageTag);
             $queryString = preg_replace('#^'. $pdfTag .'&?#', '', $server['QUERY_STRING'] ?? '');
             $queryString = preg_replace('/refresh=[A-Za-z0-9\-]+(&|$)/', '', $queryString);
             $sourceUrl = $this->wiki->href('preview', $pageTag, $queryString, false);
@@ -308,11 +308,11 @@ class PdfHelper
             $this->setValueInSession($uuid, PdfHelper::SESSION_BROWSER_READY, 1);
 
             $timeout = (
-                empty($options['sendSyncDefaultTimeout']) || 
+                empty($options['sendSyncDefaultTimeout']) ||
                 !is_scalar($options['sendSyncDefaultTimeout']) ||
                 intval($options['sendSyncDefaultTimeout']) < 10000 // in ms
             ) ? 20 // in sec
-            : ceil(intval($options['sendSyncDefaultTimeout'])*2/1000); // in s 
+            : ceil(intval($options['sendSyncDefaultTimeout'])*2/1000); // in s
             // (twice to be sure that Browser manages timeout and not php)
             set_time_limit($timeout);
 

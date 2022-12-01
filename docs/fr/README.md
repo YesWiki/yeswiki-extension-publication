@@ -166,6 +166,12 @@ Pour ceci:
  2. contacter l'administrateurice du site concerné pour lui demander d'ajouter votre nom de domaine aux domaines autorisés.
     - l'administrateurice concernée devra alors modifier le paramètre `htmltopdf_service_authorized_domains` dans la page [GererConfig](?GererConfig 'Page config :ignore') dans la partie `publication` (quelques exemples de valeurs possibles : `['example.com']` ou `['example.com','wiki.example.com','example.net']`)
 
+### Que faire si la page d'impression ne s'affiche pas un cadre de type `iframe` ?
+
+Si la page d'impression est affichée dans un cadre de type `iframe`, il est possible qu'elle ne s'affiche pas en raison des contraintes de sécurité de certains serveurs.
+
+Pour en autoriser l'affichage, rendez-vous en temps qu'administrateurice sur la page [GererConfig](?GererConfig 'Page config :ignore') dans la partie `Paramètres principaux` et ajouter `'pdf','pdfiframe'` aux valeurs possibles pour le paramètre `allowed_methods_in_iframe`.
+
 ## Utilisation détaillée
 
 Cette partie décrit de façon détaillée les paramètres pour les actions et handlers utilisés. Pour les explications de prise en main, veuillez vous rendre [en haut de ce fichier](?id=prise-en-main).

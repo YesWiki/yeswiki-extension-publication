@@ -161,6 +161,7 @@ return [
     'PUBLICATION_ERROR_FOR_USER' => 'Connexion not possible<br/>Pdf creation by altenative way.<br/><i>If a new window does not open in this browser in few seconds, click on button bellow.</i>.',
     'PUBLICATION_ERROR_RELOADING' => 'This website uses an external service to print pdf. You will be redirected to this service.',
     'PUBLICATION_ERROR_WHILE_GENERATING_PDF' => 'Error while generating pdf for \'{url}\' : {error}',
+    'PUBLICATION_IFRAME_NOT_SET' => 'The handler `pdfiframe` is not allowed to display in iframe!<br/>Go to page page %{gererConfigLink}, part \'Main parameters\' to add \'pdfiframe\' in parameter `allowed_methods_in_iframe` ',
     'PUBLICATION_GET_PDF_SERVICE_URL' => 'Get pdf server address',
     'PUBLICATION_LOADING_BROWSER' => 'Loading browser on server',
     'PUBLICATION_LOADING_PAGE' => 'Loading page on server',

@@ -9,6 +9,7 @@ let appParams = {
     components: { Translations, Step, SpinnerLoader },
     data: function() {
         return {
+            abortController : null,
             browserLoaded: 0,
             buttonAction: null,
             buttonType: 'primary',
@@ -73,7 +74,9 @@ let appParams = {
             return urls;
         },
         contactServer: async function(url){
-            return fetch(url,{referrer:wiki.url(this.pageTag)})
+            this.stopFetch();
+            this.abortController = new AbortController();
+            return fetch(url,{referrer:wiki.url(this.pageTag),signal:this.abortController.signal})
                 .then((response)=>{
                     if (!response.ok && [401,403,404].includes(response.status)){
                         return Promise.reject(`${response.status} => ${response.statusText}`);
@@ -81,6 +84,9 @@ let appParams = {
                     return response;
                 })
                 .catch((error)=>{
+                    if (typeof error == 'DOMException' && error.name == 'AbortError'){
+                        return Promise.reject(new Error('===Do Nothing==='));
+                    }
                     let errorMessage = this.t('errorforexternaleurlcheck',{
                         extUrl: url,
                         helpLink: this.renderHelpUrlButton(),
@@ -185,7 +191,9 @@ let appParams = {
                 })
                 .catch((error)=>{
                     this.clearTimer();
-                    this.message = '';
+                    if (typeof error != "object" || error.message !== '===Do Nothing==='){
+                        this.message = '';
+                    }
                     if (this.pdfServiceContacted < 2){
                         this.pdfServiceContacted = 3;
                     }
@@ -312,7 +320,7 @@ let appParams = {
             if (error.message === '===Do Nothing==='){
                 return;
             }
-            this.messageType = 'danger';
+            this.messageType = this.isAdmin ? 'danger' : 'info';
             if (this.isAdmin){
                 this.message = this.t('errorforadmin',{error:error.toString()})
                 if (error.lineNumber != undefined && error.fileName != undefined){
@@ -338,6 +346,16 @@ let appParams = {
         },
         renderErrorJsonFormat: function ({url,response,contentType}){
             return Promise.reject(`Bad format of response to url '${url}' : status '${response.status}'  => '${response.statusText}', but json waited with error = true, obtained : ${contentType}`);
+        },
+        returnToPage: function(){
+            this.stopFetch();
+            window.location = wiki.url(wiki.pageTag);
+        },
+        stopFetch: function(){
+            if (this.abortController !== null){
+                this.abortController.abort();
+            }
+            this.abortController = null;
         },
         t: function(text, replacements = null){
             if (replacements === null || typeof replacements != "object"){
@@ -379,7 +397,12 @@ let appParams = {
         },
         updateStatus: async function(url){
             try {
-                let jsonResponse = await fetch(url)
+                let aController = this.abortController
+                if (aController === null){
+                    this.abortController = new AbortController();
+                    aController = this.abortController;
+                }
+                let jsonResponse = await fetch(url,{signal:this.abortController.signal})
                     .then((response)=>{
                         return (response.ok)
                             ? response.json()

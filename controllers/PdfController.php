@@ -16,7 +16,7 @@ class PdfController extends YesWikiController
     public function __construct(
         ParameterBagInterface $params,
         PdfHelper $pdfHelper,
-        Wiki $wiki,
+        Wiki $wiki
     ) {
         $this->params = $params;
         $this->pdfHelper = $pdfHelper;

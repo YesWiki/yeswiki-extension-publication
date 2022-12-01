@@ -28,7 +28,7 @@ class Bazar2PublicationAction extends YesWikiAction
         if (array_key_exists('wiki', $queries)) {
             unset($queries['wiki']);
         }
-        $href = $this->wiki->Href('pdf', null, $queries// merge GET with wiki and following params
+        $href = $this->wiki->Href('pdf'.testUrlInIframe(), null, $queries// merge GET with wiki and following params
             +[
               'via' => 'bazarliste',
               'template-page' => $this->arguments['templatepage'],

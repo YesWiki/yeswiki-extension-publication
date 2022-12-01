@@ -159,6 +159,7 @@ return [
     // 'PUBLICATION_ERROR_FOR_USER' => 'Connexion impossible<br/>Génération du pdf par un moyen alternatif.<br/><i>Si une fenêtre ne s\'ouvre pas dans ce navigateur dans quelques secondes, vous pouvez cliquer sur le bouton ci-dessous.</i>.',
     // 'PUBLICATION_ERROR_RELOADING' => 'Ce site utilise un service externe pour imprimer les pages. Vous allez être redirigé vers ce service.',
     // 'PUBLICATION_ERROR_WHILE_GENERATING_PDF' => 'Erreur en générant le pdf pour \'{url}\' : {error}',
+    // 'PUBLICATION_IFRAME_NOT_SET' => 'Le handler `pdfiframe` n\'est pas autorisé à s\'afficher dans les iframes !<br/>Veuiller vous rendre dans la page %{gererConfigLink}, partie \'Paramètres principaux\' pour ajouter \'pdfiframe\' au paramètre `allowed_methods_in_iframe` !',
     // 'PUBLICATION_GET_PDF_SERVICE_URL' => 'Récupération de l\'adresse du serveur pdf',
     // 'PUBLICATION_LOADING_BROWSER' => 'Chargement du navigateur sur le serveur',
     // 'PUBLICATION_LOADING_PAGE' => 'Chargement de la page sur le serveur',

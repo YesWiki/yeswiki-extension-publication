@@ -66,6 +66,12 @@ For this:
  2. contact administrator of the concerned website to ask to add the current ueswiki's domain to the list of authorized domains.
     - the concerned adminsitrator will have to modify the parameter `htmltopdf_service_authorized_domains` into page [GererConfig](?GererConfig 'Page config :ignore'), part `publication` (examples of possibles values : `['example.com']` or `['example.com','wiki.example.com','example.net']`)
 
+### What do if print page does not display in `iframe` ?
+
+If print page does not display in `iframe`, it is possible that server constraints of security prevent its display.
+
+To authorize it, go as admin in page page [GererConfig](?GererConfig 'Page config :ignore') in part `Main parameters` and add `'pdf','pdfiframe'` to possible values in parameter `allowed_methods_in_iframe`.
+
 ## More precise usage
 
 See french help at this [address](/tools/publication/docs/fr/?id=utilisation-d%c3%a9taill%c3%a9e)

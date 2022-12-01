@@ -52,3 +52,6 @@ services:
 
   YesWiki\Publication\Service\:
     resource: 'services/*'
+
+  YesWiki\Publication\Controller\:
+    resource: 'controllers/*'

@@ -208,7 +208,7 @@ Ce handler peut utiliser les paramètres suivants.
 |`&browserPrintAfterRendered=1`|non défini ou `1` ou `yes`|Déclenche automatiquement l'impression via le navigateur dès que la prévisualisation est prête si la valeur est `1`|Doit correpsondre à la valeur d'un `boolean`|
 |`&via=bazarliste`|non défini ou `bazarliste`|Si la valeur est `bazarliste`, fait le rendu des fiches sélectionnées par l'action `{{bazarliste}}` au lieu de rendre la page elle-même||
 |`&template-page=TaG`|non défini ou nom d'une page|Définit la page à utiliser comme modèle|Doit être une chaîne de caractère|
-|`&query=bf_name=value1|bf_name2=value3`|une reqûete de type `bazarliste`|Permet de filtrer la liste des fiches à afficher dans le cas de `&via=bazarliste`|Doit respecter la syntaxe utilisé par `bazar`|
+|`&query=bf_name=value1\|bf_name2=value3`|une reqûete de type `bazarliste`|Permet de filtrer la liste des fiches à afficher dans le cas de `&via=bazarliste`|Doit respecter la syntaxe utilisé par `bazar`|
 
 #### handler `/pdf`
 

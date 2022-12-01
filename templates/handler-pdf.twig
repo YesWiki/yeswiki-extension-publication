@@ -38,7 +38,7 @@
         <step :name="'pageLoadedByBrowser'" :value="pageLoadedByBrowser" :text="{{ _t('PUBLICATION_LOADING_PAGE')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
         <step :name="'creatingPdf'" :value="creatingPdf" :text="{{ _t('PUBLICATION_CREATING_PDF')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
       {% endif %}
-        <step :name="'getPdf'" :value="pdfDownloaded" :text="{{ _t('PUBLICATION_DOWNLOAD_PDF')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+        <step :name="'getPdf'" :value="pdfDownloaded" :text="{{ _t('PUBLICATION_DOWNLOAD_PDF_STEP')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
     </div>
     <div v-if="message.length > 0" :class="{alert:true,[`alert-${messageType}`]:true}" v-html="message">
     </div>

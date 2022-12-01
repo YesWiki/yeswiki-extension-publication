@@ -167,5 +167,6 @@ return [
     'PUBLICATION_OPEN_DEFAULT_LINK' => 'Open external page for print',
     'PUBLICATION_PDF_CREATION' => 'Create pdf of %{pageTag}\s page',
     'PUBLICATION_PRINT_VIA_PREVIEW' => 'Print via browser',
+    'PUBLICATION_RETURN_TO_PAGE' => 'Back to page',
     'PUBLICATION_SAVE_FILE' => 'Save pdf',
 ];

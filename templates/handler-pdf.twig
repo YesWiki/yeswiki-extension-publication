@@ -29,16 +29,16 @@
     <h2>{{ _t('PUBLICATION_PDF_CREATION',{pageTag:pageTag}) }}</h2>
     <div>
       {% if isAdmin == true %}
-        <step :name="'getPdfServiceUrl'" :value="urlOfPdfServiceGet" :text="{{ _t('PUBLICATION_GET_PDF_SERVICE_URL')|json_encode }}"></step>
-        <step :name="'checkUrls'" :value="urlsChecked" :text="{{ _t('PUBLICATION_CHECK_URLS')|json_encode }}"></step>
+        <step :name="'getPdfServiceUrl'" :value="urlOfPdfServiceGet" :text="{{ _t('PUBLICATION_GET_PDF_SERVICE_URL')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+        <step :name="'checkUrls'" :value="urlsChecked" :text="{{ _t('PUBLICATION_CHECK_URLS')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
       {% endif %}
-        <step :name="'contactService'" :value="pdfServiceContacted" :text="{{ _t('PUBLICATION_CONTACT_SERVICE')|json_encode }}"></step>
+        <step :name="'contactService'" :value="pdfServiceContacted" :text="{{ _t('PUBLICATION_CONTACT_SERVICE')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
       {% if isAdmin == true %}
-        <step :name="'browserLoaded'" :value="browserLoaded" :text="{{ _t('PUBLICATION_LOADING_BROWSER')|json_encode }}"></step>
-        <step :name="'pageLoadedByBrowser'" :value="pageLoadedByBrowser" :text="{{ _t('PUBLICATION_LOADING_PAGE')|json_encode }}"></step>
-        <step :name="'creatingPdf'" :value="creatingPdf" :text="{{ _t('PUBLICATION_CREATING_PDF')|json_encode }}"></step>
+        <step :name="'browserLoaded'" :value="browserLoaded" :text="{{ _t('PUBLICATION_LOADING_BROWSER')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+        <step :name="'pageLoadedByBrowser'" :value="pageLoadedByBrowser" :text="{{ _t('PUBLICATION_LOADING_PAGE')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+        <step :name="'creatingPdf'" :value="creatingPdf" :text="{{ _t('PUBLICATION_CREATING_PDF')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
       {% endif %}
-        <step :name="'getPdf'" :value="pdfDownloaded" :text="{{ _t('PUBLICATION_DOWNLOAD_PDF')|json_encode }}"></step>
+        <step :name="'getPdf'" :value="pdfDownloaded" :text="{{ _t('PUBLICATION_DOWNLOAD_PDF')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
     </div>
     <div v-if="message.length > 0" :class="{alert:true,[`alert-${messageType}`]:true}" v-html="message">
     </div>
@@ -53,4 +53,5 @@
         >
       {{ _t('PUBLICATION_SAVE_FILE') }}
     </a>
+    <button class="btn btn-default" @click.prevent.stop="returnToPage">{{ _t('PUBLICATION_RETURN_TO_PAGE') }}</button>
 </div>

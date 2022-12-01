@@ -167,5 +167,6 @@ return [
     'PUBLICATION_OPEN_DEFAULT_LINK' => 'Ouvrir la page externe d\'impresssion',
     'PUBLICATION_PDF_CREATION' => 'Création du pdf de la page %{pageTag}',
     'PUBLICATION_PRINT_VIA_PREVIEW' => 'Imprimer par le navigateur',
+    'PUBLICATION_RETURN_TO_PAGE' => 'Retour à la page',
     'PUBLICATION_SAVE_FILE' => 'Enregistrer le pdf',
 ];

@@ -1,7 +1,7 @@
 import SpinnerLoader from './SpinnerLoader.js'
 
 export default {
-    props: ['name','value','text'],
+    props: ['name','value','text','isAdmin'],
     components: {SpinnerLoader},
     computed: {
         isChecked: function(){
@@ -21,8 +21,10 @@ export default {
                 <span v-html="text"></span>
             </label>
             &nbsp;
+            <span v-if="value === 1">&#9203;</span>
             <SpinnerLoader :size="1" :height="25" v-if="value === 1"/>
-            <span v-if="value === 3">&#10060;</span>
+            <span v-else-if="value === 3 && isAdmin">&#10060;</span>
+            <span v-else-if="value === 3 && !isAdmin">&#9889;</span>
         </div>
     `
 }

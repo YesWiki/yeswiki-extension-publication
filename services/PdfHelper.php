@@ -344,7 +344,7 @@ class PdfHelper
                 }
             }
 
-            $page->navigate($sourceUrl)->waitForNavigation(Page::NETWORK_IDLE);
+            $page->navigate($sourceUrl)->waitForNavigation(Page::NETWORK_IDLE, intval($this->params->get('page_load_timeout')) > 30000 ? $this->params->get('page_load_timeout') : 30000);
             $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 2);
 
             $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue($this->params->get('page_load_timeout'));

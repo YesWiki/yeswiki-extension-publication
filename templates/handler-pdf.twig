@@ -1,0 +1,58 @@
+{{ include_javascript('javascripts/vendor/vue/vue.js') }}
+{{ include_javascript('tools/publication/javascripts/handler-pdf.js',false,true) }}
+{{ include_css('tools/publication/styles/handler-pdf.css',) }}
+
+<div class="pdf-handler-container" 
+        data-is-admin="{{ (isAdmin == true)|json_encode }}" 
+        data-is-iframe="{{ (isIframe == true)|json_encode }}" 
+        data-urls="{{ urls|json_encode }}" 
+        data-source-url="{{ sourceUrl }}" 
+        data-hash="{{ hash }}" 
+        data-page-tag="{{ pageTag }}"
+        data-refresh="{{ refresh|json_encode }}"
+    >
+    <translations>
+        <template #errorforadmin>{{ _t('PUBLICATION_ERROR_FOR_ADMIN') }}</template>
+        <template #errorforexternalwithoutchromium>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_WITHOUT_CHROMIUM') }}</template>
+        <template #errorforuser>{{ _t('PUBLICATION_ERROR_FOR_USER') }}</template>
+        <template #errorforurls>{{ _t('PUBLICATION_ERROR_FOR_URLS') }}</template>
+        <template #errorforexternaleurlcheck>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_URL_DOMAIN_CHECK') }}</template>
+        <template #errorforexternaleurlhtmlformat>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_HTML_FORMAT') }}</template>
+        <template #errorforexternaleurldomainnotauthorized>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_DOMAIN_NOT_AUTHORIZED') }}</template>
+        <template #errorforexternaleurlnotconfigured>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_NOT_CONFIGURED') }}</template>
+        <template #errorforexternalwhilecreatingpdf>{{ _t('PUBLICATION_ERROR_WHILE_GENERATING_PDF') }}</template>
+        <template #errorreloading>{{ _t('PUBLICATION_ERROR_RELOADING') }}</template>
+        <template #creatingpdf>{{ _t('PUBLICATION_CREATING_PDF') }}</template>
+        <template #preview>{{ _t('PUBLICATION_PREVIEW') }}</template>
+        <template #printviapreview>{{ _t('PUBLICATION_PRINT_VIA_PREVIEW') }}</template>
+        <template #opendefaultlink>{{ _t('PUBLICATION_OPEN_DEFAULT_LINK') }}</template>
+    </translations>
+    <h2>{{ _t('PUBLICATION_PDF_CREATION',{pageTag:pageTag}) }}</h2>
+    <div>
+      {% if isAdmin == true %}
+        <step :name="'getPdfServiceUrl'" :value="urlOfPdfServiceGet" :text="{{ _t('PUBLICATION_GET_PDF_SERVICE_URL')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+        <step :name="'checkUrls'" :value="urlsChecked" :text="{{ _t('PUBLICATION_CHECK_URLS')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+      {% endif %}
+        <step :name="'contactService'" :value="pdfServiceContacted" :text="{{ _t('PUBLICATION_CONTACT_SERVICE')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+      {% if isAdmin == true %}
+        <step :name="'browserLoaded'" :value="browserLoaded" :text="{{ _t('PUBLICATION_LOADING_BROWSER')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+        <step :name="'pageLoadedByBrowser'" :value="pageLoadedByBrowser" :text="{{ _t('PUBLICATION_LOADING_PAGE')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+        <step :name="'creatingPdf'" :value="creatingPdf" :text="{{ _t('PUBLICATION_CREATING_PDF')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+      {% endif %}
+        <step :name="'getPdf'" :value="pdfDownloaded" :text="{{ _t('PUBLICATION_DOWNLOAD_PDF_STEP')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+    </div>
+    <div v-if="message.length > 0" :class="{alert:true,[`alert-${messageType}`]:true}" v-html="message">
+    </div>
+    <button v-if="buttonTitle.length > 0" v-html="buttonTitle" :class="{btn:true,[`btn-${buttonType}`]:true}" @click.prevent.stop="manageButton"></button>
+    <a 
+        v-if="downloadLink.length > 0" 
+        :download="downloadFileName"
+        class="btn btn-primary"
+        title="{{ _t('PUBLICATION_SAVE_FILE') }}"
+        :href="downloadLink"
+        ref="downLoadButton"
+        >
+      {{ _t('PUBLICATION_SAVE_FILE') }}
+    </a>
+    <button class="btn btn-default" @click.prevent.stop="returnToPage">{{ _t('PUBLICATION_RETURN_TO_PAGE') }}</button>
+</div>

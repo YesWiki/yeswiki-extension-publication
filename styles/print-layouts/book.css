@@ -20,7 +20,10 @@ body {
 }
 
 @page :left {
-  margin: 20mm 40mm 20mm 30mm;
+  margin-top: 20mm;
+  margin-right: 40mm;
+  margin-bottom: 20mm;
+  margin-left: 30mm;
   @top-left {
     vertical-align: bottom;
     padding-bottom: 10mm;
@@ -32,7 +35,10 @@ body {
 }
 
 @page :right {
-  margin: 20mm 30mm 20mm 40mm;
+  margin-top: 20mm;
+  margin-right: 30mm;
+  margin-bottom: 20mm;
+  margin-left: 40mm;
   @top-right {
     vertical-align: bottom;
     padding-bottom: 10mm;

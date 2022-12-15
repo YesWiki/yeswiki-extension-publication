@@ -65,7 +65,7 @@ class PdfHandler extends YesWikiHandler
                     'message' => $th->getMessage()
                 ]);
             } elseif ($th->getCode() == 2) {
-                return $this->Header().$th->getMessage().$this->Footer()."\n";
+                return $this->wiki->Header().$th->getMessage().$this->wiki->Footer()."\n";
             }
             throw $th;
         }

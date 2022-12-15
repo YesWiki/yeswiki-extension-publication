@@ -35,7 +35,7 @@ class PdfController extends YesWikiController
             }
             $filteredParams = array_filter($_GET, function ($v, $k) {
                 return in_array($k, ['url','urlPageTag','hash','refresh','forceNewFormat','via','template-page'], true) && is_scalar($v);
-            }, ARRAY_FILTER8USE_BOTH);
+            }, ARRAY_FILTER_USE_BOTH);
             $this->wiki->redirect($this->wiki->href('', 'api/pdf/getPdf', $filteredParams + [
                 'fromOldPath' => '1'
             ], false));

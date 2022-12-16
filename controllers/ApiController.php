@@ -142,7 +142,7 @@ class ApiController extends YesWikiController
                 return new ApiResponse([
                     'error'=>true,
                     'cause' => $cause
-                ], Response::HTTP_SERVICE_UNAVAILABLE);
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
             } else {
                 throw $ex;
             }

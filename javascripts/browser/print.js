@@ -111,17 +111,40 @@ registerHandlers(class backgroundImageCover extends Handler {
       page.style.backgroundImage = `url(${node.dataset.backgroundImage})`
     }
   }
-
-  afterRendered(pages) {
-    if (browserPrintAfterRendered === true){
-      // print page with browser
-      window.print();
-    }
-  }
 })
 
 window.addEventListener('load', () => {
-  new Previewer().preview().then(() => {
-    document.body.dataset.publication = 'ready'
+  // wait two animation frames to be sure high resolution images are rendered after loaded
+  // src: https://stackoverflow.com/questions/14578356/how-to-detect-when-an-image-has-finished-rendering-in-the-browser-i-e-painted
+  let previousTime = null;
+  const waitNextAnimationIframe = new Promise((resolve,reject) =>{
+    const timeoutId = setTimeout(reject,1000) // not more than 1 s
+    window.requestAnimationFrame((t)=>{
+      if (previousTime === t){
+        waitNextAnimationIframe.then((t)=>{
+          clearTimeout(timeoutId)
+          resolve(t)
+        })
+      } else {
+        previousTime = t
+        clearTimeout(timeoutId)
+        resolve(t)
+      }
+    })
   })
+  
+  // TODO be able to detec ready state for VueJs bazarliste dynamic 
+  //   and end of rendering of Leaflet map
+  waitNextAnimationIframe
+    .then((t)=>waitNextAnimationIframe)
+    .finally(()=>{
+      new Previewer().preview().then(() => {
+        document.body.dataset.publication = 'ready'
+        
+        if (browserPrintAfterRendered === true){
+          // print page with browser
+          window.print();
+        }
+      })
+    })
 })

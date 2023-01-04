@@ -413,7 +413,7 @@ class PdfHelperTest extends YesWikiTestCase
                 'expected' => [
                     'pageTag' => '{{rootPageTag}}',
                     'dlFilename' => 'regexp:/^{{rootPageTag}}-{{hash}}\.pdf$/',
-                    'fullFilename' => 'regexp:/.+\/yeswiki\/{{rootPageTag}}-publication-{{hash}}\.pdf$/',
+                    'fullFilename' => 'regexp:/.+\/yeswiki\/[A-Za-z0-9\-]+\/{{rootPageTag}}-publication-{{hash}}\.pdf$/',
                     'hash' => 'regexp:/^[A-Fa-f0-9]{10,}$/',
                     'sourceUrl' => 'regexp:/^https?:\/\/.+\/\??{{rootPageTag}}\/preview.*$/'
                 ],
@@ -428,7 +428,7 @@ class PdfHelperTest extends YesWikiTestCase
                 'expected' => [
                     'pageTag' => 'publication',
                     'dlFilename' => 'regexp:/^publication-{{hash}}\.pdf$/',
-                    'fullFilename' => 'regexp:/.+\/yeswiki\/publication-publication-{{hash}}\.pdf$/',
+                    'fullFilename' => 'regexp:/.+\/yeswiki\/[A-Za-z0-9\-]+\/publication-publication-{{hash}}\.pdf$/',
                     'hash' => 'regexp:/^[A-Fa-f0-9]{10,}$/',
                     'sourceUrl' => 'regexp:/^http:\/\/localhost\/\?TesT\/preview$/'
                 ],
@@ -444,7 +444,7 @@ class PdfHelperTest extends YesWikiTestCase
                 'expected' => [
                     'pageTag' => 'TesT',
                     'dlFilename' => 'regexp:/^TesT-{{hash}}\.pdf$/',
-                    'fullFilename' => 'regexp:/.+\/yeswiki\/TesT-publication-{{hash}}\.pdf$/',
+                    'fullFilename' => 'regexp:/.+\/yeswiki\/[A-Za-z0-9\-]+\/TesT-publication-{{hash}}\.pdf$/',
                     'hash' => 'regexp:/^[A-Fa-f0-9]{10,}$/',
                     'sourceUrl' => 'regexp:/^http:\/\/localhost\/\?TesT\/preview$/'
                 ],

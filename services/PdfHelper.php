@@ -200,17 +200,28 @@ class PdfHelper
             $pageTag,
             $hash
         );
+        $sanitizeWebsiteName = preg_replace(
+            "/-+$/",
+            "",
+            preg_replace(
+                "/[^A-Za-z0-9]/",
+                "-",
+                preg_replace(
+                    "/^https?:\/\//",
+                    "",
+                    $this->params->get('base_url')
+                )
+            )
+        );
         $dirname = sys_get_temp_dir()."/yeswiki/";
         if (!file_exists($dirname)) {
             mkdir($dirname);
         }
-        $fullFilename = sprintf(
-            '%s/yeswiki/%s-%s-%s.pdf',
-            sys_get_temp_dir(),
-            $pageTag,
-            'publication',
-            $hash
-        );
+        $dirname = "$dirname$sanitizeWebsiteName/";
+        if (!file_exists($dirname)) {
+            mkdir($dirname);
+        }
+        $fullFilename = "$dirname$pageTag-publication-$hash.pdf";
         return compact(['pageTag','sourceUrl','hash','dlFilename','fullFilename']);
     }
 

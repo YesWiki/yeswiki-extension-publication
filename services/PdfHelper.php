@@ -213,11 +213,7 @@ class PdfHelper
                 )
             )
         );
-        $dirname = sys_get_temp_dir()."/yeswiki/";
-        if (!file_exists($dirname)) {
-            mkdir($dirname);
-        }
-        $dirname = "$dirname$sanitizeWebsiteName/";
+        $dirname = sys_get_temp_dir()."/yeswiki-$sanitizeWebsiteName/";
         if (!file_exists($dirname)) {
             mkdir($dirname);
         }

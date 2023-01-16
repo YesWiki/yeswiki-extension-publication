@@ -206,7 +206,7 @@ class PublicationGeneratorAction extends YesWikiAction
     {
         // recuperation des pages creees a l'installation
         $installedPageNames = [];
-        if ($this->arguments['addinstalledpage']) {
+        if ($this->arguments['addinstalledpage'] && is_dir("setup/doc/")) {
             $d = dir("setup/doc/");
             while ($doc = $d->read()) {
                 if ($doc == '.' || $doc == '..' || is_dir($doc) || substr($doc, -4) != '.txt') {

@@ -27,7 +27,7 @@
         <template #printviapreview>{{ _t('PUBLICATION_PRINT_VIA_PREVIEW') }}</template>
         <template #opendefaultlink>{{ _t('PUBLICATION_OPEN_DEFAULT_LINK') }}</template>
     </translations>
-    <h2>{{ _t('PUBLICATION_PDF_CREATION',{pageTag:pageTag}) }}</h2>
+    <h2>{{ _t('PUBLICATION_PDF_CREATION',{pageTag:pageTag|length < 12 ? pageTag : pageTag|slice(0,11)~'…'}) }}</h2>
     <div>
       {% if isAdmin == true %}
         <step :name="'getPdfServiceUrl'" :value="urlOfPdfServiceGet" :text="{{ _t('PUBLICATION_GET_PDF_SERVICE_URL')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>

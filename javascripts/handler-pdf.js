@@ -309,8 +309,7 @@ let appParams = {
             return this.renderErrorJsonFormat({url,response,contentType});
         },
         printViaPreview: function(){
-            let newUrl = wiki.url(`${wiki.pageTag}/preview`,{browserPrintAfterRendered:"1"});
-            window.open(newUrl);
+            window.open(this.sourceUrl+(this.sourceUrl.includes('?') ? '&' : '?')+'browserPrintAfterRendered=1');
         },
         openDefaultLink: function(){
             let newUrl = this.appendSourceUrl(this.urls.external);
@@ -436,8 +435,7 @@ let appParams = {
             }
         },
         viewPreview: function(){
-            let newUrl = wiki.url(`${wiki.pageTag}/preview`);
-            window.open(newUrl);
+            window.open(this.sourceUrl);
         },
     },
     mounted(){

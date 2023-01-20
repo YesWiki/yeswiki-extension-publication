@@ -167,6 +167,7 @@ return [
     'PUBLICATION_LOADING_PAGE' => 'Loading page on server',
     'PUBLICATION_OPEN_DEFAULT_LINK' => 'Open pdf on external page',
     'PUBLICATION_PDF_CREATION' => 'Create pdf of %{pageTag} page',
+    'PUBLICATION_POPUP_TO_VALIDATE' => 'A new window/tab should be opened but you have to manually validate its opening!',
     'PUBLICATION_PRINT_VIA_PREVIEW' => 'Print via browser',
     'PUBLICATION_RETURN_TO_PAGE' => 'Back to page',
     'PUBLICATION_SAVE_FILE' => 'Save pdf',

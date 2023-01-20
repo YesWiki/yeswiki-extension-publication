@@ -165,6 +165,7 @@ return [
     // 'PUBLICATION_LOADING_PAGE' => 'Chargement de la page sur le serveur',
     // 'PUBLICATION_OPEN_DEFAULT_LINK' => 'Ouvrir le pdf sur une page externe',
     // 'PUBLICATION_PDF_CREATION' => 'Création du pdf de la page %{pageTag}',
+    // 'PUBLICATION_POPUP_TO_VALIDATE' => 'Une nouvelle fenêtre/onglet aurait dû s\'ouvrir, mais il faut que vous validiez son ouverture manuellement !',
     // 'PUBLICATION_PRINT_VIA_PREVIEW' => 'Imprimer par le navigateur',
     // 'PUBLICATION_RETURN_TO_PAGE' => 'Retour à la page',
     // 'PUBLICATION_SAVE_FILE' => 'Enregistrer le pdf',

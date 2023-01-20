@@ -309,7 +309,12 @@ let appParams = {
             return this.renderErrorJsonFormat({url,response,contentType});
         },
         printViaPreview: function(){
-            window.open(this.sourceUrl+(this.sourceUrl.includes('?') ? '&' : '?')+'browserPrintAfterRendered=1');
+            this.openWindowAndTest(this.sourceUrl+(this.sourceUrl.includes('?') ? '&' : '?')+'browserPrintAfterRendered=1');
+        },
+        openWindowAndTest(url) {
+            if (window.open(url) == null){
+                this.message = this.message + '<br/><br/><b><span style="text-transform: uppercase;">' + this.t('popuptovalidate')+'</span></b>'
+            }
         },
         openDefaultLink: function(){
             let newUrl = this.appendSourceUrl(this.urls.external);
@@ -435,7 +440,7 @@ let appParams = {
             }
         },
         viewPreview: function(){
-            window.open(this.sourceUrl);
+            this.openWindowAndTest(this.sourceUrl);
         },
     },
     mounted(){

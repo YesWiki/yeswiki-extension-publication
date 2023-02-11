@@ -131,6 +131,28 @@ class PreviewHandler extends YesWikiHandler
                     if (isset($params['groups'])) {
                         unset($params['groups']);
                     }
+                    // be careful for query because currenty making or instead of and if same key in $_GET and params
+                    if (!empty($params['query']) && !empty($_GET['query'])){
+                        $paramQueries = $this->getQueries($params['query']);
+                        $getQueries = $this->getQueries($_GET['query']);
+                        $filteredGetQueries = [];
+                        foreach ($getQueries as $key => $value) {
+                            if (!array_key_exists($key,$paramQueries)){
+                                $filteredGetQueries[$key] = $value;
+                            }
+                        }
+                        if (empty($filteredGetQueries)){
+                            unset($_GET['query']);
+                        } else {
+                            $_GET['query'] = implode('|',array_map(
+                                function($key) use($filteredGetQueries){
+                                    return "$key={$filteredGetQueries[$key]}";
+                                },
+                                array_keys($filteredGetQueries)
+                            ));
+                        }
+                        $get = $_GET;
+                    }
                     $content = $this->wiki->Action($actionName, 0, $params);
                 }
             }
@@ -189,6 +211,19 @@ class PreviewHandler extends YesWikiHandler
             );
         }
         return $publication;
+    }
+
+    protected function getQueries(string $raw): array
+    {
+        $queriesRaw = explode('|',$raw);
+        $queries = [];
+        foreach ($queriesRaw as $queryRaw) {
+            if (strpos($queryRaw,'=')!==false){
+                list($key,$criterion) = explode('=',$queryRaw,2);
+                $queries[$key] = $criterion;
+            }
+        }
+        return $queries;
     }
 
     protected function addCssFiles(array $metadatas)

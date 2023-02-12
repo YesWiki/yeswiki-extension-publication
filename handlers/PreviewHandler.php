@@ -131,27 +131,32 @@ class PreviewHandler extends YesWikiHandler
                     if (isset($params['groups'])) {
                         unset($params['groups']);
                     }
-                    // be careful for query because currenty making or instead of and if same key in $_GET and params
+                    // be careful for query because currenty making 'or' instead of 'and' if same key in $_GET and params
                     if (!empty($params['query']) && !empty($_GET['query'])){
-                        $paramQueries = $this->getQueries($params['query']);
-                        $getQueries = $this->getQueries($_GET['query']);
-                        $filteredGetQueries = [];
-                        foreach ($getQueries as $key => $value) {
-                            if (!array_key_exists($key,$paramQueries)){
-                                $filteredGetQueries[$key] = $value;
+                        $paramQueries = $this->entryController->formatQuery(['query'=>$params['query']],[]);
+                        $getQueries = $this->entryController->formatQuery([],['query'=>$_GET['query']]);
+                        if (count(array_intersect_key($paramQueries,$getQueries)) > 0){
+                            if (!empty($params['id'])){
+                                $formsIds = explode(',',$params['id']);
+                                $formsIds = array_filter($formsIds,function($val){
+                                    return is_scalar($val) && intval($val) > 0 && strval($val) == strval(intval($val));
+                                });
+                                if (!empty($formsIds)){
+                                    $authorizedEntries = $this->entryManager->search([
+                                        'queries' => $paramQueries,
+                                        'formsIds' => array_map('strval',$formsIds)
+                                    ]);
+                                    $authorizedEntries = array_filter($authorizedEntries,function($entry){
+                                        return !empty($entry['id_fiche']);
+                                    });
+                                    $entrieIds = empty($authorizedEntries)
+                                        ? []
+                                        : array_column($authorizedEntries,'id_fiche');
+                                    // keep only `id_fiche` matching `paramQueries` to emulate a 'AND'
+                                    $params['query'] = "id_fiche=".implode(',',$entrieIds);
+                                }
                             }
                         }
-                        if (empty($filteredGetQueries)){
-                            unset($_GET['query']);
-                        } else {
-                            $_GET['query'] = implode('|',array_map(
-                                function($key) use($filteredGetQueries){
-                                    return "$key={$filteredGetQueries[$key]}";
-                                },
-                                array_keys($filteredGetQueries)
-                            ));
-                        }
-                        $get = $_GET;
                     }
                     $content = $this->wiki->Action($actionName, 0, $params);
                 }
@@ -211,19 +216,6 @@ class PreviewHandler extends YesWikiHandler
             );
         }
         return $publication;
-    }
-
-    protected function getQueries(string $raw): array
-    {
-        $queriesRaw = explode('|',$raw);
-        $queries = [];
-        foreach ($queriesRaw as $queryRaw) {
-            if (strpos($queryRaw,'=')!==false){
-                list($key,$criterion) = explode('=',$queryRaw,2);
-                $queries[$key] = $criterion;
-            }
-        }
-        return $queries;
     }
 
     protected function addCssFiles(array $metadatas)

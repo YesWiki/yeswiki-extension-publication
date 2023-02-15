@@ -51,7 +51,7 @@ $(document).ready(function(){
       params.delete('query');
     }
     
-    let newUrl = decodeURIComponent(url).replace(/(\/(?:pdf|preview))=($|&|\?)/,'$1$2');
+    let newUrl = decodeURIComponent(url).replace(/(\/(?:pdf|pdfiframe|preview))=($|&|\?)/,'$1$2');
     if ( wiki.isDebugEnabled) {
       console.debug('Updating url %s', newUrl)
     }

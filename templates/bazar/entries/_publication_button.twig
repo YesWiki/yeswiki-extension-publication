@@ -1,6 +1,6 @@
-{% set curretHandler = url({params:{}}) matches '/.*iframe$/' ? 'pdfiframe' : 'pdf' %}
+{% set currentHandler = url({params:{}}) matches '/.*iframe$/' ? 'pdfiframe' : 'pdf' %}
 <a class="{{ forPage ? 'link-pdf' : 'btn btn-entry-action btn-sm btn-default'}}"
-    href="{{ forPage ? url({handler: curretHandler }) : (urlentry['external-data'] ? entry.url ~ '/' ~ curretHandler : url({ tag: entryId, handler: 'pdf' })) }}"
+    href="{{ forPage ? url({handler: currentHandler }) : (urlentry['external-data'] ? entry.url ~ '/' ~ currentHandler : url({ tag: entryId, handler: 'pdf' })) }}"
     onclick="toastMessage(_t('PUBLICATION_PDF_GENERATION_LANCHED'),7000,'alert alert-primary');"
     title="{{ _t('PUBLICATION_EXPORT_PAGE_TO_PDF') }}">
     <i class="{{ forPage ? 'glyphicon glyphicon-book' : 'fas fa-book' }}"></i>

@@ -18,6 +18,7 @@ parameters:
     sendSyncDefaultTimeout: 10000
     customFlags:
     - '--crash-dumps-dir=/tmp'
+    - '--remote-allow-origins=*' # try to be more compatible with chromium 111 and +
     # uncomment to view browser logs in PHP/Apache logs
     # debugLogger: 'php://stdout'
 

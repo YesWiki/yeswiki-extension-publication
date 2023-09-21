@@ -78,6 +78,6 @@ See french help at this [address](/tools/publication/docs/fr/?id=utilisation-d%c
 
 <div style="text-align:center;">
 
-[Modify this page on GitHub](https://github.com/YesWiki/yeswiki-extension-publication/edit/doc/docs/en/README.md)
+[Modify this page on GitHub](https://github.com/YesWiki/yeswiki-extension-publication/edit/master/docs/en/README.md)
 
 </div>

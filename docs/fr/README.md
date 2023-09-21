@@ -230,6 +230,6 @@ Ce handler peut utiliser les paramètres suivants.
 
 <div style="text-align:center;">
 
-[Modifier cette page sur GitHub](https://github.com/YesWiki/yeswiki-extension-publication/edit/doc/docs/fr/README.md)
+[Modifier cette page sur GitHub](https://github.com/YesWiki/yeswiki-extension-publication/edit/master/docs/fr/README.md)
 
 </div>

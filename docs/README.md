@@ -7,6 +7,6 @@ Creates a PDF (books, booklets, fanzines) from a selection of YesWiki pages.
 
 <div style="text-align:center;">
 
-[Edit this page on GitHub](https://github.com/YesWiki/yeswiki-extension-publication/edit/doc/docs/README.md)
+[Edit this page on GitHub](https://github.com/YesWiki/yeswiki-extension-publication/edit/master/docs/README.md)
 
 </div>

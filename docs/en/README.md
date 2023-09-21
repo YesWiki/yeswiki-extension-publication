@@ -1,6 +1,6 @@
 # Extension Publication
 
-Publication extension has mainly been developped by Oncle Tom, alias, [Thomas Parisot](https://github.com/thom4parisot/), and it is currently maintained by [Jeremy Dufraisse](https://github.com/J9rem/). It corresponds to the need, often described by YesWiki'users, to easily generate publication, from the content of their wiki : 
+Publication extension has mainly been developped by Oncle Tom, alias, [Thomas Parisot](https://github.com/thom4parisot/), and it is currently maintained by [MrFlos](https://github.com/MrFlos). It corresponds to the need, often described by YesWiki'users, to easily generate publication, from the content of their wiki : 
  - books / booklets
  - fanzines
  - newsletters

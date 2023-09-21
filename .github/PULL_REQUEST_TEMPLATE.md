@@ -3,7 +3,6 @@ name: Pull-request
 about: Create a pull-request
 title: "fix(...):"
 labels: ''
-assignees: J9rem
 
 ---
 _Il est possible d'écrire en Français._

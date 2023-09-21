@@ -18,8 +18,11 @@ To contribute into the current repository https://github.com/YesWiki/yeswiki-ext
 ## Maintainers
 
 Current maintainers of this repository are :
+ - MrFlos (https://github.com/MrFlos)
+
+Previous maintainers were:
  - J9rem (https://github.com/J9rem)
- - Thom4parisot (https://github.com/thom4parisot) (previous maintainer)
+ - Thom4parisot (https://github.com/thom4parisot)
 
 ## Commits
 
@@ -30,7 +33,7 @@ Current maintainers of this repository are :
  - When a reviewed pull-request is closed, the concerned branch must be deleted
  - It is preferable not to do force-push on `master` branch to keep a prettier commits history tree, but maintainers can do that to rename commits messages if not understandable.
  - When a pull-request is done, you should warn maintainers by assigning the pull-request to one maintainer.
- - If after two weeks, there is no response you can ping a maintainer on YesWiki developement Framteam channel : https://framateam.org/yeswiki/channels/developpement
+ - If after two weeks, there is no response you can ping a maintainer on YesWiki forum : https://forum.yeswiki.net/c/support/9
  - For contributors with rights to write on the current repository, if no answer is done by a maintainer after three weeks (no contact), you can merge the changes. That's why no security checks are done on commits and push. **This rule is applicable also to change the current rule.**
 
 ## Branch names

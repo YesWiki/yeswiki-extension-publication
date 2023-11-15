@@ -8,7 +8,7 @@ parameters:
   # Has to comply with HeadlessChromium::createBrowser() options
   # See https://github.com/chrome-php/headless-chromium-php#options
   htmltopdf_options:
-    windowSize: [1440, 780]
+    windowSize: [1920, 1080]
     noSandbox: true
     headless: true
     userAgent: 'YesWiki/4.0'

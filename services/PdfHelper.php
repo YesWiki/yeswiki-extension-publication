@@ -381,10 +381,10 @@ class PdfHelper
 
             $browser->close();
         } catch (Exception $e) {
-            if (($e instanceof OperationTimedOut) === false) {
-                $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
-            }
-            $browser->close();
+            // if (($e instanceof OperationTimedOut) === false) {
+            //     $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
+            // }
+            // $browser->close();
             throw new ExceptionWithHtml($e->getMessage(), 0, $e, $html ?? '');
         }
     }

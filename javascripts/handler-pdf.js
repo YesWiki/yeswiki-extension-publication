@@ -110,7 +110,7 @@ let appParams = {
                 })
                 .then((response)=>{
                     if (!response.ok && response.status != 503){
-                        return Promise.reject(`Not possible to get url because response code is not right : '${response.status}' => '${response.statusText}'`)
+                        return Promise.reject(`Not possible to get url `+url+` because response code is not right : '${response.status}' => '${response.statusText}'`)
                     }
                     let headers = response.headers;
                     if (!headers.has('Content-Type')){
@@ -209,10 +209,10 @@ let appParams = {
             this.urls = JSON.parse(baseEl.dataset.urls);
             let urls = this.urls;
             this.urlOfPdfServiceGet = 1;
-            if (typeof urls == "object" && 
-                    'local' in urls && 
-                    'external' in urls && 
-                    typeof urls.local == 'string' && 
+            if (typeof urls == "object" &&
+                    'local' in urls &&
+                    'external' in urls &&
+                    typeof urls.local == 'string' &&
                     typeof urls.external == 'string'){
                 this.urlOfPdfServiceGet = 2;
                 return this.urls;
@@ -398,7 +398,7 @@ let appParams = {
             }
         },
         updateVariablesInternal: function (name, previousName, value , waited,setError){
-            this[name] = this[name] == 2 ? 2 : ((this[name] == 1 && setError) ? 3 : (value === waited  ? 2 : (value === 0 ? 3 : (this[previousName] == 2 ? (setError ? 3 : 1) : 0)))); 
+            this[name] = this[name] == 2 ? 2 : ((this[name] == 1 && setError) ? 3 : (value === waited  ? 2 : (value === 0 ? 3 : (this[previousName] == 2 ? (setError ? 3 : 1) : 0))));
         },
         updateStatus: async function(url){
             try {
@@ -433,7 +433,7 @@ let appParams = {
                 if (!this.finish){
                     this.createupdateStatusTimerDirect(url);
                 }
-                
+
             } catch (error) {
                 // do nothing if fetch error
                 return null;

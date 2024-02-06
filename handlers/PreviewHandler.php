@@ -115,7 +115,7 @@ class PreviewHandler extends YesWikiHandler
             /**
              * Print from page, but render its {{ bazar* }} elements
              */
-            elseif (preg_match('/({{(bazarliste|bazarcarto|bazar|calendrier|map|gogomap)\s*[^}]*}})/i', $this->wiki->page['body'], $matches)) {
+            elseif (preg_match('/({{(bazarliste|bazarcarto|calendrier|map|gogomap)\s*[^}]*}})/i', $this->wiki->page['body'], $matches)) {
                 $actionText = $matches[1];
                 $actionName = $matches[2];
                 $matches = [];

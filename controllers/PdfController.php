@@ -54,7 +54,7 @@ class PdfController extends YesWikiController
 
     // simplier handler for client rendering
     if (!$this->pdfHelper->canExecChromium()) {
-      $this->wiki->redirect($this->wiki->href('preview', $pageTag, 'browserPrintAfterRendered=1', false));
+      $this->wiki->redirect($sourceUrl . '&browserPrintAfterRendered=1');
       return;
     } else {
       return $this->$method('@publication/handler-pdf.twig', [

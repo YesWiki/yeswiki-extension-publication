@@ -114,7 +114,7 @@ class PdfHelper
                         foreach ($ids as $id) {
                             $templatePath = $this->getTemplatePathFromFormId($id);
                             if (!empty($templatePath)) {
-                                $return['template fiche-'.$id] = file_get_contents($templatePath);
+                                $return['template fiche-' . $id] = file_get_contents($templatePath);
                             }
                         }
                     }
@@ -132,10 +132,10 @@ class PdfHelper
      */
     private function getTemplatePathFromFormId(string $formId): ?string
     {
-        $templateFileName = 'fiche-'.trim($formId);
-        if ($this->templateEngine->hasTemplate('@bazar/'.$templateFileName.'.tpl.html')) {
+        $templateFileName = 'fiche-' . trim($formId);
+        if ($this->templateEngine->hasTemplate('@bazar/' . $templateFileName . '.tpl.html')) {
             $templateFileName .= '.tpl.html';
-        } elseif ($this->templateEngine->hasTemplate('@bazar/'.$templateFileName.'.twig')) {
+        } elseif ($this->templateEngine->hasTemplate('@bazar/' . $templateFileName . '.twig')) {
             $templateFileName .= '.twig';
         } else {
             $templateFileName = '';
@@ -143,8 +143,8 @@ class PdfHelper
 
         if (!empty($templateFileName)) {
             foreach (self::PATH_LIST as $path) {
-                if (file_exists($path.$templateFileName)) {
-                    return $path.$templateFileName;
+                if (file_exists($path . $templateFileName)) {
+                    return $path . $templateFileName;
                 }
             }
         }
@@ -165,21 +165,21 @@ class PdfHelper
         $FormIdRequest = join(
             ' OR ',
             array_map(function ($id) {
-                return 'body LIKE \'%"id_typeannonce":"'.trim($id).'"%\'';
+                return 'body LIKE \'%"id_typeannonce":"' . trim($id) . '"%\'';
             }, $formsIds)
         );
 
         if (empty($FormIdRequest)) {
-            throw new \Exception("No form id request ! \$formsIds = ".json_encode($formsIds));
+            throw new \Exception("No form id request ! \$formsIds = " . json_encode($formsIds));
         }
 
         $SQLRequest =
-        'SELECT DISTINCT time FROM ' . $this->dbService->prefixTable('pages') . ' '.
-        'WHERE latest="Y" AND comment_on = \'\' ' .
-        'AND ('.$FormIdRequest.') ' .
-        'AND tag IN (' . $EntriesRequest . ') '.
-        'ORDER BY time DESC '.
-        'LIMIT 1';
+            'SELECT DISTINCT time FROM ' . $this->dbService->prefixTable('pages') . ' ' .
+            'WHERE latest="Y" AND comment_on = \'\' ' .
+            'AND (' . $FormIdRequest . ') ' .
+            'AND tag IN (' . $EntriesRequest . ') ' .
+            'ORDER BY time DESC ' .
+            'LIMIT 1';
 
         return $results = $this->dbService->loadSingle($SQLRequest);
     }
@@ -192,7 +192,7 @@ class PdfHelper
      */
     public function getFullFileName(array $get, array $server): array
     {
-        list('pageTag'=>$pageTag, 'sourceUrl'=>$sourceUrl, 'hash'=>$hash) =
+        list('pageTag' => $pageTag, 'sourceUrl' => $sourceUrl, 'hash' => $hash) =
             $this->getSourceUrl($get, $server);
 
         $dlFilename = sprintf(
@@ -213,12 +213,12 @@ class PdfHelper
                 )
             )
         );
-        $dirname = sys_get_temp_dir()."/yeswiki-$sanitizeWebsiteName/";
+        $dirname = sys_get_temp_dir() . "/yeswiki-$sanitizeWebsiteName/";
         if (!file_exists($dirname)) {
             mkdir($dirname);
         }
         $fullFilename = "$dirname$pageTag-publication-$hash.pdf";
-        return compact(['pageTag','sourceUrl','hash','dlFilename','fullFilename']);
+        return compact(['pageTag', 'sourceUrl', 'hash', 'dlFilename', 'fullFilename']);
     }
 
     /**
@@ -268,19 +268,20 @@ class PdfHelper
             $hash = substr(sha1($pagedjs_hash . strtolower($queryString)), 0, 10);
         } else {
             $pageTag = $this->wiki->GetPageTag();
-            $pdfTag = $this->wiki->MiniHref('pdf'.testUrlInIframe(), $pageTag);
-            $queryString = preg_replace('#^'. $pdfTag .'&?#', '', $server['QUERY_STRING'] ?? '');
+            $pdfTag = $this->wiki->MiniHref('pdf' . testUrlInIframe(), $pageTag);
+            $queryString = preg_replace('#^' . $pdfTag . '&?#', '', $server['QUERY_STRING'] ?? '');
             $queryString = preg_replace('/refresh=[A-Za-z0-9\-]+(&|$)/', '', $queryString);
             $sourceUrl = $this->wiki->href('preview', $pageTag, $queryString, false);
 
-
             $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
                 $this->wiki->page,
-                ['query_string' => strtolower($queryString),
-                $this->getPageEntriesContent(
-                    $pageTag,
-                    $get['via'] ?? null
-                ) ?? []]
+                [
+                    'query_string' => strtolower($queryString),
+                    $this->getPageEntriesContent(
+                        $pageTag,
+                        $get['via'] ?? null
+                    ) ?? []
+                ]
             ))), 0, 10);
 
             // In case we are behind a proxy (like a Docker container)
@@ -289,7 +290,7 @@ class PdfHelper
                 $sourceUrl = str_replace($this->params->get('base_url'), $this->params->get('htmltopdf_base_url'), $sourceUrl);
             }
         }
-        return compact(['pageTag','sourceUrl','hash']);
+        return compact(['pageTag', 'sourceUrl', 'hash']);
     }
 
     /**
@@ -319,7 +320,7 @@ class PdfHelper
                 !is_scalar($options['sendSyncDefaultTimeout']) ||
                 intval($options['sendSyncDefaultTimeout']) < 10000 // in ms
             ) ? 20 // in sec
-            : ceil(intval($options['sendSyncDefaultTimeout'])*2/1000); // in s
+                : ceil(intval($options['sendSyncDefaultTimeout']) * 2 / 1000); // in s
             // (twice to be sure that Browser manages timeout and not php)
             set_time_limit($timeout);
 
@@ -331,7 +332,7 @@ class PdfHelper
                 $formattedCookies = [];
                 foreach ($cookies as $cookie) {
                     $cookie = array_filter($cookie, function ($v, $k) {
-                        return in_array($k, ['domain','path','name','value'], true) && !empty($v) && is_string($v);
+                        return in_array($k, ['domain', 'path', 'name', 'value'], true) && !empty($v) && is_string($v);
                     }, ARRAY_FILTER_USE_BOTH);
                     if (count($cookie) == 4) {
                         $formattedCookies[] = new Cookie([
@@ -356,7 +357,7 @@ class PdfHelper
                 empty(intval($this->params->get('page_load_timeout'))) ||
                 intval($this->params->get('page_load_timeout')) < 30000 // in ms
             ) ? 60 // in sec
-            : ceil(intval($this->params->get('page_load_timeout'))*2/1000); // in s
+                : ceil(intval($this->params->get('page_load_timeout')) * 2 / 1000); // in s
             // (twice to be sure that page manages timeout and not php)
             set_time_limit($timeout);
 
@@ -376,7 +377,7 @@ class PdfHelper
                 'printBackground' => true,
                 'displayHeaderFooter' => true,
                 'preferCSSPageSize' => true
-                ))->saveToFile($fullFilename);
+            ))->saveToFile($fullFilename);
             $this->setValueInSession($uuid, PdfHelper::SESSION_PDF_CREATED, 1);
 
             $browser->close();
@@ -420,8 +421,8 @@ class PdfHelper
             $sourceDomain = parse_url($sourceUrl, PHP_URL_HOST);
             $authorizedDomains = $this->params->get('htmltopdf_service_authorized_domains');
             $authorizedDomains = is_array($authorizedDomains)
-                 ? array_filter(array_map('trim', array_filter($authorizedDomains, 'is_string')))
-                 : [];
+                ? array_filter(array_map('trim', array_filter($authorizedDomains, 'is_string')))
+                : [];
             return (
                 $sourceDomain === $currentDomain ||
                 (!empty($authorizedDomains) && in_array($sourceDomain, $authorizedDomains, true))
@@ -442,7 +443,7 @@ class PdfHelper
             if (!isset($_SESSION[self::SESSION_KEY]) || !is_array($_SESSION[self::SESSION_KEY])) {
                 $_SESSION[self::SESSION_KEY] = [];
             }
-            $limitTime = time() + 3600*2;
+            $limitTime = time() + 3600 * 2;
             foreach ($_SESSION[self::SESSION_KEY] as $uuid => $data) {
                 if (empty($data[self::SESSION_TIME_KEY]) && $data[self::SESSION_TIME_KEY] < $limitTime) {
                     unset($_SESSION[self::SESSION_KEY][$uuid]);

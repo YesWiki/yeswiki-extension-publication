@@ -29,10 +29,10 @@ class Bazar2PublicationAction extends YesWikiAction
             unset($queries['wiki']);
         }
         $href = $this->wiki->Href('pdf'.testUrlInIframe(), null, $queries// merge GET with wiki and following params
-            +[
+            + [
               'via' => 'bazarliste',
               'template-page' => $this->arguments['templatepage'],
-          ]+(
+          ] + (
               empty($this->arguments['excludedfields'])
               ? []
               : [

@@ -13,7 +13,7 @@ class BarreRedactionAction__ extends YesWikiAction
             $this->render(
                 '@bazar/entries/_publication_button.twig',
                 [
-                    'forPage'=>true
+                    'forPage' => true
                 ]
             )."\n".'</div>',
             $this->output

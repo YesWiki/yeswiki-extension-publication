@@ -27,7 +27,7 @@ class ApiController extends YesWikiController
         return new ApiResponse($status, Response::HTTP_OK);
     }
 
-        /**
+    /**
      * @Route("/api/pdf/getTmpCookie",methods={"GET"}, options={"acl":{"public","+"}},priority=2)
      */
     public function getTmpCookie()
@@ -77,11 +77,11 @@ class ApiController extends YesWikiController
             $this->pdfHelper->prepareSession($uuid);
 
             list(
-                'pageTag'=>$pageTag,
-                'sourceUrl'=>$sourceUrl,
-                'hash'=>$hash,
-                'dlFilename'=>$dlFilename,
-                'fullFilename'=>$fullFilename
+                'pageTag' => $pageTag,
+                'sourceUrl' => $sourceUrl,
+                'hash' => $hash,
+                'dlFilename' => $dlFilename,
+                'fullFilename' => $fullFilename
             ) =
                 $this->pdfHelper->getFullFileName(
                     $_GET ?? [],
@@ -94,7 +94,7 @@ class ApiController extends YesWikiController
             $file_exists = file_exists($fullFilename);
             $this->pdfHelper->setValueInSession($uuid, PdfHelper::SESSION_FILE_STATUS, $file_exists ? 1 : 0);
             if (!$file_exists
-            || ($file_exists && $this->wiki->UserIsAdmin() && isset($_GET['refresh']) && $_GET['refresh']==1)
+            || ($file_exists && $this->wiki->UserIsAdmin() && isset($_GET['refresh']) && $_GET['refresh'] == 1)
             ) {
                 $this->pdfHelper->useBrowserToCreatePdfFromPage($sourceUrl, $fullFilename, $uuid, $cookies);
             }
@@ -116,7 +116,7 @@ class ApiController extends YesWikiController
                 if ($isOld && !$forceNewFormat) {
                     if (isset($cause['canExecChromium']) && $cause['canExecChromium'] === false) {
                         $output = $this->renderInSquelette('@templates/alert-message.twig', [
-                            'type'=> 'danger',
+                            'type' => 'danger',
                             'message' => _t('PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH').' : '
                                 .$this->params->get('htmltopdf_path').'<br />'
                                 ._t('PUBLICATION_DID_YOU_INSTALL_CHROMIUM_OR_SET_UP_PATH')
@@ -125,14 +125,14 @@ class ApiController extends YesWikiController
                     }
                     if (isset($cause['domainAuthorized']) && $cause['domainAuthorized'] === false) {
                         $output = $this->renderInSquelette('@templates/alert-message.twig', [
-                            'type'=> 'danger',
+                            'type' => 'danger',
                             'message' => _t('PUBLICATION_DOMAIN_NOT_AUTORIZED').' : '.parse_url($_GET['url'] ?? '', PHP_URL_HOST),
                         ]);
                         return new Response($output, Response::HTTP_OK);
                     }
                     if (isset($cause['pdfCreationError']) && $cause['pdfCreationError'] === true) {
                         $output = $this->renderInSquelette('@publication/old-error-message.twig', [
-                            'sourceUrl'=> $_GET['url'] ?? '',
+                            'sourceUrl' => $_GET['url'] ?? '',
                             'message' => $ex->getMessage(),
                             'html' => $cause['pdfCreationErrorHTML'] ?? ''
                         ]);
@@ -140,7 +140,7 @@ class ApiController extends YesWikiController
                     }
                 }
                 return new ApiResponse([
-                    'error'=>true,
+                    'error' => true,
                     'cause' => $cause
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             } else {

@@ -80,7 +80,7 @@ class SessionManager
     public function isEqual($a, $b): bool
     {
         if (is_float($a) && is_float($b)) {
-            return (abs($a-$b)<1E-9);
+            return (abs($a - $b) < 1E-9);
         } elseif (is_float($a) != is_float($b)) {
             return false;
         } else {

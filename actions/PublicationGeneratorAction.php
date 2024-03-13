@@ -40,7 +40,7 @@ class PublicationGeneratorAction extends YesWikiAction
 
         return $deprecatedParameters + [
             'outputformat' => $this->formatString($args, 'outputformat', 'ebook'),
-            'formid' => (!empty($args['formid']) && is_scalar($args['formid']) && intval($args['formid'])>0) ? strval($args['formid']) : '',
+            'formid' => (!empty($args['formid']) && is_scalar($args['formid']) && intval($args['formid']) > 0) ? strval($args['formid']) : '',
             // Indicates if fields and elements are "read only"
             'readonly' => isset($args['readonly']) && in_array($args['readonly'], ['',true], true),
             // Pages used for intro and outro
@@ -87,9 +87,9 @@ class PublicationGeneratorAction extends YesWikiAction
 
         list(
             'ebookPageName' => $ebookPageName,
-            'selectedPages'=>$selectedPages,
-            'publicationStart'=>$publicationStart,
-            'publicationEnd'=>$publicationEnd,
+            'selectedPages' => $selectedPages,
+            'publicationStart' => $publicationStart,
+            'publicationEnd' => $publicationEnd,
         ) = $this->getEbookPageName($results);
 
         try {
@@ -358,7 +358,7 @@ class PublicationGeneratorAction extends YesWikiAction
                 )) {
                     // there is no publication-cover-image
                     $messages[] = [
-                        'message' =>_t('PUBLICATION_NOT_IMAGE_FILE'),
+                        'message' => _t('PUBLICATION_NOT_IMAGE_FILE'),
                         'type' => 'danger'
                     ];
                 } else {
@@ -432,7 +432,7 @@ class PublicationGeneratorAction extends YesWikiAction
                 $fiche = $this->entryManager->create($this->arguments['formid'], $fiche);
                 if (!empty($fiche)) {
                     $messages[] = [
-                        'message' =>_t('PUBLICATION_NEWSLETTER_CREATED'),
+                        'message' => _t('PUBLICATION_NEWSLETTER_CREATED'),
                         'type' => 'success'
                     ];
                 } else {

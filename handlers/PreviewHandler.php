@@ -102,7 +102,6 @@ class PreviewHandler extends YesWikiHandler
                 // backward compatibilty
                 if (preg_match('#{{\s*bazar.+id="(.+)".+}}#siU', $this->wiki->page['body'], $matches)) {
                     list(, $formId) = $matches;
-
                     $query = $get['query'] ?? '';
 
                     $results = $this->entryManager->search(['query' => $query, 'formsIds' => [$formId]]);
@@ -120,7 +119,7 @@ class PreviewHandler extends YesWikiHandler
                 $actionName = $matches[2];
                 $matches = [];
                 $params = [];
-                preg_match_all('/([a-zA-Z0-9_]*)=\"(.*)\"/U', $actionText, $matches);
+                preg_match_all('/([a-zA-Z0-9_]*)=\\\\?\"(.*)\\\\?\"/mU', $actionText, $matches);
                 foreach ($matches[0] as $id => $match) {
                     $params[$matches[1][$id]] = $matches[2][$id];
                 }

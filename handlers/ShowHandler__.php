@@ -11,7 +11,7 @@ class ShowHandler__ extends YesWikiHandler
     public function run()
     {
         if ($this->getService(AclService::class)->hasAccess('read') && (
-            isset($this->wiki->page['metadatas']['publication-title'])||
+            isset($this->wiki->page['metadatas']['publication-title']) ||
             isset($this->wiki->page['metadatas']['publication']['title'])
         )) {
             $metadata = $this->getService(Publication::class)->getOptions($this->wiki->page['metadatas']);

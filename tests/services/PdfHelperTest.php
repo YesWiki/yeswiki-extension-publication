@@ -80,7 +80,7 @@ class PdfHelperTest extends YesWikiTestCase
                         $templatesNameToDelete[] = $templateName;
                     }
                 }
-            // }
+                // }
             } else {
                 $pageTag = $this->getPageTagWithoutBazar2Publication();
             }
@@ -196,7 +196,7 @@ class PdfHelperTest extends YesWikiTestCase
                 'bazarlisteIds' => [],
                 'withTemplate' => true,
                 'clean' => true,
-                'expected' => ["template content"=>"{{content}}"]
+                'expected' => ["template content" => "{{content}}"]
             ],
             'entry with via with template' => [
                 'mode' => 'entry',
@@ -204,7 +204,7 @@ class PdfHelperTest extends YesWikiTestCase
                 'bazarlisteIds' => [],
                 'withTemplate' => true,
                 'clean' => true,
-                'expected' => ["template content"=>"{{content}}"]
+                'expected' => ["template content" => "{{content}}"]
             ]
         ];
     }
@@ -458,12 +458,12 @@ class PdfHelperTest extends YesWikiTestCase
         $previousPageContent = $wiki->page;
         $rootPageTag = $this->getParam($wiki, 'root_page');
         $this->setPage($wiki, [
-            'tag'=>$rootPageTag,
+            'tag' => $rootPageTag,
             'content' => $this->getService($wiki, PageManager::class)->getOne($rootPageTag)
         ]);
         return [
-            'tag'=>$previousPageTag,
-            'content'=>$previousPageContent
+            'tag' => $previousPageTag,
+            'content' => $previousPageContent
         ];
     }
 

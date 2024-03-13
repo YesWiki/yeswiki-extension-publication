@@ -31,7 +31,7 @@ class Bazar2PublicationActionTest extends YesWikiTestCase
      */
     public function testRun(string $templatepage, bool $displayTemplateAlert, bool $throwException, Wiki $wiki)
     {
-        $templateString = empty($templatepage) ? '' :" templatepage=\"$templatepage\"";
+        $templateString = empty($templatepage) ? '' : " templatepage=\"$templatepage\"";
         $yesWikiString = "{{bazar2publication$templateString}}";
 
         $exceptionThrown = false;
@@ -59,17 +59,17 @@ class Bazar2PublicationActionTest extends YesWikiTestCase
     {
         return [
             'default behaviour' => [
-                'templatepage'=>'',
+                'templatepage' => '',
                 'templatepage alert displayed' => false,
                 'exception thrown' => false
             ],
             'wrong template page' => [
-                'templatepage'=>' ',
+                'templatepage' => ' ',
                 'templatepage alert displayed' => true,
                 'exception thrown' => false
             ],
             'template from template Page' => [
-                'templatepage'=>'PageTitre',  // because PageTitre exists all the time
+                'templatepage' => 'PageTitre',  // because PageTitre exists all the time
                 'templatepage alert displayed' => false,
                 'exception thrown' => false
             ],

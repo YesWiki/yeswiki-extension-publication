@@ -72,6 +72,6 @@ $(document).ready(function(){
       console.debug('Redirecting to %s', url)
     }
 
-    window.location = url
+    window.open(url, '_blank');
   })
 });

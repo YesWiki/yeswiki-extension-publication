@@ -1,0 +1,68 @@
+name: Release extension
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g. v4.4.0)'
+        required: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+
+      - uses: shivammathur/setup-php@v2
+        if: hashFiles('composer.json') != ''
+        with:
+          php-version: '8.3'
+          extensions: mysqli
+          tools: composer:v2
+
+      - name: Install PHP dependencies
+        if: hashFiles('composer.json') != ''
+        run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
+
+      - name: Setup Node.js
+        if: hashFiles('package.json') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install JS dependencies
+        if: hashFiles('package.json') != ''
+        run: yarn install
+
+      - name: Create release archive
+        run: |
+          EXTENSION="publication"
+          TAG="${{ github.event.inputs.tag || github.event.release.tag_name }}"
+          ARCHIVE_NAME="yeswiki-extension-${EXTENSION}-${TAG}.zip"
+          mkdir -p /tmp/release/${EXTENSION}
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='.php-cs-fixer.cache' \
+            --exclude='.twig-cs-fixer.cache' \
+            --exclude='.DS_Store' \
+            . /tmp/release/${EXTENSION}/
+          cd /tmp/release
+          zip -r "$GITHUB_WORKSPACE/$ARCHIVE_NAME" ${EXTENSION}/
+          echo "ARCHIVE_NAME=$ARCHIVE_NAME" >> $GITHUB_ENV
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+          files: ${{ env.ARCHIVE_NAME }}

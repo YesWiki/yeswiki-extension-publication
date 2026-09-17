@@ -118,7 +118,7 @@ class PublicationGeneratorAction extends YesWikiAction
                   "description" => $this->arguments['desc'],
                   "authors" => $this->arguments['authors'],
                 ]
-              ], $_POST, $this->wiki->page["metadatas"] ?: []),
+              ], $_POST, is_array($this->wiki->page['metadatas'] ?? null) ? $this->wiki->page['metadatas'] : []),
             'selectedPages' => $selectedPages,
             'chapterCoverPages' => $this->getChapterCoverPages(),
             'url' => $this->wiki->href('', $this->wiki->GetPageTag()),
@@ -166,7 +166,8 @@ class PublicationGeneratorAction extends YesWikiAction
         $selectedPages = [];
         $publicationStart = $this->arguments['pagestart'];
         $publicationEnd = $this->arguments['pageend'];
-        if (isset($this->wiki->page["metadatas"]["publication-title"])) {
+        if (isset($this->wiki->page["metadatas"]["publication"]["title"])
+            || isset($this->wiki->page["metadatas"]["publication-title"])) {
             $ebookPageName = $this->wiki->GetPageTag();
             $matches = [];
             if (preg_match_all('/{{include page="(.*)".*}}/Ui', $this->wiki->page['body'], $matches)) {
@@ -235,20 +236,21 @@ class PublicationGeneratorAction extends YesWikiAction
                     if (strval($formId) == strval(intval($formId)) && intval($formId) > 0) {
                         $results[$i]['type'] = 'bazar';
                         $formValues = $this->formManager->getOne(strval($formId));
-                        if (!empty($titles[$i])) {
-                            $results[$i]['name'] = $titles[$i];
+                        if (!empty($this->arguments['titles'][$i])) {
+                            $results[$i]['name'] = $this->arguments['titles'][$i];
                         } else {
-                            $results[$i]['name'] = $formValues['bn_label_nature'];
+                            $results[$i]['name'] = $formValues['bn_label_nature'] ?? strval($formId);
                         }
                         $tabQuery = [];
                         if (isset($matches[3][$i])) {
                             $tab = explode('|', $matches[3][$i]); // splits the query using |
                             foreach ($tab as $req) {
                                 $tabdecoup = explode('=', $req, 2);
-                                if (isset($tabQuery[$tabdecoup[0]]) && !empty($tabQuery[$tabdecoup[0]])) {
-                                    $tabQuery[$tabdecoup[0]] = $tabQuery[$tabdecoup[0]].','.trim($tabdecoup[1]);
+                                $value = isset($tabdecoup[1]) ? trim($tabdecoup[1]) : '';
+                                if (!empty($tabQuery[$tabdecoup[0]])) {
+                                    $tabQuery[$tabdecoup[0]] = $tabQuery[$tabdecoup[0]].','.$value;
                                 } else {
-                                    $tabQuery[$tabdecoup[0]] = !empty($tabdecoup[1]) ? trim($tabdecoup[1]) : '';
+                                    $tabQuery[$tabdecoup[0]] = $value;
                                 }
                             }
                         }
@@ -258,8 +260,8 @@ class PublicationGeneratorAction extends YesWikiAction
                         $this->fieldSort($results[$i]['entries'], 'asc', 'bf_titre');
                     } elseif ($formId == 'pages') {
                         $results[$i]['type'] = 'pages';
-                        if (!empty($titles[$i])) {
-                            $results[$i]['name'] = $titles[$i];
+                        if (!empty($this->arguments['titles'][$i])) {
+                            $results[$i]['name'] = $this->arguments['titles'][$i];
                         } else {
                             $results[$i]['name'] = 'Pages wikis';
                         }
@@ -309,11 +311,10 @@ class PublicationGeneratorAction extends YesWikiAction
     protected function fieldSort(array &$data, string $order, string $field)
     {
         usort($data, function ($a, $b) use ($order, $field) {
-            if ($order == 'desc') {
-                return strcoll(mb_strtolower($b[$field]), mb_strtolower($a[$field]));
-            } else {
-                return strcoll(mb_strtolower($a[$field]), mb_strtolower($b[$field]));
-            }
+            $first = mb_strtolower(strval($a[$field] ?? ''));
+            $second = mb_strtolower(strval($b[$field] ?? ''));
+
+            return ($order == 'desc') ? strcoll($second, $first) : strcoll($first, $second);
         });
     }
 
@@ -362,6 +363,7 @@ class PublicationGeneratorAction extends YesWikiAction
                         'type' => 'danger'
                     ];
                 } else {
+                    $ebookPageNamePrefix = $this->arguments['pagenameprefix'];
                     $pageName = !empty($ebookPageName) ? $ebookPageName : generatePageName("$ebookPageNamePrefix {$post["publication"]["title"]}");
 
                     $output = '';
@@ -455,7 +457,7 @@ class PublicationGeneratorAction extends YesWikiAction
             ];
             return false;
         }
-        if (!isset($post["page"]) || count($post["page"]) === 0 || !(is_string($post["page"]) || is_array($post["page"]))) {
+        if (!isset($post["page"]) || !is_array($post["page"]) || count($post["page"]) === 0) {
             // There is no page selected
             $messages[] = [
                 'message' => _t('PUBLICATION_NO_PAGE_FOUND'),

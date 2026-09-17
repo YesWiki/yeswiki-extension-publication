@@ -42,7 +42,7 @@ class ListContribAction extends YesWikiAction
                                 $name = [];
                                 if (preg_match_all($anchor, $page['body'], $name)) {
                                     if (!empty($name[1][0])) {
-                                        $v = ucwords(strtolower(trim(json_decode("\"{$name[1][0]}\""))));
+                                        $v = ucwords(strtolower(trim(strval(json_decode("\"{$name[1][0]}\"")))));
                                         $v = str_replace(' Et ', ' et ', $v);
                                         $contributors[$v] = $v;
                                     }

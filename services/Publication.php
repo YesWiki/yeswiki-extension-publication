@@ -135,13 +135,23 @@ class Publication
 
     public function getOptions(...$args)
     {
+        // a page can hold metadatas that are not arrays, array_replace_recursive would fail on those
+        $args = array_values(array_filter($args, 'is_array'));
         $options = array_replace_recursive($this->defaultOptions, ...$args);
+
+        // a scalar posted over one of these would break every nested read that follows
+        foreach (['publication', 'publication-book', 'publication-fanzine'] as $key) {
+            if (!is_array($options[$key] ?? null)) {
+                $options[$key] = $this->defaultOptions[$key];
+            }
+        }
+
         return $this->convertToNewOptionsFormat($options);
     }
 
     public function getStyles($metadatas, $options = [])
     {
-        $isDebug = $options['debug'] === 'yes';
+        $isDebug = ($options['debug'] ?? '') === 'yes';
         $mode = $metadatas['publication-mode'];
 
         return array_merge(

@@ -165,7 +165,7 @@
 					<label for="publication-title" class="control-label">{{ _t('PUBLICATION_EBOOK_TITLE') }}<span aria-label="{{ _t('PUBLICATION_MANDATORY_FIELD') }}">*</span></label>
 					<div class="controls">
             {% if areParamsReadonly %}
-              <input type="hidden" required id="publication-title" name="publication[title]" value="{{ metadatas['publication-title'] }}">
+              <input type="hidden" required id="publication-title" name="publication[title]" value="{{ metadatas['publication']['title'] }}">
             {% endif %}
 
             <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="text" required="required" placeholder="{{ _t('PUBLICATION_EBOOK_TITLE') }}" id="publication-title" name="publication[title]" value="{{ metadatas['publication']['title'] }}">
@@ -176,7 +176,7 @@
           <label for="publication-description" class="control-label">{{ _t('PUBLICATION_EBOOK_DESC') }}</label>
           <div class="controls">
             {% if areParamsReadonly %}
-              <input type="hidden" id="publication-description" name="publication[description]" value="{{ metadatas['publication-description'] }}">
+              <input type="hidden" id="publication-description" name="publication[description]" value="{{ metadatas['publication']['description'] }}">
             {% endif %}
 
             <textarea {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" placeholder="{{ _t('PUBLICATION_EBOOK_DESC') }}" id="publication-description" name="publication[description]">{{ metadatas['publication']['description'] }}</textarea>
@@ -187,7 +187,7 @@
           <label for="publication-authors" class="control-label">{{ _t('PUBLICATION_EBOOK_AUTHOR') }}</label>
           <div class="controls">
             {% if areParamsReadonly %}
-              <input type="hidden" id="publication-authors" name="publication[authors]" value="{{ metadatas['publication-authors'] }}">
+              <input type="hidden" id="publication-authors" name="publication[authors]" value="{{ metadatas['publication']['authors'] }}">
             {% endif %}
 
             <input {{ areParamsReadonly ? 'readonly' }} class="control-group form-control" type="text" placeholder="{{ _t('PUBLICATION_EXAMPLE_AUTHOR') }}" id="publication-authors" name="publication[authors]" value="{{ metadatas['publication']['authors'] }}">
@@ -238,7 +238,7 @@
               <small class="form-text text-muted">{{ _t('PUBLICATION_EBOOK_FOLD_HELP') }}</small>
             </div>
             <div class="form-group">
-              <input type="checkbox" class="form-check-input" name="publication-book[print-marks]" value="1" id="publication-print-marks" {{ metadatas['publication-marks']['print-fold'] == '1' ? 'checked' }}>
+              <input type="checkbox" class="form-check-input" name="publication-book[print-marks]" value="1" id="publication-print-marks" {{ metadatas['publication-book']['print-marks'] == '1' ? 'checked' }}>
               <label for="publication-print-marks" class="control-label">{{ _t('PUBLICATION_EBOOK_DISPLAY_PRINT_MARKS') }}</label>
               <small class="form-text text-muted">{{ _t('PUBLICATION_EBOOK_DISPLAY_PRINT_MARKS_HELP') }}</small>
             </div>

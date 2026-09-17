@@ -84,9 +84,12 @@ class PdfHelper
     {
         $return = [];
         if ($this->entryManager->isEntry($pageTag)) {
+            // getOne applies the acls, so it returns null on an entry the user cannot read
             $entry = $this->entryManager->getOne($pageTag);
-            $formId = $entry['id_typeannonce'];
-            $templatePath = $this->getTemplatePathFromFormId($formId);
+            $formId = (!empty($entry['id_typeannonce']) && is_scalar($entry['id_typeannonce']))
+                ? strval($entry['id_typeannonce'])
+                : '';
+            $templatePath = empty($formId) ? null : $this->getTemplatePathFromFormId($formId);
             if (!empty($templatePath)) {
                 $return['template content'] = file_get_contents($templatePath);
             }
@@ -99,7 +102,7 @@ class PdfHelper
                     foreach ($matchesLevel2[0] as $id => $match) {
                         $params[$matchesLevel2[1][$id]] = $matchesLevel2[2][$id];
                     }
-                    $ids = explode(',', $params['id'] ?? null);
+                    $ids = explode(',', strval($params['id'] ?? ''));
                     if (!empty($ids)) {
                         $ids = array_map(function ($id) {
                             return trim($id);
@@ -214,8 +217,9 @@ class PdfHelper
             )
         );
         $dirname = sys_get_temp_dir() . "/yeswiki-$sanitizeWebsiteName/";
-        if (!file_exists($dirname)) {
-            mkdir($dirname);
+        // two concurrent exports can reach this at the same time, so no test then create
+        if (!is_dir($dirname) && !@mkdir($dirname, 0777, true) && !is_dir($dirname)) {
+            throw new Exception("Not possible to create the directory '$dirname'", 3);
         }
         $fullFilename = "$dirname$pageTag-publication-$hash.pdf";
         return compact(['pageTag', 'sourceUrl', 'hash', 'dlFilename', 'fullFilename']);
@@ -236,8 +240,8 @@ class PdfHelper
                 'custom/templates/publication/print-layouts/base.twig',
                 'tools/publication/infos.json',
             ],
-            glob('custom/tools/publication/*.css'),
-            glob('custom/tools/publication/print-layouts/*.css'),
+            glob('custom/tools/publication/*.css') ?: [],
+            glob('custom/tools/publication/print-layouts/*.css') ?: [],
         ) as $path) {
             if (file_exists($path)) {
                 $data[] = file_get_contents($path);
@@ -265,7 +269,7 @@ class PdfHelper
             $sourceUrl = strval($get['url']);
             $queryString = preg_replace('/&uuid=[A-Za-z0-9\-]+(&|$)/', '$1', $server['QUERY_STRING'] ?? '');
             $queryString = preg_replace('/(?|&)refresh=[A-Za-z0-9\-]+(&|$)/', '$1', $queryString);
-            $hash = substr(sha1($pagedjs_hash . strtolower($queryString)), 0, 10);
+            $hash = substr(sha1($pagedjs_hash . $this->getLoggedUserName() . strtolower($queryString)), 0, 10);
         } else {
             $pageTag = $this->wiki->GetPageTag();
             $pdfTag = $this->wiki->MiniHref('pdf' . testUrlInIframe(), $pageTag);
@@ -273,16 +277,22 @@ class PdfHelper
             $queryString = preg_replace('/refresh=[A-Za-z0-9\-]+(&|$)/', '', $queryString);
             $sourceUrl = $this->wiki->href('preview', $pageTag, $queryString, false);
 
-            $hash = substr(sha1($pagedjs_hash . json_encode(array_merge(
-                $this->wiki->page,
-                [
-                    'query_string' => strtolower($queryString),
-                    $this->getPageEntriesContent(
-                        $pageTag,
-                        $get['via'] ?? null
-                    ) ?? []
-                ]
-            ))), 0, 10);
+            // an entry body holding invalid utf-8 would make json_encode return false,
+            // and the hash would then stop changing when the entry is edited
+            $hash = substr(sha1($pagedjs_hash . json_encode(
+                array_merge(
+                    $this->wiki->page,
+                    [
+                        'user' => $this->getLoggedUserName(),
+                        'query_string' => strtolower($queryString),
+                        $this->getPageEntriesContent(
+                            $pageTag,
+                            $get['via'] ?? null
+                        ) ?? []
+                    ]
+                ),
+                JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
+            )), 0, 10);
 
             // In case we are behind a proxy (like a Docker container)
             // It allows us to properly load the document from within the container itself
@@ -291,6 +301,59 @@ class PdfHelper
             }
         }
         return compact(['pageTag', 'sourceUrl', 'hash']);
+    }
+
+    /**
+     * name of the logged user, empty string when anonymous
+     * @return string
+     */
+    public function getLoggedUserName(): string
+    {
+        try {
+            $user = $this->wiki->GetUser();
+        } catch (Throwable $th) {
+            return '';
+        }
+        return (!empty($user) && !empty($user['name']) && is_string($user['name'])) ? $user['name'] : '';
+    }
+
+    /**
+     * cookies to give to the browser so that it renders the page as the logged user
+     * @param string $sourceUrl
+     * @return array
+     */
+    public function getAuthenticationCookies(string $sourceUrl): array
+    {
+        if (method_exists($this->wiki, 'isCli') && $this->wiki->isCli()) {
+            return [];
+        }
+        // anonymous renders stay anonymous, and stay cacheable
+        if (empty($this->getLoggedUserName())) {
+            return [];
+        }
+        $domain = parse_url($sourceUrl, PHP_URL_HOST);
+        if (empty($domain) || !is_string($domain)) {
+            return [];
+        }
+        $isSecure = (parse_url($sourceUrl, PHP_URL_SCHEME) === 'https');
+
+        $cookies = [];
+        // the php session cookie carries the login, 'name' and 'token' are the 'remember me' fallback
+        foreach (array_unique([session_name(), 'name', 'token']) as $name) {
+            if (!is_string($name) || empty($_COOKIE[$name]) || !is_string($_COOKIE[$name])) {
+                continue;
+            }
+            $cookies[] = [
+                'name' => $name,
+                'value' => $_COOKIE[$name],
+                'domain' => $domain,
+                'path' => '/',
+                'secure' => $isSecure,
+                // the browser only makes same-site requests, 'None' would need 'secure'
+                'samesite' => 'Lax',
+            ];
+        }
+        return $cookies;
     }
 
     /**
@@ -331,21 +394,27 @@ class PdfHelper
             if (!empty($cookies)) {
                 $formattedCookies = [];
                 foreach ($cookies as $cookie) {
-                    $cookie = array_filter($cookie, function ($v, $k) {
-                        return in_array($k, ['domain', 'path', 'name', 'value'], true) && !empty($v) && is_string($v);
-                    }, ARRAY_FILTER_USE_BOTH);
-                    if (count($cookie) == 4) {
-                        $formattedCookies[] = new Cookie([
-                            'name' => $cookie['name'],
-                            'value' => $cookie['value'],
-                            'domain' => $cookie['domain'],
-                            'path' => $cookie['path'],
-                            'httponly' => true,
-                            'secure' => true,
-                            'samesite' => 'None',
-                            'expires' => time() + 600 // expires in 10 minutes
-                        ]);
+                    if (!is_array($cookie)) {
+                        continue;
                     }
+                    foreach (['name', 'value', 'domain', 'path'] as $key) {
+                        if (empty($cookie[$key]) || !is_string($cookie[$key])) {
+                            continue 2;
+                        }
+                    }
+                    $formattedCookies[] = new Cookie([
+                        'name' => $cookie['name'],
+                        'value' => $cookie['value'],
+                        'domain' => $cookie['domain'],
+                        'path' => $cookie['path'],
+                        // Page::setCookies only forwards these keys in camelCase
+                        'httpOnly' => true,
+                        'secure' => !empty($cookie['secure']),
+                        'sameSite' => (!empty($cookie['samesite']) && is_string($cookie['samesite']))
+                            ? $cookie['samesite']
+                            : 'Lax',
+                        'expires' => time() + 600 // expires in 10 minutes
+                    ]);
                 }
                 if (!empty($formattedCookies)) {
                     $page->setCookies($formattedCookies)->await();
@@ -381,12 +450,26 @@ class PdfHelper
             $this->setValueInSession($uuid, PdfHelper::SESSION_PDF_CREATED, 1);
 
             $browser->close();
-        } catch (Exception $e) {
-            // if (($e instanceof OperationTimedOut) === false) {
-            //     $html = $page->evaluate('document.documentElement.innerHTML')->getReturnValue();
-            // }
-            // $browser->close();
-            throw new ExceptionWithHtml($e->getMessage(), 0, $e, $html ?? '');
+        } catch (Throwable $e) {
+            // what the browser really got, so that an admin can read the error in the console
+            $html = '';
+            if (isset($page) && !($e instanceof OperationTimedOut)) {
+                try {
+                    $html = strval($page->evaluate('document.documentElement.innerHTML')->getReturnValue(5000));
+                } catch (Throwable $th) {
+                    $html = '';
+                }
+            }
+            // without this the chromium process survives the failed export
+            if (isset($browser)) {
+                try {
+                    $browser->close();
+                } catch (Throwable $th) {
+                    // the browser is already gone
+                }
+            }
+
+            throw new ExceptionWithHtml($e->getMessage(), 0, $e, $html);
         }
     }
 

@@ -32,6 +32,13 @@ class PreviewHandler extends YesWikiHandler
         $this->publicationService = $this->getService(Publication::class);
         $this->templateEngine = $this->getService(TemplateEngine::class);
 
+        if (!$this->aclService->hasAccess('read')) {
+            return $this->renderInSquelette('@templates/alert-message.twig', [
+                'type' => 'danger',
+                'message' => _t('ERROR_NO_ACCESS'),
+            ]);
+        }
+
         $publication = $this->getContentAndPublication($_GET ?? []);
 
         /*
@@ -120,13 +127,12 @@ class PreviewHandler extends YesWikiHandler
     protected function getContentAndPublication(array $get): array
     {
         $content = '';
-        $publication = [];
+        $publication = ['metadatas' => [], 'content' => ''];
         /*
          * Print from {{ bazar2publication }} (dynamic results)
          */
         if (
-            $this->aclService->hasAccess('read')
-            && isset($get['via'])
+            isset($get['via'])
             && $get['via'] === 'bazarliste'
         ) {
             // we assemble bazar pages
@@ -147,7 +153,7 @@ class PreviewHandler extends YesWikiHandler
             // we gather a few things from
             if (!empty($get['template-page'])) {
                 if (!is_string($get['template-page'])) {
-                    throw new Exception("'template-page' should be a string");
+                    throw new \Exception("'template-page' should be a string");
                 }
                 $templatePage = $this->pageManager->getOne(
                     $get['template-page'],
@@ -186,7 +192,7 @@ class PreviewHandler extends YesWikiHandler
             ];
         } /*
          * We print a Wiki page which has been created as an ebook
-         */ elseif ($this->aclService->hasAccess('read')) {
+         */ else {
             // if page is a bazar entry format the json into html
             if ($this->entryManager->isEntry($this->wiki->GetPageTag())) {
                 $content = $this->entryController->view(
@@ -206,7 +212,7 @@ class PreviewHandler extends YesWikiHandler
             $content = preg_replace('#<br />\n(<h\d)#sU', "\n$1", $content);
 
             $publication = [
-                'metadatas' => $this->wiki->page['metadatas'],
+                'metadatas' => $this->wiki->page['metadatas'] ?? [],
                 'content' => $content,
             ];
         }
@@ -216,32 +222,22 @@ class PreviewHandler extends YesWikiHandler
 
     protected function addCssFiles(array $metadatas)
     {
+        $mode = $metadatas['publication-mode'];
+        $theme = $this->wiki->config['favorite_theme'] ?? '';
+
         // Load the cascade of publication styles
         $cssFiles = array_merge(
-            glob(
-                'tools/publication/styles/print-layouts/' .
-                    $metadatas['publication-mode'] .
-                    '.css',
-            ),
-            glob('tools/publication/styles/*.css'),
-            glob(
-                'themes/' .
-                    $this->wiki->config['favorite_theme'] .
-                    '/tools/publication/*.css',
-            ),
-            glob(
-                'themes/' .
-                    $this->wiki->config['favorite_theme'] .
-                    '/tools/publication/print-layouts/' .
-                    $metadatas['publication-mode'] .
-                    '.css',
-            ),
-            glob('custom/tools/publication/*.css'),
-            glob(
-                'custom/tools/publication/print-layouts/' .
-                    $metadatas['publication-mode'] .
-                    '.css',
-            ),
+            ...array_map(function ($pattern) {
+                // glob returns false when the directory cannot be read
+                return glob($pattern) ?: [];
+            }, [
+                "tools/publication/styles/print-layouts/$mode.css",
+                'tools/publication/styles/*.css',
+                "themes/$theme/tools/publication/*.css",
+                "themes/$theme/tools/publication/print-layouts/$mode.css",
+                'custom/tools/publication/*.css',
+                "custom/tools/publication/print-layouts/$mode.css",
+            ])
         );
 
         array_map(function ($file) {
@@ -282,45 +278,69 @@ class PreviewHandler extends YesWikiHandler
 
     protected function sanitizeUrlForProxy(string &$output)
     {
-        if ($this->params->get('htmltopdf_base_url')) {
-            ['scheme' => $scheme, 'host' => $host, 'port' => $port] = parse_url(
-                $this->params->get('base_url'),
-            );
-            $base_url =
-                $scheme .
-                '://' .
-                $host .
-                (!$port || (string)$port === '80' ? '' : ':' . $port) .
-                '/';
-
-            ['scheme' => $scheme, 'host' => $host, 'port' => $port] = parse_url(
-                $this->params->get('htmltopdf_base_url'),
-            );
-            $new_base_url =
-                $scheme .
-                '://' .
-                $host .
-                (!$port || (string)$port === '80' ? '' : ':' . $port) .
-                '/';
-
-            $full_request_url =
-                $_SERVER['REQUEST_SCHEME'] .
-                '://' .
-                $_SERVER['HTTP_HOST'] .
-                ((string)$_SERVER['SERVER_PORT'] === '80'
-                    ? ''
-                    : ':' . $_SERVER['SERVER_PORT']) .
-                $_SERVER['REQUEST_URI'];
-
-            // Replaces https://example.com/?Accueil by http://localhost:8000/?Accueil
-            // Replaces https://example.com/favicon.ico by http://localhost:8000/favicon.ico
-            if (strpos($full_request_url, $new_base_url) === 0) {
-                $output = str_replace(
-                    [$this->params->get('base_url'), $base_url],
-                    [$this->params->get('htmltopdf_base_url'), $new_base_url],
-                    $output,
-                );
-            }
+        $proxyBaseUrl = $this->params->get('htmltopdf_base_url');
+        if (empty($proxyBaseUrl)) {
+            return;
         }
+
+        $base_url = $this->getOrigin($this->params->get('base_url'));
+        $new_base_url = $this->getOrigin($proxyBaseUrl);
+
+        // Replaces https://example.com/?Accueil by http://localhost:8000/?Accueil
+        // Replaces https://example.com/favicon.ico by http://localhost:8000/favicon.ico
+        if (strpos($this->getCurrentUrl(), $new_base_url) === 0) {
+            $output = str_replace(
+                [$this->params->get('base_url'), $base_url],
+                [$proxyBaseUrl, $new_base_url],
+                $output,
+            );
+        }
+    }
+
+    /**
+     * scheme, host and non default port of an url, with a trailing slash
+     */
+    protected function getOrigin(string $url): string
+    {
+        $parts = parse_url($url) ?: [];
+        $scheme = $parts['scheme'] ?? 'http';
+
+        return $scheme
+            . '://'
+            . ($parts['host'] ?? '')
+            . $this->formatPort($scheme, strval($parts['port'] ?? ''))
+            . '/';
+    }
+
+    /**
+     * url the current request came in on
+     */
+    protected function getCurrentUrl(): string
+    {
+        $scheme = $_SERVER['REQUEST_SCHEME']
+            ?? ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http');
+        // HTTP_HOST already carries the port, appending SERVER_PORT would double it
+        $host = strval($_SERVER['HTTP_HOST'] ?? '');
+        $port = '';
+        if (preg_match('/^(.*):(\d+)$/', $host, $matches)) {
+            $host = $matches[1];
+            $port = $matches[2];
+        }
+
+        return $scheme
+            . '://'
+            . $host
+            . $this->formatPort($scheme, $port)
+            . strval($_SERVER['REQUEST_URI'] ?? '');
+    }
+
+    /**
+     * ':1234', or an empty string when the port is the default one of the scheme
+     */
+    protected function formatPort(string $scheme, string $port): string
+    {
+        $defaultPort = ($scheme === 'https') ? '443' : '80';
+
+        return (empty($port) || $port === $defaultPort) ? '' : ':' . $port;
     }
 }

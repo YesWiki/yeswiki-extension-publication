@@ -16,7 +16,10 @@ use YesWiki\Publication\Service\SessionManager;
 
 class ApiController extends YesWikiController
 {
+    protected $params;
     protected $pdfHelper;
+    protected $sessionManager;
+
     /**
      * @Route("/api/pdf/getStatus/{uuid}",methods={"GET"}, options={"acl":{"public"}},priority=2)
      */
@@ -42,6 +45,8 @@ class ApiController extends YesWikiController
     {
         $this->pdfHelper = $this->getService(PdfHelper::class);
         $this->sessionManager = $this->getService(SessionManager::class);
+        // read in the error branch below, it is not set by the parent controller
+        $this->params = $this->getService(ParameterBagInterface::class);
         ob_start();
 
         $cause = [];
@@ -70,10 +75,6 @@ class ApiController extends YesWikiController
             }
             $cause['domainAuthorized'] = true;
 
-            $cookies = (!empty($_POST['coookiesToUse']) && is_array($_POST['coookiesToUse']))
-                ? array_filter($_POST['coookiesToUse'], 'is_string')
-                : [];
-
             $this->pdfHelper->prepareSession($uuid);
 
             list(
@@ -87,6 +88,9 @@ class ApiController extends YesWikiController
                     $_GET ?? [],
                     $_SERVER ?? []
                 );
+
+            // give the login cookies to the browser so it prints what the user actually sees
+            $cookies = $this->pdfHelper->getAuthenticationCookies($sourceUrl);
 
             $this->pdfHelper->setValueInSession($uuid, PdfHelper::SESSION_FULLFILENAMEREADY, 1);
 
@@ -168,7 +172,7 @@ class ApiController extends YesWikiController
 
         $this->pdfHelper->addValueInSession($uuid, PdfHelper::SESSION_FILE_STATUS, 2);
         if ($oldMode) {
-            $response = $this->returnFileOldMode($fullFilename, $dlFilename, $deleteFileAfterSend);
+            $response = $this->returnFileOldMode($fullFilename, $dlFilename);
         } else {
             ob_end_clean();
             $headers = [

@@ -3,17 +3,15 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width">
-		<title>{{ metadatas['publication-title'] | default('Publication') }} • {{ siteTitle }}</title>
+		<title>{{ metadatas.publication.title | default('Publication') }} • {{ siteTitle }}</title>
 		{{ styles | raw }}
 
     {% block css %}
     <style type="text/css">
 			@media print {
 				@page {
-					size: {{metadatas['publication-page-format']}}
-					{{metadatas['publication-page-orientation']}}
-					;
-					{% if metadatas['publication-print-marks'] == '1' %}
+					size: {{ metadatas['publication-book']['page-format'] }} {{ metadatas['publication-book']['page-orientation'] }};
+					{% if metadatas['publication-book']['print-marks'] == '1' %}
 						bleed: 6mm;
 						marks: crop cross;
 					{% endif %}

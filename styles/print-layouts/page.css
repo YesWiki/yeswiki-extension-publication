@@ -4,6 +4,17 @@
  * title, no forced recto starts, and the bootstrap grid is left alone.
  */
 
+:root {
+  /**
+   * Width a page offers to the content, A4 minus the margins below. print.js
+   * lays the content out at this width before paginating, so that the widgets
+   * that measure themselves (Leaflet maps) frame what the page will show and
+   * not the browser window. Book and fanzine do not declare it and keep
+   * laying out against the window.
+   */
+  --publication-measure: 190mm;
+}
+
 @page {
   size: A4 portrait;
   margin: 10mm;
@@ -159,4 +170,19 @@ hr.page-break {
 /* max-height crushes a tall image inside the page box */
 .publication--page img {
   max-height: none;
+}
+
+/**
+ * Paged.js copies the map into the page, but Leaflet only adds
+ * `leaflet-tile-loaded` to the tiles it created itself, and its stylesheet
+ * hides every other one. The copies would show nothing but the grey background
+ * of the container.
+ */
+.publication--page .leaflet-tile {
+  visibility: inherit;
+}
+
+/* a printed map has nothing to click on, the attribution stays, it is the licence */
+.publication--page .leaflet-control-container .leaflet-control:not(.leaflet-control-attribution) {
+  display: none;
 }

@@ -456,6 +456,26 @@ colonne étroite d'un livre. Les largeurs viennent des `@media (min-width: …)`
 Bootstrap, évaluées contre la fenêtre de rendu (`windowSize` dans
 `htmltopdf_options`, 1920 px par défaut).
 
+#### Les cartes Leaflet
+
+Elles sortaient en aplat gris. Deux choses s'y opposaient.
+
+Leaflet cache ses tuiles par défaut, `.leaflet-tile { visibility: hidden }`, et ne
+les révèle qu'en posant `leaflet-tile-loaded` depuis son code, sur les balises
+qu'il a créées lui-même. Paged.js recopie la carte dans la page, et les copies
+n'obtiennent jamais cette classe. `page.css` les rend visibles.
+
+Leaflet cadre ensuite sa vue sur la largeur de son conteneur au moment où il
+démarre, soit la fenêtre du navigateur, 1855 px ici. Paged.js rogne ensuite cette
+vue aux 653 px de la page, et le sujet de la carte sortait du cadre, à 869 px du
+bord. `page.css` déclare la largeur imprimée dans `--publication-measure`, et
+`print.js` met le contenu à cette largeur avant de paginer, ce qui donne à Leaflet
+la bonne mesure. Les livres et les fanzines ne déclarent pas cette variable et ne
+changent donc pas de comportement.
+
+Les commandes de zoom et de navigation sont masquées, l'attribution reste : c'est
+la licence des tuiles.
+
 ### Pourquoi Paged.js reste en 0.3.5
 
 La 0.4 plante sur toute requête média que son analyseur ne sait pas lire. Son

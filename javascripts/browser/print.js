@@ -3,6 +3,9 @@ import {Previewer, registerHandlers, Handler} from '../../javascripts/vendor/pag
 // give up on the paged layout after this, rather than never marking the page ready
 const PAGINATION_TIMEOUT = 20000
 
+// a tile server that does not answer must not hold the export back
+const TILES_TIMEOUT = 10000
+
 /**
  * Returns true if the second array contains all the selectors of the first array
  *
@@ -117,6 +120,48 @@ registerHandlers(class backgroundImageCover extends Handler {
 })
 
 /**
+ * Lays the content out at the width a printed page offers, and gives back what undoes it.
+ *
+ * A Leaflet map frames itself on the width of its container. Left alone it
+ * measures the browser window, then Paged.js clips that view down to the page
+ * and the subject of the map falls out of frame.
+ */
+function layOutAtPrintedMeasure () {
+  const measure = getComputedStyle(document.documentElement)
+    .getPropertyValue('--publication-measure').trim()
+  if (measure === '') {
+    return () => {}
+  }
+
+  const {width, margin} = document.body.style
+  document.body.style.width = measure
+  document.body.style.margin = '0'
+  // how Leaflet is told to recompute its frame
+  window.dispatchEvent(new Event('resize'))
+
+  return () => {
+    document.body.style.width = width
+    document.body.style.margin = margin
+  }
+}
+
+/**
+ * Resolves once every map tile of the page has loaded or failed
+ */
+function whenMapTilesSettle () {
+  return Promise.all(Array.from(document.querySelectorAll('.leaflet-tile')).map((tile) => {
+    if (tile.complete) {
+      return Promise.resolve()
+    }
+
+    return new Promise((resolve) => {
+      tile.addEventListener('load', resolve, {once: true})
+      tile.addEventListener('error', resolve, {once: true})
+    })
+  }))
+}
+
+/**
  * Resolves on the next animation frame, or after a second if the browser draws none
  */
 function nextAnimationFrame () {
@@ -151,10 +196,19 @@ window.addEventListener('load', async () => {
     image.loading = 'eager'
   })
 
+  const restoreMeasure = layOutAtPrintedMeasure()
+
   // wait two animation frames to be sure high resolution images are rendered after loaded
   // src: https://stackoverflow.com/questions/14578356/how-to-detect-when-an-image-has-finished-rendering-in-the-browser-i-e-painted
   await nextAnimationFrame()
   await nextAnimationFrame()
+
+  // the maps reframed on the resize above, so their tiles are only here now
+  await atMost(
+    whenMapTilesSettle(),
+    TILES_TIMEOUT,
+    () => console.error(`Map tiles did not all load within ${TILES_TIMEOUT}ms.`)
+  )
 
   // Whatever else keeps the layout pending, the export only waits for
   // data-publication, so never marking it would hang the whole export.
@@ -167,6 +221,8 @@ window.addEventListener('load', async () => {
   } catch (error) {
     console.error(error)
   }
+
+  restoreMeasure()
 
   document.body.dataset.publication = 'ready'
 

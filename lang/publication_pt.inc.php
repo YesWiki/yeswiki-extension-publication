@@ -60,6 +60,7 @@ return [
     'PUBLICATION_MODE' => 'Disposição',
     'PUBLICATION_MODE_BOOK' => 'Livro, livreto',
     'PUBLICATION_MODE_FANZINE' => 'Fanzine',
+    'PUBLICATION_MODE_PAGE' => 'Página simples',
     'PUBLICATION_MORE_OPTIONS' => 'Outras opções de personalização',
     'PUBLICATION_NEWSLETTER' => 'Newsletter',
     'PUBLICATION_NEWSLETTER_CREATED' => 'A newsletter foi criada',

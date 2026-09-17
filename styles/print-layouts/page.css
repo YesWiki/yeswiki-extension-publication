@@ -1,0 +1,162 @@
+/**
+ * A wiki page or a bazar entry printed on its own, outside any publication.
+ * It deliberately does not reuse book.css: no binding margins, no running
+ * title, no forced recto starts, and the bootstrap grid is left alone.
+ */
+
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+
+  @bottom-center {
+    content: counter(page);
+    font-family: monospace;
+    font-size: 0.8em;
+  }
+}
+
+body {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/**
+ * Writing helpers
+ */
+.yeswiki-publication .hide-print,
+.yeswiki-publication .hide-from-print,
+.yeswiki-publication .no-print,
+.yeswiki-publication .d-print-none {
+  display: none;
+}
+
+.yeswiki-publication .print-only,
+.yeswiki-publication .d-none.d-print-block {
+  display: block;
+  visibility: unset;
+}
+
+.pagebreak,
+.page-break {
+  break-after: page;
+}
+
+hr.pagebreak,
+hr.page-break {
+  border: none;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.blank-page {
+  break-after: page;
+}
+
+/**
+ * Browser Print setup
+ * @see http://www.richardnichols.net/2012/08/getting-chrome-to-print-with-background-colors-enabled/
+ */
+.yeswiki-publication {
+  -webkit-print-color-adjust: exact;
+}
+
+/* Screen chrome that carries nothing on paper */
+.yeswiki-publication .BAZ_fiche_info,
+.yeswiki-publication .bazar-search,
+.yeswiki-publication .filters-col,
+.yeswiki-publication .dummy {
+  display: none;
+}
+
+/* Unfold panels and other collapsed content */
+.yeswiki-publication .collapse {
+  display: block;
+  height: 100% !important;
+}
+
+.yeswiki-publication .panel-heading[data-toggle="collapse"]::after {
+  display: none;
+}
+
+/* Blocks that read badly when a page break falls inside them */
+.yeswiki-publication .well,
+.yeswiki-publication .panel-heading,
+.yeswiki-publication h1,
+.yeswiki-publication h2,
+.yeswiki-publication h3,
+.yeswiki-publication h4,
+.yeswiki-publication iframe,
+.yeswiki-publication video,
+.yeswiki-publication audio {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.yeswiki-publication .well,
+.yeswiki-publication .panel {
+  margin-top: 1em;
+}
+
+/* We clear Bazar image setting for pictures */
+.yeswiki-publication .BAZ_cadre_fiche [data-id="bf_image"] img {
+  width: auto;
+}
+
+.yeswiki-publication img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* OPTION We remove link URLs from the print */
+.yeswiki-publication.hide-links-url a[href]::after {
+  content: "";
+}
+
+/**
+ * print.css dresses every layout as a book: justified text with a first line
+ * indent, headings centred in spaced capitals, old style figures. A wiki page
+ * reads better as itself, so these go back to plain values here.
+ *
+ * Black links are kept on purpose, a printed page has nothing to click on.
+ */
+.publication--page {
+  font-variant-numeric: normal;
+}
+
+.publication--page p {
+  text-align: initial;
+  text-indent: 0;
+  margin-bottom: 0.7em;
+}
+
+/* print.css lowercases the whole first line of an opening paragraph */
+.publication--page header + p:first-line {
+  text-transform: none !important;
+  font-variant: normal;
+  font-size: inherit;
+}
+
+.publication--page h1,
+.publication--page h2,
+.publication--page .BAZ_fiche_titre {
+  text-align: initial;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.publication--page h1,
+.publication--page .BAZ_fiche_titre {
+  font-size: 1.8rem;
+}
+
+.publication--page h2 {
+  font-size: 1.4rem;
+}
+
+/* max-height crushes a tall image inside the page box */
+.publication--page img {
+  max-height: none;
+}

@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/yeswiki/yeswiki-extension-punlication#readme",
   "dependencies": {
-    "pagedjs": "^0.3.x"
+    "pagedjs": "^0.4.3"
   }
 }

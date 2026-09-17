@@ -439,6 +439,26 @@ Ces fonctions sont accessibles depuis le sous-menu "partager" du bas de page.
  - `""<div class="no-print"> ""bla bla à supprimer à l'impression""</div>"" `
  - `""<div class="hide-print"> ""bla bla à supprimer à l'impression""</div>"" `
 
+### Imprimer une page qui n'est pas une publication
+
+`?MaPage/pdf` sur une page ou une fiche qui ne porte pas d'options de publication
+utilise une disposition à part, `page`, au lieu de celle des livres :
+
+- des marges de 10 mm au lieu des 20 à 40 mm réservés à la reliure, soit 190 mm de
+  largeur utile sur A4 au lieu de 140 mm ;
+- pas de titre courant, pas de démarrage forcé sur une belle page, pas de saut de
+  page avant chaque `h1` ;
+- la grille Bootstrap est conservée, les colonnes restent côte à côte.
+
+Ce dernier point demande une précision. Paged.js jette toutes les `@media` autres
+que `print` et `all`, y compris les `@media (min-width: …)` où vit la grille
+Bootstrap, ce qui met chaque colonne sur sa propre ligne. En disposition `page`,
+`print.js` recopie hors de leur bloc les `@media` qui correspondent à la fenêtre du
+navigateur, ce qui fige la mise en page à la largeur de rendu (`windowSize` dans
+`htmltopdf_options`). Les livres et les fanzines ne sont pas concernés : ils
+annulent la grille volontairement, pour garder une justification lisible sur une
+colonne étroite.
+
 ### Surcharger les styles d'impression par défaut
 
 Des styles d'impression par défaut sont ajoutés pour vous donner le moins de travail possible lors de la création d'une publication.
@@ -447,9 +467,9 @@ Il y a plusieurs mécanismes pour **personnaliser vos styles d'impression** en c
 | Répertoire                                                  | Noms possibles            | À quoi ça s'applique ?
 | ---                                                         | ---                       | ---
 | `custom/tools/publication/*.css`                            | Peu importe               | Toute publication, peu importe le thème
-| `custom/tools/publication/print-layouts/*.css`              | `fanzine.css`, `book.css` | Seulement les fanzines, ou les livres/livrets, peu importe le thème
+| `custom/tools/publication/print-layouts/*.css`              | `fanzine.css`, `book.css`, `page.css` | Seulement les fanzines, les livres/livrets, ou les pages simples, peu importe le thème
 | `themes/NOM_DU_THEME/tools/publication/*.css`               | Peu importe               | Toute publication, pour un thème donné
-| `themes/NOM_DU_THEME/tools/publication/print-layouts/*.css` | `fanzine.css`, `book.css` | Seulement les fanzines, ou les livres/livrets, pour un thème donné
+| `themes/NOM_DU_THEME/tools/publication/print-layouts/*.css` | `fanzine.css`, `book.css`, `page.css` | Seulement les fanzines, les livres/livrets, ou les pages simples, pour un thème donné
 
 ## Configuration serveur (`wakka.config.php`)
 

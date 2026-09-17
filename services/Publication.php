@@ -4,17 +4,21 @@ namespace YesWiki\Publication\Service;
 
 define('PUBLICATION_LAYOUT_BOOK', 'book');
 define('PUBLICATION_LAYOUT_FANZINE', 'fanzine');
+define('PUBLICATION_LAYOUT_PAGE', 'page');
 
 class Publication
 {
     private $modes = [
       PUBLICATION_LAYOUT_BOOK,
-      PUBLICATION_LAYOUT_FANZINE
+      PUBLICATION_LAYOUT_FANZINE,
+      // a wiki page or a bazar entry printed on its own, outside any publication
+      PUBLICATION_LAYOUT_PAGE
     ];
 
     // Publication modes that require to load Paged.js to assemble the paged content
     private $pagedLayouts = [
-      PUBLICATION_LAYOUT_BOOK
+      PUBLICATION_LAYOUT_BOOK,
+      PUBLICATION_LAYOUT_PAGE
     ];
 
     private $fanzineLayouts = [
@@ -63,6 +67,23 @@ class Publication
     public function isMode($mode)
     {
         return in_array($mode, $this->modes);
+    }
+
+    /**
+     * a page carries a publication when the generator saved its options on it
+     * @param array $metadatas
+     * @return bool
+     */
+    public function isPublication(array $metadatas): bool
+    {
+        foreach (array_keys($this->defaultOptions) as $key) {
+            if (isset($metadatas[$key])) {
+                return true;
+            }
+        }
+
+        // options saved before the current format
+        return isset($metadatas['publication-title']);
     }
 
     public function isPaged($layout)

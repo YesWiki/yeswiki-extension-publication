@@ -56,8 +56,13 @@ class PreviewHandler extends YesWikiHandler
          * We now generate the content.
          */
         // user  options
+        $pageMetadatas = $publication['metadatas'] ?? [];
         $metadatas = $this->publicationService->getOptions(
-            $publication['metadatas'] ?? [],
+            // a page printed on its own is not a book, it gets its own layout
+            $this->publicationService->isPublication($pageMetadatas)
+                ? []
+                : ['publication-mode' => PUBLICATION_LAYOUT_PAGE],
+            $pageMetadatas,
             isset($_GET['layout'])
                 ? ['publication-fanzine' => ['layout' => $_GET['layout']]]
                 : [],

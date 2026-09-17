@@ -60,6 +60,7 @@ return [
     'PUBLICATION_MODE' => 'Disposition',
     'PUBLICATION_MODE_BOOK' => 'Book, booklet',
     'PUBLICATION_MODE_FANZINE' => 'Fanzine',
+    'PUBLICATION_MODE_PAGE' => 'Single page',
     'PUBLICATION_MORE_OPTIONS' => 'Other customization options',
     'PUBLICATION_NEWSLETTER' => 'Newsletter',
     'PUBLICATION_NEWSLETTER_CREATED' => 'The newsletter record has successfully been created',

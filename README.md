@@ -450,14 +450,24 @@ utilise une disposition à part, `page`, au lieu de celle des livres :
   page avant chaque `h1` ;
 - la grille Bootstrap est conservée, les colonnes restent côte à côte.
 
-Ce dernier point demande une précision. Paged.js jette toutes les `@media` autres
-que `print` et `all`, y compris les `@media (min-width: …)` où vit la grille
-Bootstrap, ce qui met chaque colonne sur sa propre ligne. En disposition `page`,
-`print.js` recopie hors de leur bloc les `@media` qui correspondent à la fenêtre du
-navigateur, ce qui fige la mise en page à la largeur de rendu (`windowSize` dans
-`htmltopdf_options`). Les livres et les fanzines ne sont pas concernés : ils
-annulent la grille volontairement, pour garder une justification lisible sur une
-colonne étroite.
+La grille tient parce que la disposition `page` ne charge pas `book.css`, qui
+annule les colonnes volontairement pour garder une justification lisible sur la
+colonne étroite d'un livre. Les largeurs viennent des `@media (min-width: …)` de
+Bootstrap, évaluées contre la fenêtre de rendu (`windowSize` dans
+`htmltopdf_options`, 1920 px par défaut).
+
+### Pourquoi Paged.js reste en 0.3.5
+
+La 0.4 plante sur toute requête média que son analyseur ne sait pas lire. Son
+gestionnaire `PrintMedia` appelle `.includes()` sur le retour de `getMediaName()`,
+qui vaut `undefined` dès que css-tree n'a pas su analyser le prélude. Or css-tree
+1.1.3, la version qu'embarque Paged.js, ne connaît pas la syntaxe d'intervalle du
+niveau 4, `@media (width <= 801px)`, que le `yeswiki-base.css` du cœur et plusieurs
+thèmes utilisent. L'exception remonte jusqu'à `preview()`, aucune page n'est
+composée, et le PDF sort blanc.
+
+La 0.4 supprime aussi tous les blocs `@media` autres que `print` et `all`, ce qui
+met chaque colonne Bootstrap sur sa propre ligne. La 0.3.5 les conserve.
 
 ### Surcharger les styles d'impression par défaut
 

@@ -1,5 +1,5 @@
 /**
- * @license Paged.js v0.4.3 | MIT | https://gitlab.coko.foundation/pagedjs/pagedjs
+ * @license Paged.js v0.3.5 | MIT | https://gitlab.pagedmedia.org/tools/pagedjs
  */
 
 function getBoundingClientRect(element) {
@@ -284,7 +284,7 @@ function displayedElementAfter(node, limiter) {
 	let after = elementAfter(node, limiter);
 
 	while (after && after.dataset.undisplayed) {
-		after = elementAfter(after, limiter);
+		after = elementAfter(after);
 	}
 
 	return after;
@@ -294,7 +294,7 @@ function displayedElementBefore(node, limiter) {
 	let before = elementBefore(node, limiter);
 
 	while (before && before.dataset.undisplayed) {
-		before = elementBefore(before, limiter);
+		before = elementBefore(before);
 	}
 
 	return before;
@@ -352,7 +352,7 @@ function rebuildAncestors(node) {
 	for (var i = 0; i < ancestors.length; i++) {
 		ancestor = ancestors[i];
 		parent = ancestor.cloneNode(false);
-	
+
 		parent.setAttribute("data-split-from", parent.getAttribute("data-ref"));
 		// ancestor.setAttribute("data-split-to", parent.getAttribute("data-ref"));
 
@@ -378,23 +378,12 @@ function rebuildAncestors(node) {
 			fragment.appendChild(parent);
 		}
 		added.push(parent);
-
-		// rebuild table rows
-		if (parent.nodeName === "TD" && ancestor.parentElement.contains(ancestor)) {
-			let td = ancestor;
-			let prev = parent;
-			while ((td = td.previousElementSibling)) {
-				let sib = td.cloneNode(false);
-				parent.parentElement.insertBefore(sib, prev);
-				prev = sib;
-			}
-			
-		}
 	}
 
 	added = undefined;
 	return fragment;
 }
+
 /*
 export function split(bound, cutElement, breakAfter) {
 		let needsRemoval = [];
@@ -611,7 +600,7 @@ function isContainer(node) {
 		case "BLOCKQUOTE":
 		case "PRE":
 		case "LI":
-		case "TD":
+		case "TR":
 		case "DT":
 		case "DD":
 		case "VIDEO":
@@ -629,13 +618,13 @@ function cloneNode(n, deep=false) {
 	return n.cloneNode(deep);
 }
 
-function findElement(node, doc, forceQuery) {
+function findElement(node, doc) {
 	const ref = node.getAttribute("data-ref");
-	return findRef(ref, doc, forceQuery);
+	return findRef(ref, doc);
 }
 
-function findRef(ref, doc, forceQuery) {
-	if (!forceQuery && doc.indexOfRefs && doc.indexOfRefs[ref]) {
+function findRef(ref, doc) {
+	if (doc.indexOfRefs && doc.indexOfRefs[ref]) {
 		return doc.indexOfRefs[ref];
 	} else {
 		return doc.querySelector(`[data-ref='${ref}']`);
@@ -671,7 +660,7 @@ function prevValidNode(node) {
 }
 
 
-function indexOf$2(node) {
+function indexOf$3(node) {
 	let parent = node.parentNode;
 	if (!parent) {
 		return 0;
@@ -856,7 +845,7 @@ function filterTree(content, func, what) {
 }
 
 /**
- * BreakToken
+ * Layout
  * @class
  */
 class BreakToken {
@@ -881,30 +870,6 @@ class BreakToken {
 		return true;
 	}
 
-	toJSON(hash) {
-		let node;
-		let index = 0;
-		if (!this.node) {
-			return {};
-		}
-		if (isElement(this.node) && this.node.dataset.ref) {
-			node = this.node.dataset.ref;
-		} else if (hash) {
-			node = this.node.parentElement.dataset.ref;
-		}
-
-		if (this.node.parentElement) {
-			const children = Array.from(this.node.parentElement.childNodes);
-			index = children.indexOf(this.node);
-		}
-
-		return JSON.stringify({
-			"node": node,
-			"index" : index,
-			"offset": this.offset
-		});
-	}
-
 }
 
 /**
@@ -926,13 +891,9 @@ class OverflowContentError extends Error {
 	}
 }
 
-function getDefaultExportFromCjs (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-}
-
 var eventEmitter = {exports: {}};
 
-var d$2 = {exports: {}};
+var d$3 = {exports: {}};
 
 var isImplemented$6 = function () {
 	var assign = Object.assign, obj;
@@ -942,108 +903,72 @@ var isImplemented$6 = function () {
 	return (obj.foo + obj.bar + obj.trzy) === "razdwatrzy";
 };
 
-var isImplemented$5;
-var hasRequiredIsImplemented$1;
-
-function requireIsImplemented$1 () {
-	if (hasRequiredIsImplemented$1) return isImplemented$5;
-	hasRequiredIsImplemented$1 = 1;
-
-	isImplemented$5 = function () {
-		try {
-			Object.keys("primitive");
-			return true;
-		} catch (e) {
-	 return false;
-	}
-	};
-	return isImplemented$5;
+var isImplemented$5 = function () {
+	try {
+		Object.keys("primitive");
+		return true;
+	} catch (e) {
+ return false;
 }
+};
 
 // eslint-disable-next-line no-empty-function
 var noop$4 = function () {};
 
 var _undefined = noop$4(); // Support ES3 engines
 
-var isValue$3 = function (val) {
+var isValue$5 = function (val) {
  return (val !== _undefined) && (val !== null);
 };
 
-var shim$5;
-var hasRequiredShim$5;
+var isValue$4 = isValue$5;
 
-function requireShim$5 () {
-	if (hasRequiredShim$5) return shim$5;
-	hasRequiredShim$5 = 1;
+var keys$2 = Object.keys;
 
-	var isValue = isValue$3;
+var shim$5 = function (object) {
+	return keys$2(isValue$4(object) ? Object(object) : object);
+};
 
-	var keys = Object.keys;
+var keys$1 = isImplemented$5()
+	? Object.keys
+	: shim$5;
 
-	shim$5 = function (object) {
-		return keys(isValue(object) ? Object(object) : object);
-	};
-	return shim$5;
-}
+var isValue$3 = isValue$5;
 
-var keys;
-var hasRequiredKeys;
-
-function requireKeys () {
-	if (hasRequiredKeys) return keys;
-	hasRequiredKeys = 1;
-
-	keys = requireIsImplemented$1()()
-		? Object.keys
-		: requireShim$5();
-	return keys;
-}
-
-var isValue$2 = isValue$3;
-
-var validValue = function (value) {
-	if (!isValue$2(value)) throw new TypeError("Cannot use null or undefined");
+var validValue$1 = function (value) {
+	if (!isValue$3(value)) throw new TypeError("Cannot use null or undefined");
 	return value;
 };
 
-var shim$4;
-var hasRequiredShim$4;
+var keys  = keys$1
+  , value$3 = validValue$1
+  , max$1   = Math.max;
 
-function requireShim$4 () {
-	if (hasRequiredShim$4) return shim$4;
-	hasRequiredShim$4 = 1;
-
-	var keys  = requireKeys()
-	  , value = validValue
-	  , max   = Math.max;
-
-	shim$4 = function (dest, src /*, …srcn*/) {
-		var error, i, length = max(arguments.length, 2), assign;
-		dest = Object(value(dest));
-		assign = function (key) {
-			try {
-				dest[key] = src[key];
-			} catch (e) {
-				if (!error) error = e;
-			}
-		};
-		for (i = 1; i < length; ++i) {
-			src = arguments[i];
-			keys(src).forEach(assign);
+var shim$4 = function (dest, src /*, …srcn*/) {
+	var error, i, length = max$1(arguments.length, 2), assign;
+	dest = Object(value$3(dest));
+	assign = function (key) {
+		try {
+			dest[key] = src[key];
+		} catch (e) {
+			if (!error) error = e;
 		}
-		if (error !== undefined) throw error;
-		return dest;
 	};
-	return shim$4;
-}
+	for (i = 1; i < length; ++i) {
+		src = arguments[i];
+		keys(src).forEach(assign);
+	}
+	if (error !== undefined) throw error;
+	return dest;
+};
 
 var assign$2 = isImplemented$6()
 	? Object.assign
-	: requireShim$4();
+	: shim$4;
 
-var isValue$1 = isValue$3;
+var isValue$2 = isValue$5;
 
-var forEach$1 = Array.prototype.forEach, create$5 = Object.create;
+var forEach$1 = Array.prototype.forEach, create$6 = Object.create;
 
 var process = function (src, obj) {
 	var key;
@@ -1052,9 +977,9 @@ var process = function (src, obj) {
 
 // eslint-disable-next-line no-unused-vars
 var normalizeOptions = function (opts1 /*, …options*/) {
-	var result = create$5(null);
+	var result = create$6(null);
 	forEach$1.call(arguments, function (options) {
-		if (!isValue$1(options)) return;
+		if (!isValue$2(options)) return;
 		process(Object(options), result);
 	});
 	return result;
@@ -1071,33 +996,24 @@ var isImplemented$4 = function () {
 	return (str.contains("dwa") === true) && (str.contains("foo") === false);
 };
 
-var shim$3;
-var hasRequiredShim$3;
+var indexOf$2 = String.prototype.indexOf;
 
-function requireShim$3 () {
-	if (hasRequiredShim$3) return shim$3;
-	hasRequiredShim$3 = 1;
-
-	var indexOf = String.prototype.indexOf;
-
-	shim$3 = function (searchString/*, position*/) {
-		return indexOf.call(this, searchString, arguments[1]) > -1;
-	};
-	return shim$3;
-}
+var shim$3 = function (searchString/*, position*/) {
+	return indexOf$2.call(this, searchString, arguments[1]) > -1;
+};
 
 var contains$1 = isImplemented$4()
 	? String.prototype.contains
-	: requireShim$3();
+	: shim$3;
 
 var assign$1        = assign$2
   , normalizeOpts = normalizeOptions
   , isCallable    = isCallable$1
   , contains      = contains$1
 
-  , d$1;
+  , d$2;
 
-d$1 = d$2.exports = function (dscr, value/*, options*/) {
+d$2 = d$3.exports = function (dscr, value/*, options*/) {
 	var c, e, w, options, desc;
 	if ((arguments.length < 2) || (typeof dscr !== 'string')) {
 		options = value;
@@ -1119,7 +1035,7 @@ d$1 = d$2.exports = function (dscr, value/*, options*/) {
 	return !options ? desc : assign$1(normalizeOpts(options), desc);
 };
 
-d$1.gs = function (dscr, get, set/*, options*/) {
+d$2.gs = function (dscr, get, set/*, options*/) {
 	var c, e, options, desc;
 	if (typeof dscr !== 'string') {
 		options = set;
@@ -1152,8 +1068,6 @@ d$1.gs = function (dscr, get, set/*, options*/) {
 	return !options ? desc : assign$1(normalizeOpts(options), desc);
 };
 
-var dExports = d$2.exports;
-
 var validCallable = function (fn) {
 	if (typeof fn !== "function") throw new TypeError(fn + " is not a function");
 	return fn;
@@ -1161,140 +1075,139 @@ var validCallable = function (fn) {
 
 (function (module, exports) {
 
-	var d        = dExports
-	  , callable = validCallable
+var d        = d$3.exports
+  , callable = validCallable
 
-	  , apply = Function.prototype.apply, call = Function.prototype.call
-	  , create = Object.create, defineProperty = Object.defineProperty
-	  , defineProperties = Object.defineProperties
-	  , hasOwnProperty = Object.prototype.hasOwnProperty
-	  , descriptor = { configurable: true, enumerable: false, writable: true }
+  , apply = Function.prototype.apply, call = Function.prototype.call
+  , create = Object.create, defineProperty = Object.defineProperty
+  , defineProperties = Object.defineProperties
+  , hasOwnProperty = Object.prototype.hasOwnProperty
+  , descriptor = { configurable: true, enumerable: false, writable: true }
 
-	  , on, once, off, emit, methods, descriptors, base;
+  , on, once, off, emit, methods, descriptors, base;
 
-	on = function (type, listener) {
-		var data;
+on = function (type, listener) {
+	var data;
 
-		callable(listener);
+	callable(listener);
 
-		if (!hasOwnProperty.call(this, '__ee__')) {
-			data = descriptor.value = create(null);
-			defineProperty(this, '__ee__', descriptor);
-			descriptor.value = null;
-		} else {
-			data = this.__ee__;
-		}
-		if (!data[type]) data[type] = listener;
-		else if (typeof data[type] === 'object') data[type].push(listener);
-		else data[type] = [data[type], listener];
-
-		return this;
-	};
-
-	once = function (type, listener) {
-		var once, self;
-
-		callable(listener);
-		self = this;
-		on.call(this, type, once = function () {
-			off.call(self, type, once);
-			apply.call(listener, this, arguments);
-		});
-
-		once.__eeOnceListener__ = listener;
-		return this;
-	};
-
-	off = function (type, listener) {
-		var data, listeners, candidate, i;
-
-		callable(listener);
-
-		if (!hasOwnProperty.call(this, '__ee__')) return this;
+	if (!hasOwnProperty.call(this, '__ee__')) {
+		data = descriptor.value = create(null);
+		defineProperty(this, '__ee__', descriptor);
+		descriptor.value = null;
+	} else {
 		data = this.__ee__;
-		if (!data[type]) return this;
-		listeners = data[type];
+	}
+	if (!data[type]) data[type] = listener;
+	else if (typeof data[type] === 'object') data[type].push(listener);
+	else data[type] = [data[type], listener];
 
-		if (typeof listeners === 'object') {
-			for (i = 0; (candidate = listeners[i]); ++i) {
-				if ((candidate === listener) ||
-						(candidate.__eeOnceListener__ === listener)) {
-					if (listeners.length === 2) data[type] = listeners[i ? 0 : 1];
-					else listeners.splice(i, 1);
-				}
-			}
-		} else {
-			if ((listeners === listener) ||
-					(listeners.__eeOnceListener__ === listener)) {
-				delete data[type];
+	return this;
+};
+
+once = function (type, listener) {
+	var once, self;
+
+	callable(listener);
+	self = this;
+	on.call(this, type, once = function () {
+		off.call(self, type, once);
+		apply.call(listener, this, arguments);
+	});
+
+	once.__eeOnceListener__ = listener;
+	return this;
+};
+
+off = function (type, listener) {
+	var data, listeners, candidate, i;
+
+	callable(listener);
+
+	if (!hasOwnProperty.call(this, '__ee__')) return this;
+	data = this.__ee__;
+	if (!data[type]) return this;
+	listeners = data[type];
+
+	if (typeof listeners === 'object') {
+		for (i = 0; (candidate = listeners[i]); ++i) {
+			if ((candidate === listener) ||
+					(candidate.__eeOnceListener__ === listener)) {
+				if (listeners.length === 2) data[type] = listeners[i ? 0 : 1];
+				else listeners.splice(i, 1);
 			}
 		}
+	} else {
+		if ((listeners === listener) ||
+				(listeners.__eeOnceListener__ === listener)) {
+			delete data[type];
+		}
+	}
 
-		return this;
-	};
+	return this;
+};
 
-	emit = function (type) {
-		var i, l, listener, listeners, args;
+emit = function (type) {
+	var i, l, listener, listeners, args;
 
-		if (!hasOwnProperty.call(this, '__ee__')) return;
-		listeners = this.__ee__[type];
-		if (!listeners) return;
+	if (!hasOwnProperty.call(this, '__ee__')) return;
+	listeners = this.__ee__[type];
+	if (!listeners) return;
 
-		if (typeof listeners === 'object') {
+	if (typeof listeners === 'object') {
+		l = arguments.length;
+		args = new Array(l - 1);
+		for (i = 1; i < l; ++i) args[i - 1] = arguments[i];
+
+		listeners = listeners.slice();
+		for (i = 0; (listener = listeners[i]); ++i) {
+			apply.call(listener, this, args);
+		}
+	} else {
+		switch (arguments.length) {
+		case 1:
+			call.call(listeners, this);
+			break;
+		case 2:
+			call.call(listeners, this, arguments[1]);
+			break;
+		case 3:
+			call.call(listeners, this, arguments[1], arguments[2]);
+			break;
+		default:
 			l = arguments.length;
 			args = new Array(l - 1);
-			for (i = 1; i < l; ++i) args[i - 1] = arguments[i];
-
-			listeners = listeners.slice();
-			for (i = 0; (listener = listeners[i]); ++i) {
-				apply.call(listener, this, args);
+			for (i = 1; i < l; ++i) {
+				args[i - 1] = arguments[i];
 			}
-		} else {
-			switch (arguments.length) {
-			case 1:
-				call.call(listeners, this);
-				break;
-			case 2:
-				call.call(listeners, this, arguments[1]);
-				break;
-			case 3:
-				call.call(listeners, this, arguments[1], arguments[2]);
-				break;
-			default:
-				l = arguments.length;
-				args = new Array(l - 1);
-				for (i = 1; i < l; ++i) {
-					args[i - 1] = arguments[i];
-				}
-				apply.call(listeners, this, args);
-			}
+			apply.call(listeners, this, args);
 		}
-	};
+	}
+};
 
-	methods = {
-		on: on,
-		once: once,
-		off: off,
-		emit: emit
-	};
+methods = {
+	on: on,
+	once: once,
+	off: off,
+	emit: emit
+};
 
-	descriptors = {
-		on: d(on),
-		once: d(once),
-		off: d(off),
-		emit: d(emit)
-	};
+descriptors = {
+	on: d(on),
+	once: d(once),
+	off: d(off),
+	emit: d(emit)
+};
 
-	base = defineProperties({}, descriptors);
+base = defineProperties({}, descriptors);
 
-	module.exports = exports = function (o) {
-		return (o == null) ? create(base) : defineProperties(Object(o), descriptors);
-	};
-	exports.methods = methods; 
-} (eventEmitter, eventEmitter.exports));
+module.exports = exports = function (o) {
+	return (o == null) ? create(base) : defineProperties(Object(o), descriptors);
+};
+exports.methods = methods;
+}(eventEmitter, eventEmitter.exports));
 
-var eventEmitterExports = eventEmitter.exports;
-var EventEmitter = /*@__PURE__*/getDefaultExportFromCjs(eventEmitterExports);
+var EventEmitter = eventEmitter.exports;
 
 /**
  * Hooks allow for injecting functions that must all complete in order before finishing
@@ -1398,21 +1311,11 @@ class Layout {
 		this.element = element;
 
 		this.bounds = this.element.getBoundingClientRect();
-		this.parentBounds = this.element.offsetParent.getBoundingClientRect();
-		let gap = parseFloat(window.getComputedStyle(this.element).columnGap);
-	
-		if (gap) {
-			let leftMargin = this.bounds.left - this.parentBounds.left;
-			this.gap =  gap - leftMargin;	
-		} else {
-			this.gap = 0;
-		}
 
 		if (hooks) {
 			this.hooks = hooks;
 		} else {
 			this.hooks = {};
-			this.hooks.onPageLayout = new Hook();
 			this.hooks.layout = new Hook();
 			this.hooks.renderNode = new Hook();
 			this.hooks.layoutNode = new Hook();
@@ -1420,7 +1323,6 @@ class Layout {
 			this.hooks.onOverflow = new Hook();
 			this.hooks.afterOverflowRemoved = new Hook();
 			this.hooks.onBreakToken = new Hook();
-			this.hooks.beforeRenderResult = new Hook();
 		}
 
 		this.settings = options || {};
@@ -1445,8 +1347,6 @@ class Layout {
 
 		let prevBreakToken = breakToken || new BreakToken(start);
 
-		this.hooks && this.hooks.onPageLayout.trigger(wrapper, prevBreakToken, this);
-
 		while (!done && !newBreakToken) {
 			next = walker.next();
 			prevNode = node;
@@ -1465,13 +1365,8 @@ class Layout {
 
 				if (newBreakToken && newBreakToken.equals(prevBreakToken)) {
 					console.warn("Unable to layout item: ", prevNode);
-					this.hooks && this.hooks.beforeRenderResult.trigger(undefined, wrapper, this);
 					return new RenderResult(undefined, new OverflowContentError("Unable to layout item", [prevNode]));
 				}
-
-				this.rebuildTableFromBreakToken(newBreakToken, wrapper);
-
-				this.hooks && this.hooks.beforeRenderResult.trigger(newBreakToken, wrapper, this);
 				return new RenderResult(newBreakToken);
 			}
 
@@ -1490,34 +1385,16 @@ class Layout {
 
 				if (!newBreakToken) {
 					newBreakToken = this.breakAt(node);
-				} else {
-					this.rebuildTableFromBreakToken(newBreakToken, wrapper);
 				}
 
 				if (newBreakToken && newBreakToken.equals(prevBreakToken)) {
 					console.warn("Unable to layout item: ", node);
-					let after = newBreakToken.node && nodeAfter(newBreakToken.node);
-					if (after) {
-						newBreakToken = new BreakToken(after);
-					} else {
-						return new RenderResult(undefined, new OverflowContentError("Unable to layout item", [node]));
-					}
+					return new RenderResult(undefined, new OverflowContentError("Unable to layout item", [node]));
 				}
 
 				length = 0;
 
 				break;
-			}
-
-			if (node.dataset && node.dataset.page) {
-				let named = node.dataset.page;
-				let page = this.element.closest(".pagedjs_page");
-				page.classList.add("pagedjs_named_page");
-				page.classList.add("pagedjs_" + named + "_page");
-
-				if (!node.dataset.splitFrom) {
-					page.classList.add("pagedjs_" + named + "_first_page");
-				}
 			}
 
 			// Should the Node be a shallow or deep clone
@@ -1544,8 +1421,6 @@ class Layout {
 
 				if (!newBreakToken) {
 					newBreakToken = this.breakAt(node);
-				} else {
-					this.rebuildTableFromBreakToken(newBreakToken, wrapper);
 				}
 
 				length = 0;
@@ -1566,26 +1441,18 @@ class Layout {
 
 				newBreakToken = this.findBreakToken(wrapper, source, bounds, prevBreakToken);
 
-				if (newBreakToken) {
-					length = 0;
-					this.rebuildTableFromBreakToken(newBreakToken, wrapper);
-				}
-
 				if (newBreakToken && newBreakToken.equals(prevBreakToken)) {
 					console.warn("Unable to layout item: ", node);
-					let after = newBreakToken.node && nodeAfter(newBreakToken.node);
-					if (after) {
-						newBreakToken = new BreakToken(after);
-					} else {
-						this.hooks && this.hooks.beforeRenderResult.trigger(undefined, wrapper, this);
-						return new RenderResult(undefined, new OverflowContentError("Unable to layout item", [node]));
-					}
+					return new RenderResult(undefined, new OverflowContentError("Unable to layout item", [node]));
+				}
+
+				if (newBreakToken) {
+					length = 0;
 				}
 			}
 
 		}
 
-		this.hooks && this.hooks.beforeRenderResult.trigger(newBreakToken, wrapper, this);
 		return new RenderResult(newBreakToken);
 	}
 
@@ -1680,23 +1547,6 @@ class Layout {
 		});
 
 		return clone;
-	}
-
-	rebuildTableFromBreakToken(breakToken, dest) {
-		if (!breakToken || !breakToken.node) {
-			return;
-		}
-		let node = breakToken.node;
-		let td = isElement(node) ? node.closest("td") : node.parentElement.closest("td");
-		if (td) {
-			let rendered = findElement(td, dest, true);
-			if (!rendered) {
-				return;
-			}
-			while ((td = td.nextElementSibling)) {
-				this.append(td, dest, null, true);
-			}
-		}
 	}
 
 	async waitForImages(imgs) {
@@ -1878,20 +1728,16 @@ class Layout {
 
 	hasOverflow(element, bounds = this.bounds) {
 		let constrainingElement = element && element.parentNode; // this gets the element, instead of the wrapper for the width workaround
-		let {width, height} = element.getBoundingClientRect();
+		let {width} = element.getBoundingClientRect();
 		let scrollWidth = constrainingElement ? constrainingElement.scrollWidth : 0;
-		let scrollHeight = constrainingElement ? constrainingElement.scrollHeight : 0;
-		return Math.max(Math.floor(width), scrollWidth) > Math.round(bounds.width) ||
-			Math.max(Math.floor(height), scrollHeight) > Math.round(bounds.height);
+		return Math.max(Math.floor(width), scrollWidth) > Math.round(bounds.width);
 	}
 
-	findOverflow(rendered, bounds = this.bounds, gap = this.gap) {
+	findOverflow(rendered, bounds = this.bounds) {
 		if (!this.hasOverflow(rendered, bounds)) return;
 
-		let start = Math.floor(bounds.left);
-		let end = Math.round(bounds.right + gap);
-		let vStart = Math.round(bounds.top);
-		let vEnd = Math.round(bounds.bottom);
+		let start = Math.round(bounds.left);
+		let end = Math.round(bounds.right);
 		let range;
 
 		let walker = walk$2(rendered.firstChild, rendered);
@@ -1911,10 +1757,8 @@ class Layout {
 				let pos = getBoundingClientRect(node);
 				let left = Math.round(pos.left);
 				let right = Math.floor(pos.right);
-				let top = Math.round(pos.top);
-				let bottom = Math.floor(pos.bottom);
 
-				if (!range && (left >= end || top >= vEnd)) {
+				if (!range && left >= end) {
 					// Check if it is a float
 					let isFloat = false;
 
@@ -1922,8 +1766,7 @@ class Layout {
 					const insideTableCell = parentOf(node, "TD", rendered);
 					if (insideTableCell && window.getComputedStyle(insideTableCell)["break-inside"] === "avoid") {
 						// breaking inside a table cell produces unexpected result, as a workaround, we forcibly avoid break inside in a cell.
-						// But we take the whole row, not just the cell that is causing the break.
-						prev = insideTableCell.parentElement;
+						prev = insideTableCell;
 					} else if (isElement(node)) {
 						let styles = window.getComputedStyle(node);
 						isFloat = styles.getPropertyValue("float") !== "none";
@@ -1949,11 +1792,10 @@ class Layout {
 
 						// Check if the node is inside a row with a rowspan
 						const table = parentOf(tableRow, "TABLE", rendered);
-						const rowspan = table.querySelector("[colspan]");
-						if (table && rowspan) {
+						if (table) {
 							let columnCount = 0;
 							for (const cell of Array.from(table.rows[0].cells)) {
-								columnCount += parseInt(cell.getAttribute("colspan") || "1");
+								columnCount += parseInt(cell.getAttribute("COLSPAN") || "1");
 							}
 							if (tableRow.cells.length !== columnCount) {
 								let previousRow = tableRow.previousElementSibling;
@@ -1961,7 +1803,7 @@ class Layout {
 								while (previousRow !== null) {
 									previousRowColumnCount = 0;
 									for (const cell of Array.from(previousRow.cells)) {
-										previousRowColumnCount += parseInt(cell.getAttribute("colspan") || "1");
+										previousRowColumnCount += parseInt(cell.getAttribute("COLSPAN") || "1");
 									}
 									if (previousRowColumnCount === columnCount) {
 										break;
@@ -2002,20 +1844,16 @@ class Layout {
 					let rects = getClientRects(node);
 					let rect;
 					left = 0;
-					top = 0;
 					for (var i = 0; i != rects.length; i++) {
 						rect = rects[i];
 						if (rect.width > 0 && (!left || rect.left > left)) {
 							left = rect.left;
 						}
-						if (rect.height > 0 && (!top || rect.top > top)) {
-							top = rect.top;
-						}
 					}
 
-					if (left >= end || top >= vEnd) {
+					if (left >= end) {
 						range = document.createRange();
-						offset = this.textBreak(node, start, end, vStart, vEnd);
+						offset = this.textBreak(node, start, end);
 						if (!offset) {
 							range = undefined;
 						} else {
@@ -2026,7 +1864,7 @@ class Layout {
 				}
 
 				// Skip children
-				if (skip || (right <= end && bottom <= vEnd)) {
+				if (skip || right <= end) {
 					next = nodeAfter(node, rendered);
 					if (next) {
 						walker = walk$2(next, rendered);
@@ -2045,7 +1883,7 @@ class Layout {
 
 	}
 
-	findEndToken(rendered, source) {
+	findEndToken(rendered, source, bounds = this.bounds) {
 		if (rendered.childNodes.length === 0) {
 			return;
 		}
@@ -2069,7 +1907,7 @@ class Layout {
 		if (isText(lastChild)) {
 
 			if (lastChild.parentNode.dataset.ref) {
-				lastNodeIndex = indexOf$2(lastChild);
+				lastNodeIndex = indexOf$3(lastChild);
 				lastChild = lastChild.parentNode;
 			} else {
 				lastChild = lastChild.previousSibling;
@@ -2087,12 +1925,10 @@ class Layout {
 		return this.breakAt(after);
 	}
 
-	textBreak(node, start, end, vStart, vEnd) {
+	textBreak(node, start, end) {
 		let wordwalker = words(node);
 		let left = 0;
 		let right = 0;
-		let top = 0;
-		let bottom = 0;
 		let word, next, done, pos;
 		let offset;
 		while (!done) {
@@ -2108,15 +1944,13 @@ class Layout {
 
 			left = Math.floor(pos.left);
 			right = Math.floor(pos.right);
-			top = Math.floor(pos.top);
-			bottom = Math.floor(pos.bottom);
 
-			if (left >= end || top >= vEnd) {
+			if (left >= end) {
 				offset = word.startOffset;
 				break;
 			}
 
-			if (right > end || bottom > vEnd) {
+			if (right > end) {
 				let letterwalker = letters(word);
 				let letter, nextLetter, doneLetter;
 
@@ -2131,9 +1965,8 @@ class Layout {
 
 					pos = getBoundingClientRect(letter);
 					left = Math.floor(pos.left);
-					top = Math.floor(pos.top);
 
-					if (left >= end || top >= vEnd) {
+					if (left >= end) {
 						offset = letter.startOffset;
 						done = true;
 
@@ -2232,7 +2065,7 @@ class Page {
 
 
 		area.style.columnWidth = Math.round(size.width) + "px";
-		area.style.columnGap = "calc(var(--pagedjs-margin-right) + var(--pagedjs-margin-left) + var(--pagedjs-bleed-right) + var(--pagedjs-bleed-left) + var(--pagedjs-column-gap-offset))";
+		area.style.columnGap = "calc(var(--pagedjs-margin-right) + var(--pagedjs-margin-left))";
 		// area.style.overflow = "scroll";
 
 		this.width = Math.round(size.width);
@@ -2842,16 +2675,13 @@ class Chunker {
 		this.hooks.filter = new Hook(this);
 		this.hooks.afterParsed = new Hook(this);
 		this.hooks.beforePageLayout = new Hook(this);
-		this.hooks.onPageLayout = new Hook(this);
 		this.hooks.layout = new Hook(this);
 		this.hooks.renderNode = new Hook(this);
 		this.hooks.layoutNode = new Hook(this);
 		this.hooks.onOverflow = new Hook(this);
 		this.hooks.afterOverflowRemoved = new Hook(this);
 		this.hooks.onBreakToken = new Hook();
-		this.hooks.beforeRenderResult = new Hook(this);
 		this.hooks.afterPageLayout = new Hook(this);
-		this.hooks.finalizePage = new Hook(this);
 		this.hooks.afterRendered = new Hook(this);
 
 		this.pages = [];
@@ -3058,14 +2888,12 @@ class Chunker {
 			this.emit("page", page);
 			// await this.hooks.layout.trigger(page.element, page, undefined, this);
 			await this.hooks.afterPageLayout.trigger(page.element, page, undefined, this);
-			await this.hooks.finalizePage.trigger(page.element, page, undefined, this);
 			this.emit("renderedPage", page);
 		}
 	}
 
 	async *layout(content, startAt) {
 		let breakToken = startAt || false;
-		let tokens = [];
 
 		while (breakToken !== undefined && (true)) {
 
@@ -3083,20 +2911,7 @@ class Chunker {
 			// Layout content in the page, starting from the breakToken
 			breakToken = await page.layout(content, breakToken, this.maxChars);
 
-			if (breakToken) {
-				let newToken = breakToken.toJSON(true);
-				if (tokens.lastIndexOf(newToken) > -1) {
-					// loop
-					let err = new OverflowContentError("Layout repeated", [breakToken.node]);
-					console.error("Layout repeated at: ", breakToken.node);
-					return err;
-				} else {
-					tokens.push(newToken);
-				}
-			}
-
 			await this.hooks.afterPageLayout.trigger(page.element, page, breakToken, this);
-			await this.hooks.finalizePage.trigger(page.element, page, undefined, this);
 			this.emit("renderedPage", page);
 
 			this.recoredCharLength(page.wrapper.textContent.length);
@@ -3267,7 +3082,6 @@ class Chunker {
 		}
 
 		await this.hooks.afterPageLayout.trigger(page.element, page, undefined, this);
-		await this.hooks.finalizePage.trigger(page.element, page, undefined, this);
 		this.emit("renderedPage", page);
 	}
 
@@ -3300,7 +3114,7 @@ EventEmitter(Chunker.prototype);
 
 var syntax = {exports: {}};
 
-var create$4 = {};
+var create$5 = {};
 
 //
 //                              list
@@ -9558,7 +9372,7 @@ function processConfig(config) {
     return parserConfig;
 }
 
-var create$3 = function createParser(config) {
+var create$4 = function createParser(config) {
     var parser = {
         scanner: new TokenStream$1(),
         locationMap: new OffsetToLocation(),
@@ -9999,494 +9813,494 @@ var util$3 = {};
 /* -*- Mode: js; js-indent-level: 2; -*- */
 
 (function (exports) {
-	/*
-	 * Copyright 2011 Mozilla Foundation and contributors
-	 * Licensed under the New BSD license. See LICENSE or:
-	 * http://opensource.org/licenses/BSD-3-Clause
-	 */
+/*
+ * Copyright 2011 Mozilla Foundation and contributors
+ * Licensed under the New BSD license. See LICENSE or:
+ * http://opensource.org/licenses/BSD-3-Clause
+ */
 
-	/**
-	 * This is a helper function for getting values from parameter/options
-	 * objects.
-	 *
-	 * @param args The object we are extracting values from
-	 * @param name The name of the property we are getting.
-	 * @param defaultValue An optional value to return if the property is missing
-	 * from the object. If this is not specified and the property is missing, an
-	 * error will be thrown.
-	 */
-	function getArg(aArgs, aName, aDefaultValue) {
-	  if (aName in aArgs) {
-	    return aArgs[aName];
-	  } else if (arguments.length === 3) {
-	    return aDefaultValue;
-	  } else {
-	    throw new Error('"' + aName + '" is a required argument.');
-	  }
-	}
-	exports.getArg = getArg;
+/**
+ * This is a helper function for getting values from parameter/options
+ * objects.
+ *
+ * @param args The object we are extracting values from
+ * @param name The name of the property we are getting.
+ * @param defaultValue An optional value to return if the property is missing
+ * from the object. If this is not specified and the property is missing, an
+ * error will be thrown.
+ */
+function getArg(aArgs, aName, aDefaultValue) {
+  if (aName in aArgs) {
+    return aArgs[aName];
+  } else if (arguments.length === 3) {
+    return aDefaultValue;
+  } else {
+    throw new Error('"' + aName + '" is a required argument.');
+  }
+}
+exports.getArg = getArg;
 
-	var urlRegexp = /^(?:([\w+\-.]+):)?\/\/(?:(\w+:\w+)@)?([\w.-]*)(?::(\d+))?(.*)$/;
-	var dataUrlRegexp = /^data:.+\,.+$/;
+var urlRegexp = /^(?:([\w+\-.]+):)?\/\/(?:(\w+:\w+)@)?([\w.-]*)(?::(\d+))?(.*)$/;
+var dataUrlRegexp = /^data:.+\,.+$/;
 
-	function urlParse(aUrl) {
-	  var match = aUrl.match(urlRegexp);
-	  if (!match) {
-	    return null;
-	  }
-	  return {
-	    scheme: match[1],
-	    auth: match[2],
-	    host: match[3],
-	    port: match[4],
-	    path: match[5]
-	  };
-	}
-	exports.urlParse = urlParse;
+function urlParse(aUrl) {
+  var match = aUrl.match(urlRegexp);
+  if (!match) {
+    return null;
+  }
+  return {
+    scheme: match[1],
+    auth: match[2],
+    host: match[3],
+    port: match[4],
+    path: match[5]
+  };
+}
+exports.urlParse = urlParse;
 
-	function urlGenerate(aParsedUrl) {
-	  var url = '';
-	  if (aParsedUrl.scheme) {
-	    url += aParsedUrl.scheme + ':';
-	  }
-	  url += '//';
-	  if (aParsedUrl.auth) {
-	    url += aParsedUrl.auth + '@';
-	  }
-	  if (aParsedUrl.host) {
-	    url += aParsedUrl.host;
-	  }
-	  if (aParsedUrl.port) {
-	    url += ":" + aParsedUrl.port;
-	  }
-	  if (aParsedUrl.path) {
-	    url += aParsedUrl.path;
-	  }
-	  return url;
-	}
-	exports.urlGenerate = urlGenerate;
+function urlGenerate(aParsedUrl) {
+  var url = '';
+  if (aParsedUrl.scheme) {
+    url += aParsedUrl.scheme + ':';
+  }
+  url += '//';
+  if (aParsedUrl.auth) {
+    url += aParsedUrl.auth + '@';
+  }
+  if (aParsedUrl.host) {
+    url += aParsedUrl.host;
+  }
+  if (aParsedUrl.port) {
+    url += ":" + aParsedUrl.port;
+  }
+  if (aParsedUrl.path) {
+    url += aParsedUrl.path;
+  }
+  return url;
+}
+exports.urlGenerate = urlGenerate;
 
-	/**
-	 * Normalizes a path, or the path portion of a URL:
-	 *
-	 * - Replaces consecutive slashes with one slash.
-	 * - Removes unnecessary '.' parts.
-	 * - Removes unnecessary '<dir>/..' parts.
-	 *
-	 * Based on code in the Node.js 'path' core module.
-	 *
-	 * @param aPath The path or url to normalize.
-	 */
-	function normalize(aPath) {
-	  var path = aPath;
-	  var url = urlParse(aPath);
-	  if (url) {
-	    if (!url.path) {
-	      return aPath;
-	    }
-	    path = url.path;
-	  }
-	  var isAbsolute = exports.isAbsolute(path);
+/**
+ * Normalizes a path, or the path portion of a URL:
+ *
+ * - Replaces consecutive slashes with one slash.
+ * - Removes unnecessary '.' parts.
+ * - Removes unnecessary '<dir>/..' parts.
+ *
+ * Based on code in the Node.js 'path' core module.
+ *
+ * @param aPath The path or url to normalize.
+ */
+function normalize(aPath) {
+  var path = aPath;
+  var url = urlParse(aPath);
+  if (url) {
+    if (!url.path) {
+      return aPath;
+    }
+    path = url.path;
+  }
+  var isAbsolute = exports.isAbsolute(path);
 
-	  var parts = path.split(/\/+/);
-	  for (var part, up = 0, i = parts.length - 1; i >= 0; i--) {
-	    part = parts[i];
-	    if (part === '.') {
-	      parts.splice(i, 1);
-	    } else if (part === '..') {
-	      up++;
-	    } else if (up > 0) {
-	      if (part === '') {
-	        // The first part is blank if the path is absolute. Trying to go
-	        // above the root is a no-op. Therefore we can remove all '..' parts
-	        // directly after the root.
-	        parts.splice(i + 1, up);
-	        up = 0;
-	      } else {
-	        parts.splice(i, 2);
-	        up--;
-	      }
-	    }
-	  }
-	  path = parts.join('/');
+  var parts = path.split(/\/+/);
+  for (var part, up = 0, i = parts.length - 1; i >= 0; i--) {
+    part = parts[i];
+    if (part === '.') {
+      parts.splice(i, 1);
+    } else if (part === '..') {
+      up++;
+    } else if (up > 0) {
+      if (part === '') {
+        // The first part is blank if the path is absolute. Trying to go
+        // above the root is a no-op. Therefore we can remove all '..' parts
+        // directly after the root.
+        parts.splice(i + 1, up);
+        up = 0;
+      } else {
+        parts.splice(i, 2);
+        up--;
+      }
+    }
+  }
+  path = parts.join('/');
 
-	  if (path === '') {
-	    path = isAbsolute ? '/' : '.';
-	  }
+  if (path === '') {
+    path = isAbsolute ? '/' : '.';
+  }
 
-	  if (url) {
-	    url.path = path;
-	    return urlGenerate(url);
-	  }
-	  return path;
-	}
-	exports.normalize = normalize;
+  if (url) {
+    url.path = path;
+    return urlGenerate(url);
+  }
+  return path;
+}
+exports.normalize = normalize;
 
-	/**
-	 * Joins two paths/URLs.
-	 *
-	 * @param aRoot The root path or URL.
-	 * @param aPath The path or URL to be joined with the root.
-	 *
-	 * - If aPath is a URL or a data URI, aPath is returned, unless aPath is a
-	 *   scheme-relative URL: Then the scheme of aRoot, if any, is prepended
-	 *   first.
-	 * - Otherwise aPath is a path. If aRoot is a URL, then its path portion
-	 *   is updated with the result and aRoot is returned. Otherwise the result
-	 *   is returned.
-	 *   - If aPath is absolute, the result is aPath.
-	 *   - Otherwise the two paths are joined with a slash.
-	 * - Joining for example 'http://' and 'www.example.com' is also supported.
-	 */
-	function join(aRoot, aPath) {
-	  if (aRoot === "") {
-	    aRoot = ".";
-	  }
-	  if (aPath === "") {
-	    aPath = ".";
-	  }
-	  var aPathUrl = urlParse(aPath);
-	  var aRootUrl = urlParse(aRoot);
-	  if (aRootUrl) {
-	    aRoot = aRootUrl.path || '/';
-	  }
+/**
+ * Joins two paths/URLs.
+ *
+ * @param aRoot The root path or URL.
+ * @param aPath The path or URL to be joined with the root.
+ *
+ * - If aPath is a URL or a data URI, aPath is returned, unless aPath is a
+ *   scheme-relative URL: Then the scheme of aRoot, if any, is prepended
+ *   first.
+ * - Otherwise aPath is a path. If aRoot is a URL, then its path portion
+ *   is updated with the result and aRoot is returned. Otherwise the result
+ *   is returned.
+ *   - If aPath is absolute, the result is aPath.
+ *   - Otherwise the two paths are joined with a slash.
+ * - Joining for example 'http://' and 'www.example.com' is also supported.
+ */
+function join(aRoot, aPath) {
+  if (aRoot === "") {
+    aRoot = ".";
+  }
+  if (aPath === "") {
+    aPath = ".";
+  }
+  var aPathUrl = urlParse(aPath);
+  var aRootUrl = urlParse(aRoot);
+  if (aRootUrl) {
+    aRoot = aRootUrl.path || '/';
+  }
 
-	  // `join(foo, '//www.example.org')`
-	  if (aPathUrl && !aPathUrl.scheme) {
-	    if (aRootUrl) {
-	      aPathUrl.scheme = aRootUrl.scheme;
-	    }
-	    return urlGenerate(aPathUrl);
-	  }
+  // `join(foo, '//www.example.org')`
+  if (aPathUrl && !aPathUrl.scheme) {
+    if (aRootUrl) {
+      aPathUrl.scheme = aRootUrl.scheme;
+    }
+    return urlGenerate(aPathUrl);
+  }
 
-	  if (aPathUrl || aPath.match(dataUrlRegexp)) {
-	    return aPath;
-	  }
+  if (aPathUrl || aPath.match(dataUrlRegexp)) {
+    return aPath;
+  }
 
-	  // `join('http://', 'www.example.com')`
-	  if (aRootUrl && !aRootUrl.host && !aRootUrl.path) {
-	    aRootUrl.host = aPath;
-	    return urlGenerate(aRootUrl);
-	  }
+  // `join('http://', 'www.example.com')`
+  if (aRootUrl && !aRootUrl.host && !aRootUrl.path) {
+    aRootUrl.host = aPath;
+    return urlGenerate(aRootUrl);
+  }
 
-	  var joined = aPath.charAt(0) === '/'
-	    ? aPath
-	    : normalize(aRoot.replace(/\/+$/, '') + '/' + aPath);
+  var joined = aPath.charAt(0) === '/'
+    ? aPath
+    : normalize(aRoot.replace(/\/+$/, '') + '/' + aPath);
 
-	  if (aRootUrl) {
-	    aRootUrl.path = joined;
-	    return urlGenerate(aRootUrl);
-	  }
-	  return joined;
-	}
-	exports.join = join;
+  if (aRootUrl) {
+    aRootUrl.path = joined;
+    return urlGenerate(aRootUrl);
+  }
+  return joined;
+}
+exports.join = join;
 
-	exports.isAbsolute = function (aPath) {
-	  return aPath.charAt(0) === '/' || urlRegexp.test(aPath);
-	};
+exports.isAbsolute = function (aPath) {
+  return aPath.charAt(0) === '/' || urlRegexp.test(aPath);
+};
 
-	/**
-	 * Make a path relative to a URL or another path.
-	 *
-	 * @param aRoot The root path or URL.
-	 * @param aPath The path or URL to be made relative to aRoot.
-	 */
-	function relative(aRoot, aPath) {
-	  if (aRoot === "") {
-	    aRoot = ".";
-	  }
+/**
+ * Make a path relative to a URL or another path.
+ *
+ * @param aRoot The root path or URL.
+ * @param aPath The path or URL to be made relative to aRoot.
+ */
+function relative(aRoot, aPath) {
+  if (aRoot === "") {
+    aRoot = ".";
+  }
 
-	  aRoot = aRoot.replace(/\/$/, '');
+  aRoot = aRoot.replace(/\/$/, '');
 
-	  // It is possible for the path to be above the root. In this case, simply
-	  // checking whether the root is a prefix of the path won't work. Instead, we
-	  // need to remove components from the root one by one, until either we find
-	  // a prefix that fits, or we run out of components to remove.
-	  var level = 0;
-	  while (aPath.indexOf(aRoot + '/') !== 0) {
-	    var index = aRoot.lastIndexOf("/");
-	    if (index < 0) {
-	      return aPath;
-	    }
+  // It is possible for the path to be above the root. In this case, simply
+  // checking whether the root is a prefix of the path won't work. Instead, we
+  // need to remove components from the root one by one, until either we find
+  // a prefix that fits, or we run out of components to remove.
+  var level = 0;
+  while (aPath.indexOf(aRoot + '/') !== 0) {
+    var index = aRoot.lastIndexOf("/");
+    if (index < 0) {
+      return aPath;
+    }
 
-	    // If the only part of the root that is left is the scheme (i.e. http://,
-	    // file:///, etc.), one or more slashes (/), or simply nothing at all, we
-	    // have exhausted all components, so the path is not relative to the root.
-	    aRoot = aRoot.slice(0, index);
-	    if (aRoot.match(/^([^\/]+:\/)?\/*$/)) {
-	      return aPath;
-	    }
+    // If the only part of the root that is left is the scheme (i.e. http://,
+    // file:///, etc.), one or more slashes (/), or simply nothing at all, we
+    // have exhausted all components, so the path is not relative to the root.
+    aRoot = aRoot.slice(0, index);
+    if (aRoot.match(/^([^\/]+:\/)?\/*$/)) {
+      return aPath;
+    }
 
-	    ++level;
-	  }
+    ++level;
+  }
 
-	  // Make sure we add a "../" for each component we removed from the root.
-	  return Array(level + 1).join("../") + aPath.substr(aRoot.length + 1);
-	}
-	exports.relative = relative;
+  // Make sure we add a "../" for each component we removed from the root.
+  return Array(level + 1).join("../") + aPath.substr(aRoot.length + 1);
+}
+exports.relative = relative;
 
-	var supportsNullProto = (function () {
-	  var obj = Object.create(null);
-	  return !('__proto__' in obj);
-	}());
+var supportsNullProto = (function () {
+  var obj = Object.create(null);
+  return !('__proto__' in obj);
+}());
 
-	function identity (s) {
-	  return s;
-	}
+function identity (s) {
+  return s;
+}
 
-	/**
-	 * Because behavior goes wacky when you set `__proto__` on objects, we
-	 * have to prefix all the strings in our set with an arbitrary character.
-	 *
-	 * See https://github.com/mozilla/source-map/pull/31 and
-	 * https://github.com/mozilla/source-map/issues/30
-	 *
-	 * @param String aStr
-	 */
-	function toSetString(aStr) {
-	  if (isProtoString(aStr)) {
-	    return '$' + aStr;
-	  }
+/**
+ * Because behavior goes wacky when you set `__proto__` on objects, we
+ * have to prefix all the strings in our set with an arbitrary character.
+ *
+ * See https://github.com/mozilla/source-map/pull/31 and
+ * https://github.com/mozilla/source-map/issues/30
+ *
+ * @param String aStr
+ */
+function toSetString(aStr) {
+  if (isProtoString(aStr)) {
+    return '$' + aStr;
+  }
 
-	  return aStr;
-	}
-	exports.toSetString = supportsNullProto ? identity : toSetString;
+  return aStr;
+}
+exports.toSetString = supportsNullProto ? identity : toSetString;
 
-	function fromSetString(aStr) {
-	  if (isProtoString(aStr)) {
-	    return aStr.slice(1);
-	  }
+function fromSetString(aStr) {
+  if (isProtoString(aStr)) {
+    return aStr.slice(1);
+  }
 
-	  return aStr;
-	}
-	exports.fromSetString = supportsNullProto ? identity : fromSetString;
+  return aStr;
+}
+exports.fromSetString = supportsNullProto ? identity : fromSetString;
 
-	function isProtoString(s) {
-	  if (!s) {
-	    return false;
-	  }
+function isProtoString(s) {
+  if (!s) {
+    return false;
+  }
 
-	  var length = s.length;
+  var length = s.length;
 
-	  if (length < 9 /* "__proto__".length */) {
-	    return false;
-	  }
+  if (length < 9 /* "__proto__".length */) {
+    return false;
+  }
 
-	  if (s.charCodeAt(length - 1) !== 95  /* '_' */ ||
-	      s.charCodeAt(length - 2) !== 95  /* '_' */ ||
-	      s.charCodeAt(length - 3) !== 111 /* 'o' */ ||
-	      s.charCodeAt(length - 4) !== 116 /* 't' */ ||
-	      s.charCodeAt(length - 5) !== 111 /* 'o' */ ||
-	      s.charCodeAt(length - 6) !== 114 /* 'r' */ ||
-	      s.charCodeAt(length - 7) !== 112 /* 'p' */ ||
-	      s.charCodeAt(length - 8) !== 95  /* '_' */ ||
-	      s.charCodeAt(length - 9) !== 95  /* '_' */) {
-	    return false;
-	  }
+  if (s.charCodeAt(length - 1) !== 95  /* '_' */ ||
+      s.charCodeAt(length - 2) !== 95  /* '_' */ ||
+      s.charCodeAt(length - 3) !== 111 /* 'o' */ ||
+      s.charCodeAt(length - 4) !== 116 /* 't' */ ||
+      s.charCodeAt(length - 5) !== 111 /* 'o' */ ||
+      s.charCodeAt(length - 6) !== 114 /* 'r' */ ||
+      s.charCodeAt(length - 7) !== 112 /* 'p' */ ||
+      s.charCodeAt(length - 8) !== 95  /* '_' */ ||
+      s.charCodeAt(length - 9) !== 95  /* '_' */) {
+    return false;
+  }
 
-	  for (var i = length - 10; i >= 0; i--) {
-	    if (s.charCodeAt(i) !== 36 /* '$' */) {
-	      return false;
-	    }
-	  }
+  for (var i = length - 10; i >= 0; i--) {
+    if (s.charCodeAt(i) !== 36 /* '$' */) {
+      return false;
+    }
+  }
 
-	  return true;
-	}
+  return true;
+}
 
-	/**
-	 * Comparator between two mappings where the original positions are compared.
-	 *
-	 * Optionally pass in `true` as `onlyCompareGenerated` to consider two
-	 * mappings with the same original source/line/column, but different generated
-	 * line and column the same. Useful when searching for a mapping with a
-	 * stubbed out mapping.
-	 */
-	function compareByOriginalPositions(mappingA, mappingB, onlyCompareOriginal) {
-	  var cmp = strcmp(mappingA.source, mappingB.source);
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+/**
+ * Comparator between two mappings where the original positions are compared.
+ *
+ * Optionally pass in `true` as `onlyCompareGenerated` to consider two
+ * mappings with the same original source/line/column, but different generated
+ * line and column the same. Useful when searching for a mapping with a
+ * stubbed out mapping.
+ */
+function compareByOriginalPositions(mappingA, mappingB, onlyCompareOriginal) {
+  var cmp = strcmp(mappingA.source, mappingB.source);
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = mappingA.originalLine - mappingB.originalLine;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = mappingA.originalLine - mappingB.originalLine;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = mappingA.originalColumn - mappingB.originalColumn;
-	  if (cmp !== 0 || onlyCompareOriginal) {
-	    return cmp;
-	  }
+  cmp = mappingA.originalColumn - mappingB.originalColumn;
+  if (cmp !== 0 || onlyCompareOriginal) {
+    return cmp;
+  }
 
-	  cmp = mappingA.generatedColumn - mappingB.generatedColumn;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = mappingA.generatedColumn - mappingB.generatedColumn;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = mappingA.generatedLine - mappingB.generatedLine;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = mappingA.generatedLine - mappingB.generatedLine;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  return strcmp(mappingA.name, mappingB.name);
-	}
-	exports.compareByOriginalPositions = compareByOriginalPositions;
+  return strcmp(mappingA.name, mappingB.name);
+}
+exports.compareByOriginalPositions = compareByOriginalPositions;
 
-	/**
-	 * Comparator between two mappings with deflated source and name indices where
-	 * the generated positions are compared.
-	 *
-	 * Optionally pass in `true` as `onlyCompareGenerated` to consider two
-	 * mappings with the same generated line and column, but different
-	 * source/name/original line and column the same. Useful when searching for a
-	 * mapping with a stubbed out mapping.
-	 */
-	function compareByGeneratedPositionsDeflated(mappingA, mappingB, onlyCompareGenerated) {
-	  var cmp = mappingA.generatedLine - mappingB.generatedLine;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+/**
+ * Comparator between two mappings with deflated source and name indices where
+ * the generated positions are compared.
+ *
+ * Optionally pass in `true` as `onlyCompareGenerated` to consider two
+ * mappings with the same generated line and column, but different
+ * source/name/original line and column the same. Useful when searching for a
+ * mapping with a stubbed out mapping.
+ */
+function compareByGeneratedPositionsDeflated(mappingA, mappingB, onlyCompareGenerated) {
+  var cmp = mappingA.generatedLine - mappingB.generatedLine;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = mappingA.generatedColumn - mappingB.generatedColumn;
-	  if (cmp !== 0 || onlyCompareGenerated) {
-	    return cmp;
-	  }
+  cmp = mappingA.generatedColumn - mappingB.generatedColumn;
+  if (cmp !== 0 || onlyCompareGenerated) {
+    return cmp;
+  }
 
-	  cmp = strcmp(mappingA.source, mappingB.source);
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = strcmp(mappingA.source, mappingB.source);
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = mappingA.originalLine - mappingB.originalLine;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = mappingA.originalLine - mappingB.originalLine;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = mappingA.originalColumn - mappingB.originalColumn;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = mappingA.originalColumn - mappingB.originalColumn;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  return strcmp(mappingA.name, mappingB.name);
-	}
-	exports.compareByGeneratedPositionsDeflated = compareByGeneratedPositionsDeflated;
+  return strcmp(mappingA.name, mappingB.name);
+}
+exports.compareByGeneratedPositionsDeflated = compareByGeneratedPositionsDeflated;
 
-	function strcmp(aStr1, aStr2) {
-	  if (aStr1 === aStr2) {
-	    return 0;
-	  }
+function strcmp(aStr1, aStr2) {
+  if (aStr1 === aStr2) {
+    return 0;
+  }
 
-	  if (aStr1 === null) {
-	    return 1; // aStr2 !== null
-	  }
+  if (aStr1 === null) {
+    return 1; // aStr2 !== null
+  }
 
-	  if (aStr2 === null) {
-	    return -1; // aStr1 !== null
-	  }
+  if (aStr2 === null) {
+    return -1; // aStr1 !== null
+  }
 
-	  if (aStr1 > aStr2) {
-	    return 1;
-	  }
+  if (aStr1 > aStr2) {
+    return 1;
+  }
 
-	  return -1;
-	}
+  return -1;
+}
 
-	/**
-	 * Comparator between two mappings with inflated source and name strings where
-	 * the generated positions are compared.
-	 */
-	function compareByGeneratedPositionsInflated(mappingA, mappingB) {
-	  var cmp = mappingA.generatedLine - mappingB.generatedLine;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+/**
+ * Comparator between two mappings with inflated source and name strings where
+ * the generated positions are compared.
+ */
+function compareByGeneratedPositionsInflated(mappingA, mappingB) {
+  var cmp = mappingA.generatedLine - mappingB.generatedLine;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = mappingA.generatedColumn - mappingB.generatedColumn;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = mappingA.generatedColumn - mappingB.generatedColumn;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = strcmp(mappingA.source, mappingB.source);
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = strcmp(mappingA.source, mappingB.source);
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = mappingA.originalLine - mappingB.originalLine;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = mappingA.originalLine - mappingB.originalLine;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  cmp = mappingA.originalColumn - mappingB.originalColumn;
-	  if (cmp !== 0) {
-	    return cmp;
-	  }
+  cmp = mappingA.originalColumn - mappingB.originalColumn;
+  if (cmp !== 0) {
+    return cmp;
+  }
 
-	  return strcmp(mappingA.name, mappingB.name);
-	}
-	exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflated;
+  return strcmp(mappingA.name, mappingB.name);
+}
+exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflated;
 
-	/**
-	 * Strip any JSON XSSI avoidance prefix from the string (as documented
-	 * in the source maps specification), and then parse the string as
-	 * JSON.
-	 */
-	function parseSourceMapInput(str) {
-	  return JSON.parse(str.replace(/^\)]}'[^\n]*\n/, ''));
-	}
-	exports.parseSourceMapInput = parseSourceMapInput;
+/**
+ * Strip any JSON XSSI avoidance prefix from the string (as documented
+ * in the source maps specification), and then parse the string as
+ * JSON.
+ */
+function parseSourceMapInput(str) {
+  return JSON.parse(str.replace(/^\)]}'[^\n]*\n/, ''));
+}
+exports.parseSourceMapInput = parseSourceMapInput;
 
-	/**
-	 * Compute the URL of a source given the the source root, the source's
-	 * URL, and the source map's URL.
-	 */
-	function computeSourceURL(sourceRoot, sourceURL, sourceMapURL) {
-	  sourceURL = sourceURL || '';
+/**
+ * Compute the URL of a source given the the source root, the source's
+ * URL, and the source map's URL.
+ */
+function computeSourceURL(sourceRoot, sourceURL, sourceMapURL) {
+  sourceURL = sourceURL || '';
 
-	  if (sourceRoot) {
-	    // This follows what Chrome does.
-	    if (sourceRoot[sourceRoot.length - 1] !== '/' && sourceURL[0] !== '/') {
-	      sourceRoot += '/';
-	    }
-	    // The spec says:
-	    //   Line 4: An optional source root, useful for relocating source
-	    //   files on a server or removing repeated values in the
-	    //   “sources” entry.  This value is prepended to the individual
-	    //   entries in the “source” field.
-	    sourceURL = sourceRoot + sourceURL;
-	  }
+  if (sourceRoot) {
+    // This follows what Chrome does.
+    if (sourceRoot[sourceRoot.length - 1] !== '/' && sourceURL[0] !== '/') {
+      sourceRoot += '/';
+    }
+    // The spec says:
+    //   Line 4: An optional source root, useful for relocating source
+    //   files on a server or removing repeated values in the
+    //   “sources” entry.  This value is prepended to the individual
+    //   entries in the “source” field.
+    sourceURL = sourceRoot + sourceURL;
+  }
 
-	  // Historically, SourceMapConsumer did not take the sourceMapURL as
-	  // a parameter.  This mode is still somewhat supported, which is why
-	  // this code block is conditional.  However, it's preferable to pass
-	  // the source map URL to SourceMapConsumer, so that this function
-	  // can implement the source URL resolution algorithm as outlined in
-	  // the spec.  This block is basically the equivalent of:
-	  //    new URL(sourceURL, sourceMapURL).toString()
-	  // ... except it avoids using URL, which wasn't available in the
-	  // older releases of node still supported by this library.
-	  //
-	  // The spec says:
-	  //   If the sources are not absolute URLs after prepending of the
-	  //   “sourceRoot”, the sources are resolved relative to the
-	  //   SourceMap (like resolving script src in a html document).
-	  if (sourceMapURL) {
-	    var parsed = urlParse(sourceMapURL);
-	    if (!parsed) {
-	      throw new Error("sourceMapURL could not be parsed");
-	    }
-	    if (parsed.path) {
-	      // Strip the last path component, but keep the "/".
-	      var index = parsed.path.lastIndexOf('/');
-	      if (index >= 0) {
-	        parsed.path = parsed.path.substring(0, index + 1);
-	      }
-	    }
-	    sourceURL = join(urlGenerate(parsed), sourceURL);
-	  }
+  // Historically, SourceMapConsumer did not take the sourceMapURL as
+  // a parameter.  This mode is still somewhat supported, which is why
+  // this code block is conditional.  However, it's preferable to pass
+  // the source map URL to SourceMapConsumer, so that this function
+  // can implement the source URL resolution algorithm as outlined in
+  // the spec.  This block is basically the equivalent of:
+  //    new URL(sourceURL, sourceMapURL).toString()
+  // ... except it avoids using URL, which wasn't available in the
+  // older releases of node still supported by this library.
+  //
+  // The spec says:
+  //   If the sources are not absolute URLs after prepending of the
+  //   “sourceRoot”, the sources are resolved relative to the
+  //   SourceMap (like resolving script src in a html document).
+  if (sourceMapURL) {
+    var parsed = urlParse(sourceMapURL);
+    if (!parsed) {
+      throw new Error("sourceMapURL could not be parsed");
+    }
+    if (parsed.path) {
+      // Strip the last path component, but keep the "/".
+      var index = parsed.path.lastIndexOf('/');
+      if (index >= 0) {
+        parsed.path = parsed.path.substring(0, index + 1);
+      }
+    }
+    sourceURL = join(urlGenerate(parsed), sourceURL);
+  }
 
-	  return normalize(sourceURL);
-	}
-	exports.computeSourceURL = computeSourceURL; 
-} (util$3));
+  return normalize(sourceURL);
+}
+exports.computeSourceURL = computeSourceURL;
+}(util$3));
 
 var arraySet = {};
 
@@ -11240,7 +11054,7 @@ function processChildren(node, delimeter) {
     }
 }
 
-var create$2 = function createGenerator(config) {
+var create$3 = function createGenerator(config) {
     function processNode(node) {
         if (hasOwnProperty$4.call(types, node.type)) {
             types[node.type].call(this, node);
@@ -11288,7 +11102,7 @@ var create$2 = function createGenerator(config) {
 
 var List$2 = List_1;
 
-var create$1 = function createConvertors(walk) {
+var create$2 = function createConvertors(walk) {
     return {
         fromPlainObject: function(ast) {
             walk(ast, {
@@ -11460,7 +11274,7 @@ function createFastTraveralMap(iterators) {
     };
 }
 
-var create = function createWalker(config) {
+var create$1 = function createWalker(config) {
     var types = getTypesFromConfig(config);
     var iteratorsNatural = {};
     var iteratorsReverse = {};
@@ -11769,10 +11583,10 @@ var TokenStream = TokenStream_1;
 var Lexer = Lexer_1;
 var definitionSyntax = definitionSyntax$1;
 var tokenize = tokenizer$3;
-var createParser = create$3;
-var createGenerator = create$2;
-var createConvertor = create$1;
-var createWalker = create;
+var createParser = create$4;
+var createGenerator = create$3;
+var createConvertor = create$2;
+var createWalker = create$1;
 var clone = clone$1;
 var names = names$2;
 var mix = mix_1;
@@ -11836,7 +11650,7 @@ function createSyntax(config) {
 
     return syntax;
 }
-create$4.create = function(config) {
+create$5.create = function(config) {
     return createSyntax(mix({}, config));
 };
 
@@ -26409,7 +26223,7 @@ function merge() {
     return dest;
 }
 
-syntax.exports = create$4.create(
+syntax.exports = create$5.create(
     merge(
         lexer,
         parser,
@@ -26418,11 +26232,7 @@ syntax.exports = create$4.create(
 );
 syntax.exports.version = require$$4.version;
 
-var syntaxExports = syntax.exports;
-
-var lib = syntaxExports;
-
-var csstree = /*@__PURE__*/getDefaultExportFromCjs(lib);
+var lib = syntax.exports;
 
 class Sheet {
 	constructor(url, hooks) {
@@ -26463,7 +26273,7 @@ class Sheet {
 		await this.hooks.beforeTreeParse.trigger(this.text, this);
 
 		// send to csstree
-		this.ast = csstree.parse(this._text);
+		this.ast = lib.parse(this._text);
 
 		await this.hooks.beforeTreeWalk.trigger(this.ast);
 
@@ -26494,14 +26304,13 @@ class Sheet {
 
 	insertRule(rule) {
 		let inserted = this.ast.children.appendData(rule);
-
-		this.declarations(rule);
-
-		return inserted;
+		inserted.forEach((item) => {
+			this.declarations(item);
+		});
 	}
 
 	urls(ast) {
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "Url",
 			enter: (node, item, list) => {
 				this.hooks.onUrl.trigger(node, item, list);
@@ -26510,10 +26319,10 @@ class Sheet {
 	}
 
 	atrules(ast) {
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "Atrule",
 			enter: (node, item, list) => {
-				const basename = csstree.keyword(node.name).basename;
+				const basename = lib.keyword(node.name).basename;
 
 				if (basename === "page") {
 					this.hooks.onAtPage.trigger(node, item, list);
@@ -26535,9 +26344,10 @@ class Sheet {
 
 
 	rules(ast) {
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "Rule",
 			enter: (ruleNode, ruleItem, rulelist) => {
+				// console.log("rule", ruleNode);
 
 				this.hooks.onRule.trigger(ruleNode, ruleItem, rulelist);
 				this.declarations(ruleNode, ruleItem, rulelist);
@@ -26548,14 +26358,15 @@ class Sheet {
 	}
 
 	declarations(ruleNode, ruleItem, rulelist) {
-		csstree.walk(ruleNode, {
+		lib.walk(ruleNode, {
 			visit: "Declaration",
 			enter: (declarationNode, dItem, dList) => {
+				// console.log(declarationNode);
 
 				this.hooks.onDeclaration.trigger(declarationNode, dItem, dList, {ruleNode, ruleItem, rulelist});
 
 				if (declarationNode.property === "content") {
-					csstree.walk(declarationNode, {
+					lib.walk(declarationNode, {
 						visit: "Function",
 						enter: (funcNode, fItem, fList) => {
 							this.hooks.onContent.trigger(funcNode, fItem, fList, {declarationNode, dItem, dList}, {ruleNode, ruleItem, rulelist});
@@ -26569,13 +26380,13 @@ class Sheet {
 
 	// add pseudo elements to parser
 	onSelector(ruleNode, ruleItem, rulelist) {
-		csstree.walk(ruleNode, {
+		lib.walk(ruleNode, {
 			visit: "Selector",
 			enter: (selectNode, selectItem, selectList) => {
 				this.hooks.onSelector.trigger(selectNode, selectItem, selectList, {ruleNode, ruleItem, rulelist});
 
 				if (selectNode.children.forEach(node => {if (node.type === "PseudoElementSelector") {
-					csstree.walk(node, {
+					lib.walk(node, {
 						visit: "PseudoElementSelector",
 						enter: (pseudoNode, pItem, pList) => {
 							this.hooks.onPseudoSelector.trigger(pseudoNode, pItem, pList, {selectNode, selectItem, selectList}, {ruleNode, ruleItem, rulelist});
@@ -26587,7 +26398,7 @@ class Sheet {
 	}
 
 	replaceUrls(ast) {
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "Url",
 			enter: (node, item, list) => {
 				let content = node.value.value;
@@ -26603,7 +26414,7 @@ class Sheet {
 	addScope(ast, id) {
 		// Get all selector lists
 		// add an id
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "Selector",
 			enter: (node, item, list) => {
 				let children = node.children;
@@ -26623,16 +26434,16 @@ class Sheet {
 
 	getNamedPageSelectors(ast) {
 		let namedPageSelectors = {};
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "Rule",
 			enter: (node, item, list) => {
-				csstree.walk(node, {
+				lib.walk(node, {
 					visit: "Declaration",
 					enter: (declaration, dItem, dList) => {
 						if (declaration.property === "page") {
 							let value = declaration.value.children.first();
 							let name = value.name;
-							let selector = csstree.generate(node.prelude);
+							let selector = lib.generate(node.prelude);
 							namedPageSelectors[name] = {
 								name: name,
 								selector: selector
@@ -26654,11 +26465,11 @@ class Sheet {
 	}
 
 	replaceIds(ast) {
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "Rule",
 			enter: (node, item, list) => {
 
-				csstree.walk(node, {
+				lib.walk(node, {
 					visit: "IdSelector",
 					enter: (idNode, idItem, idList) => {
 						let name = idNode.name;
@@ -26676,10 +26487,10 @@ class Sheet {
 	imports(node, item, list) {
 		// console.log("import", node, item, list);
 		let queries = [];
-		csstree.walk(node, {
+		lib.walk(node, {
 			visit: "MediaQuery",
 			enter: (mqNode, mqItem, mqList) => {
-				csstree.walk(mqNode, {
+				lib.walk(mqNode, {
 					visit: "Identifier",
 					enter: (identNode, identItem, identList) => {
 						queries.push(identNode.name);
@@ -26703,7 +26514,7 @@ class Sheet {
 			return;
 		}
 
-		csstree.walk(node, {
+		lib.walk(node, {
 			visit: "String",
 			enter: (urlNode, urlItem, urlList) => {
 				let href = urlNode.value.replace(/["']/g, "");
@@ -26728,7 +26539,7 @@ class Sheet {
 
 	// generate string
 	toString(ast) {
-		return csstree.generate(ast || this.ast);
+		return lib.generate(ast || this.ast);
 	}
 }
 
@@ -26777,7 +26588,6 @@ var baseStyles = `
 	--pagedjs-page-count: 0;
 	--pagedjs-page-counter-increment: 1;
 	--pagedjs-footnotes-count: 0;
-	--pagedjs-column-gap-offset: 1000px;
 }
 
 @page {
@@ -27176,18 +26986,11 @@ var baseStyles = `
 	counter-reset: unset;
 }
 
-[data-footnote-marker] {
+[data-footnote-marker]:not([data-split-from]) {
+	counter-increment: footnote-marker;
 	text-indent: 0;
 	display: list-item;
 	list-style-position: inside;
-}
-
-[data-footnote-marker][data-split-from] {
-	list-style: none;
-}
-
-[data-footnote-marker]:not([data-split-from]) {
-	counter-increment: footnote-marker;
 }
 
 [data-footnote-marker]::marker {
@@ -27809,8 +27612,7 @@ class AtPage extends Handler {
 			backgroundOrigin: undefined,
 			block: {},
 			marks: undefined,
-			notes: undefined,
-			added: false
+			notes: undefined
 		};
 	}
 
@@ -27825,7 +27627,7 @@ class AtPage extends Handler {
 			named = this.getTypeSelector(node);
 			psuedo = this.getPsuedoSelector(node);
 			nth = this.getNthSelector(node);
-			selector = csstree.generate(node.prelude);
+			selector = lib.generate(node.prelude);
 		} else {
 			selector = "*";
 		}
@@ -27838,8 +27640,6 @@ class AtPage extends Handler {
 			page = this.pages[selector];
 			marginalia = this.replaceMarginalia(node);
 			needsMerge = true;
-			// Mark page for getting classes added again
-			page.added = false;
 		} else {
 			page = this.pageModel(selector);
 			marginalia = this.replaceMarginalia(node);
@@ -27959,11 +27759,9 @@ class AtPage extends Handler {
 	*/
 
 	afterTreeWalk(ast, sheet) {
-		let dirtyPage = "*" in this.pages && this.pages["*"].added === false;
-
 		this.addPageClasses(this.pages, ast, sheet);
 
-		if (dirtyPage) {
+		if ("*" in this.pages) {
 			let width = this.pages["*"].width;
 			let height = this.pages["*"].height;
 			let format = this.pages["*"].format;
@@ -28002,7 +27800,7 @@ class AtPage extends Handler {
 		// Find page name
 		let name;
 
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "TypeSelector",
 			enter: (node, item, list) => {
 				name = node.name;
@@ -28015,7 +27813,7 @@ class AtPage extends Handler {
 	getPsuedoSelector(ast) {
 		// Find if it has :left & :right & :black & :first
 		let name;
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "PseudoClassSelector",
 			enter: (node, item, list) => {
 				if (node.name !== "nth") {
@@ -28030,7 +27828,7 @@ class AtPage extends Handler {
 	getNthSelector(ast) {
 		// Find if it has :nth
 		let nth;
-		csstree.walk(ast, {
+		lib.walk(ast, {
 			visit: "PseudoClassSelector",
 			enter: (node, item, list) => {
 				if (node.name === "nth" && node.children) {
@@ -28051,7 +27849,7 @@ class AtPage extends Handler {
 			"left-top", "left-middle", "left", "left-bottom", "top-right-corner",
 			"right-top", "right-middle", "right", "right-bottom", "right-right-corner"
 		];
-		csstree.walk(ast.block, {
+		lib.walk(ast.block, {
 			visit: "Atrule",
 			enter: (node, item, list) => {
 				let name = node.name;
@@ -28080,7 +27878,7 @@ class AtPage extends Handler {
 	replaceNotes(ast) {
 		let parsed = {};
 
-		csstree.walk(ast.block, {
+		lib.walk(ast.block, {
 			visit: "Atrule",
 			enter: (node, item, list) => {
 				let name = node.name;
@@ -28097,15 +27895,15 @@ class AtPage extends Handler {
 	replaceDeclarations(ast) {
 		let parsed = {};
 
-		csstree.walk(ast.block, {
+		lib.walk(ast.block, {
 			visit: "Declaration",
 			enter: (declaration, dItem, dList) => {
-				let prop = csstree.property(declaration.property).name;
+				let prop = lib.property(declaration.property).name;
 				// let value = declaration.value;
 
 				if (prop === "marks") {
 					parsed.marks = [];
-					csstree.walk(declaration, {
+					lib.walk(declaration, {
 						visit: "Identifier",
 						enter: (ident) => {
 							parsed.marks.push(ident.name);
@@ -28156,10 +27954,10 @@ class AtPage extends Handler {
 							bottom: {}
 						};
 					}
-					parsed.border.top = csstree.generate(declaration.value);
-					parsed.border.right = csstree.generate(declaration.value);
-					parsed.border.left = csstree.generate(declaration.value);
-					parsed.border.bottom = csstree.generate(declaration.value);
+					parsed.border.top = lib.generate(declaration.value);
+					parsed.border.right = lib.generate(declaration.value);
+					parsed.border.left = lib.generate(declaration.value);
+					parsed.border.bottom = lib.generate(declaration.value);
 
 					dList.remove(dItem);
 
@@ -28176,7 +27974,7 @@ class AtPage extends Handler {
 					}
 					let p = prop.substring("border-".length);
 
-					parsed.border[p] = csstree.generate(declaration.value);
+					parsed.border[p] = lib.generate(declaration.value);
 					dList.remove(dItem);
 
 				}
@@ -28187,7 +27985,7 @@ class AtPage extends Handler {
 				} else if (prop === "bleed") {
 					parsed.bleed = [];
 
-					csstree.walk(declaration, {
+					lib.walk(declaration, {
 						enter: (subNode) => {
 							switch (subNode.type) {
 								case "String": // bleed: "auto"
@@ -28226,7 +28024,7 @@ class AtPage extends Handler {
 		let width, height, orientation, format;
 
 		// Get size: Xmm Ymm
-		csstree.walk(declaration, {
+		lib.walk(declaration, {
 			visit: "Dimension",
 			enter: (node, item, list) => {
 				let { value, unit } = node;
@@ -28239,7 +28037,7 @@ class AtPage extends Handler {
 		});
 
 		// Get size: "A4"
-		csstree.walk(declaration, {
+		lib.walk(declaration, {
 			visit: "String",
 			enter: (node, item, list) => {
 				let name = node.value.replace(/["|']/g, "");
@@ -28252,7 +28050,7 @@ class AtPage extends Handler {
 		});
 
 		// Get Format or Landscape or Portrait
-		csstree.walk(declaration, {
+		lib.walk(declaration, {
 			visit: "Identifier",
 			enter: (node, item, list) => {
 				let name = node.name;
@@ -28286,7 +28084,7 @@ class AtPage extends Handler {
 			bottom: {}
 		};
 
-		csstree.walk(declaration, {
+		lib.walk(declaration, {
 			enter: (node) => {
 				switch (node.type) {
 					case "Dimension": // margin: 1in 2in, margin: 20px, etc...
@@ -28333,7 +28131,7 @@ class AtPage extends Handler {
 			bottom: {}
 		};
 
-		csstree.walk(declaration, {
+		lib.walk(declaration, {
 			enter: (node) => {
 				switch (node.type) {
 					case "Dimension": // padding: 1in 2in, padding: 20px, etc...
@@ -28382,25 +28180,25 @@ class AtPage extends Handler {
 		};
 
 		if (declaration.prop == "border") {
-			border.top = csstree.generate(declaration.value);
-			border.right = csstree.generate(declaration.value);
-			border.bottom = csstree.generate(declaration.value);
-			border.left = csstree.generate(declaration.value);
+			border.top = lib.generate(declaration.value);
+			border.right = lib.generate(declaration.value);
+			border.bottom = lib.generate(declaration.value);
+			border.left = lib.generate(declaration.value);
 
 		}
 		else if (declaration.prop == "border-top") {
-			border.top = csstree.generate(declaration.value);
+			border.top = lib.generate(declaration.value);
 		}
 		else if (declaration.prop == "border-right") {
-			border.right = csstree.generate(declaration.value);
+			border.right = lib.generate(declaration.value);
 
 		}
 		else if (declaration.prop == "border-bottom") {
-			border.bottom = csstree.generate(declaration.value);
+			border.bottom = lib.generate(declaration.value);
 
 		}
 		else if (declaration.prop == "border-left") {
-			border.left = csstree.generate(declaration.value);
+			border.left = lib.generate(declaration.value);
 		}
 
 		return border;
@@ -28409,48 +28207,41 @@ class AtPage extends Handler {
 
 	addPageClasses(pages, ast, sheet) {
 		// First add * page
-		if ("*" in pages && pages["*"].added === false) {
+		if ("*" in pages) {
 			let p = this.createPage(pages["*"], ast.children, sheet);
 			sheet.insertRule(p);
-			pages["*"].added = true;
 		}
 		// Add :left & :right
-		if (":left" in pages && pages[":left"].added === false) {
+		if (":left" in pages) {
 			let left = this.createPage(pages[":left"], ast.children, sheet);
 			sheet.insertRule(left);
-			pages[":left"].added = true;
 		}
-		if (":right" in pages && pages[":right"].added === false) {
+		if (":right" in pages) {
 			let right = this.createPage(pages[":right"], ast.children, sheet);
 			sheet.insertRule(right);
-			pages[":right"].added = true;
 		}
 		// Add :first & :blank
-		if (":first" in pages && pages[":first"].added === false) {
+		if (":first" in pages) {
 			let first = this.createPage(pages[":first"], ast.children, sheet);
 			sheet.insertRule(first);
-			pages[":first"].added = true;
 		}
-		if (":blank" in pages && pages[":blank"].added === false) {
+		if (":blank" in pages) {
 			let blank = this.createPage(pages[":blank"], ast.children, sheet);
 			sheet.insertRule(blank);
-			pages[":blank"].added = true;
 		}
 		// Add nth pages
 		for (let pg in pages) {
-			if (pages[pg].nth && pages[pg].added === false) {
+			if (pages[pg].nth) {
 				let nth = this.createPage(pages[pg], ast.children, sheet);
 				sheet.insertRule(nth);
-				pages[pg].added = true;
 			}
 		}
 
 		// Add named pages
 		for (let pg in pages) {
-			if (pages[pg].name && pages[pg].added === false) {
+			if (pages[pg].name) {
 				let named = this.createPage(pages[pg], ast.children, sheet);
 				sheet.insertRule(named);
-				pages[pg].added = true;
 			}
 		}
 
@@ -28576,14 +28367,14 @@ class AtPage extends Handler {
 
 	addMarginaliaStyles(page, list, item, sheet) {
 		for (let loc in page.marginalia) {
-			let block = csstree.clone(page.marginalia[loc]);
+			let block = lib.clone(page.marginalia[loc]);
 			let hasContent = false;
 
 			if (block.children.isEmpty()) {
 				continue;
 			}
 
-			csstree.walk(block, {
+			lib.walk(block, {
 				visit: "Declaration",
 				enter: (node, item, list) => {
 					if (node.property === "content") {
@@ -28595,7 +28386,7 @@ class AtPage extends Handler {
 						list.remove(item);
 					}
 					if (node.property === "vertical-align") {
-						csstree.walk(node, {
+						lib.walk(node, {
 							visit: "Identifier",
 							enter: (identNode, identItem, identlist) => {
 								let name = identNode.name;
@@ -28618,7 +28409,7 @@ class AtPage extends Handler {
 							loc === "bottom-left" ||
 							loc === "bottom-center" ||
 							loc === "bottom-right")) {
-						let c = csstree.clone(node);
+						let c = lib.clone(node);
 						c.property = "max-width";
 						list.appendData(c);
 					}
@@ -28630,7 +28421,7 @@ class AtPage extends Handler {
 							loc === "right-top" ||
 							loc === "right-middle" ||
 							loc === "right-bottom")) {
-						let c = csstree.clone(node);
+						let c = lib.clone(node);
 						c.property = "max-height";
 						list.appendData(c);
 					}
@@ -28642,7 +28433,7 @@ class AtPage extends Handler {
 
 			list.appendData(marginRule);
 
-			let sel = csstree.generate({
+			let sel = lib.generate({
 				type: "Selector",
 				children: marginSelectors
 			});
@@ -28661,8 +28452,8 @@ class AtPage extends Handler {
 		let displayNone;
 		// Just content
 		for (let loc in page.marginalia) {
-			let content = csstree.clone(page.marginalia[loc]);
-			csstree.walk(content, {
+			let content = lib.clone(page.marginalia[loc]);
+			lib.walk(content, {
 				visit: "Declaration",
 				enter: (node, item, list) => {
 					if (node.property !== "content") {
@@ -28737,7 +28528,7 @@ class AtPage extends Handler {
 
 	addRootVars(ast, width, height, orientation, bleed, bleedrecto, bleedverso, marks) {
 		let rules = [];
-		let selectors = new csstree.List();
+		let selectors = new lib.List();
 		selectors.insertData({
 			type: "PseudoClassSelector",
 			name: "root",
@@ -28888,16 +28679,16 @@ class AtPage extends Handler {
 	*/
 	addRootPage(ast, size, bleed, bleedrecto, bleedverso) {
 		let { width, height, orientation, format } = size;
-		let children = new csstree.List();
-		let childrenLeft = new csstree.List();
-		let childrenRight = new csstree.List();
-		let dimensions = new csstree.List();
-		let dimensionsLeft = new csstree.List();
-		let dimensionsRight = new csstree.List();
+		let children = new lib.List();
+		let childrenLeft = new lib.List();
+		let childrenRight = new lib.List();
+		let dimensions = new lib.List();
+		let dimensionsLeft = new lib.List();
+		let dimensionsRight = new lib.List();
 
 		if (bleed) {
-			let widthCalculations = new csstree.List();
-			let heightCalculations = new csstree.List();
+			let widthCalculations = new lib.List();
+			let heightCalculations = new lib.List();
 
 			// width
 			widthCalculations.appendData({
@@ -29116,8 +28907,8 @@ class AtPage extends Handler {
 		ast.children.append(rule);
 
 		if (bleedverso) {
-			let widthCalculationsLeft = new csstree.List();
-			let heightCalculationsLeft = new csstree.List();
+			let widthCalculationsLeft = new lib.List();
+			let heightCalculationsLeft = new lib.List();
 
 			// width
 			widthCalculationsLeft.appendData({
@@ -29260,8 +29051,8 @@ class AtPage extends Handler {
 		}
 
 		if (bleedrecto) {
-			let widthCalculationsRight = new csstree.List();
-			let heightCalculationsRight = new csstree.List();
+			let widthCalculationsRight = new lib.List();
+			let heightCalculationsRight = new lib.List();
 
 			// width
 			widthCalculationsRight.appendData({
@@ -29434,20 +29225,15 @@ class AtPage extends Handler {
 	}
 
 	addPageAttributes(page, start, pages) {
-		let namedPages = [start.dataset.page];
+		let named = start.dataset.page;
 
-		if (namedPages && namedPages.length) {
-			for (const named of namedPages) {
-				if (!named) {
-					continue;
-				}
-				page.name = named;
-				page.element.classList.add("pagedjs_named_page");
-				page.element.classList.add("pagedjs_" + named + "_page");
+		if (named) {
+			page.name = named;
+			page.element.classList.add("pagedjs_named_page");
+			page.element.classList.add("pagedjs_" + named + "_page");
 
-				if (!start.dataset.splitFrom) {
-					page.element.classList.add("pagedjs_" + named + "_first_page");
-				}
+			if (!start.dataset.splitFrom) {
+				page.element.classList.add("pagedjs_" + named + "_first_page");
 			}
 		}
 	}
@@ -29493,7 +29279,7 @@ class AtPage extends Handler {
 		// page.element.querySelector('.paged_area').style.color = red;
 	}
 
-	finalizePage(fragment, page, breakToken, chunker) {
+	afterPageLayout(fragment, page, breakToken, chunker) {
 		for (let m in this.marginalia) {
 			let margin = this.marginalia[m];
 			let sels = m.split(" ");
@@ -29742,7 +29528,7 @@ class AtPage extends Handler {
 		let nthlist;
 		let nth;
 
-		let selectors = new csstree.List();
+		let selectors = new lib.List();
 
 		selectors.insertData({
 			type: "ClassSelector",
@@ -29779,7 +29565,7 @@ class AtPage extends Handler {
 
 		// Nth
 		if (page.nth) {
-			nthlist = new csstree.List();
+			nthlist = new lib.List();
 			nth = this.getNth(page.nth);
 
 			nthlist.insertData(nth);
@@ -29811,7 +29597,7 @@ class AtPage extends Handler {
 	}
 
 	createDeclaration(property, value, important) {
-		let children = new csstree.List();
+		let children = new lib.List();
 
 		children.insertData({
 			type: "Identifier",
@@ -29845,8 +29631,8 @@ class AtPage extends Handler {
 	}
 
 	createCalculatedDimension(property, items, important, operator = "+") {
-		let children = new csstree.List();
-		let calculations = new csstree.List();
+		let children = new lib.List();
+		let calculations = new lib.List();
 
 		items.forEach((item, index) => {
 			calculations.appendData({
@@ -29894,7 +29680,7 @@ class AtPage extends Handler {
 	}
 
 	createDimension(property, cssValue, important) {
-		let children = new csstree.List();
+		let children = new lib.List();
 
 		children.insertData({
 			type: "Dimension",
@@ -29917,7 +29703,7 @@ class AtPage extends Handler {
 	}
 
 	createBlock(declarations) {
-		let block = new csstree.List();
+		let block = new lib.List();
 
 		declarations.forEach((declaration) => {
 			block.insertData(declaration);
@@ -29931,7 +29717,7 @@ class AtPage extends Handler {
 	}
 
 	createRule(selectors, block) {
-		let selectorList = new csstree.List();
+		let selectorList = new lib.List();
 		selectorList.insertData({
 			type: "Selector",
 			children: selectors
@@ -29966,7 +29752,7 @@ class Breaks extends Handler {
 		if (property === "page") {
 			let children = declaration.value.children.first();
 			let value = children.name;
-			let selector = csstree.generate(rule.ruleNode.prelude);
+			let selector = lib.generate(rule.ruleNode.prelude);
 			let name = value;
 
 			let breaker = {
@@ -29994,7 +29780,7 @@ class Breaks extends Handler {
 		) {
 			let child = declaration.value.children.first();
 			let value = child.name;
-			let selector = csstree.generate(rule.ruleNode.prelude);
+			let selector = lib.generate(rule.ruleNode.prelude);
 
 			if (property === "page-break-before") {
 				property = "break-before";
@@ -30127,55 +29913,31 @@ class PrintMedia extends Handler {
 	onAtMedia(node, item, list) {
 		let media = this.getMediaName(node);
 		let rules;
-		if (media.includes("print")) {
+
+		if (media === "print") {
 			rules = node.block.children;
 
-			// Append rules to the end of main rules list
-			// TODO: this isn't working right, needs to check what is in the prelude
-			/*
-			rules.forEach((selectList) => {
-				if (selectList.prelude) {
-					selectList.prelude.children.forEach((rule) => {
-
-						rule.children.prependData({
-							type: "Combinator",
-							name: " "
-						});
-	
-						rule.children.prependData({
-							type: "ClassSelector",
-							name: "pagedjs_page"
-						});
-					});	
-				}
-			});
-
-			list.insertList(rules, item);
-			*/
+			// Remove rules from the @media block
+			node.block.children = new lib.List();
 
 			// Append rules to the end of main rules list
 			list.appendList(rules);
-
-			// Remove rules from the @media block
-			list.remove(item);
-		} else if (!media.includes("all") && !media.includes("pagedjs-ignore")) {
-			list.remove(item);
 		}
 
 	}
 
 	getMediaName(node) {
-		let media = [];
+		let media = "";
 
 		if (typeof node.prelude === "undefined" ||
 				node.prelude.type !== "AtrulePrelude" ) {
 			return;
 		}
 
-		csstree.walk(node.prelude, {
+		lib.walk(node.prelude, {
 			visit: "Identifier",
 			enter: (identNode, iItem, iList) => {
-				media.push(identNode.name);
+				media = identNode.name;
 			}
 		});
 		return media;
@@ -30314,7 +30076,7 @@ class Counters extends Handler {
 					value = parseInt(number.data.value);
 				}
 
-				let selector = csstree.generate(rule.ruleNode.prelude);
+				let selector = lib.generate(rule.ruleNode.prelude);
 
 				let counter;
 				if (!(name in this.counters)) {
@@ -30344,6 +30106,7 @@ class Counters extends Handler {
 	}
 
 	handleReset(declaration, rule) {
+		let resets = [];
 		let children = declaration.value.children;
 
 		children.forEach((data, item) => {
@@ -30353,20 +30116,9 @@ class Counters extends Handler {
 				if (item.next && item.next.data.type === "WhiteSpace") {
 					whitespace = item.next;
 				}
-				if (whitespace && whitespace.next) {
-					if (whitespace.next.data.type === "Number") {
-						// The counter reset value is specified using a number. E.g. counter-reset: c2 5;
-						number = whitespace.next;
-						value = parseInt(number.data.value);
-					} else if (whitespace.next.data.type === "Function" && whitespace.next.data.name === "var") {
-						// The counter reset value is specified using a CSS variable (custom property).
-						// E.g. counter-reset: c2 var(--my-variable);
-						// See https://developer.mozilla.org/en-US/docs/Web/CSS/var
-						number = whitespace.next;
-						// Use the variable name (e.g. '--my-variable') as value for now. The actual value is resolved later by the
-						// processCounterResets function.
-						value = whitespace.next.data.children.head.data.name;
-					}
+				if (whitespace && whitespace.next && whitespace.next.data.type === "Number") {
+					number = whitespace.next;
+					value = parseInt(number.data.value);
 				}
 
 				let counter;
@@ -30376,7 +30128,7 @@ class Counters extends Handler {
 				if (rule.ruleNode.type === "Atrule" && rule.ruleNode.name === "page") {
 					selector = ".pagedjs_page";
 				} else {
-					selector = csstree.generate(prelude || rule.ruleNode);
+					selector = lib.generate(prelude || rule.ruleNode);
 				}
 
 				if (name === "footnote") {
@@ -30395,6 +30147,7 @@ class Counters extends Handler {
 				};
 
 				counter.resets[selector] = reset;
+				resets.push(reset);
 
 				if (selector !== ".pagedjs_page") {
 					// Remove the parsed resets
@@ -30408,6 +30161,8 @@ class Counters extends Handler {
 				}
 			}
 		});
+
+		return resets;
 	}
 
 	processCounters(parsed, counters) {
@@ -30463,19 +30218,7 @@ class Counters extends Handler {
 			let resetElements = parsed.querySelectorAll(reset.selector);
 			// Add counter data
 			for (var i = 0; i < resetElements.length; i++) {
-				let value = reset.number;
-				if (typeof value === "string" && value.startsWith("--")) {
-					// The value is specified using a CSS variable (custom property).
-					// FIXME: We get the variable value only from the inline style of the element because at this point the
-					// element is detached and thus using:
-					//
-					//		getComputedStyle(resetElements[i]).getPropertyValue(value)
-					//
-					// always returns an empty string. We could try to temporarily attach the element to get its computed style,
-					// but for now using the inline style is enough for us.
-					value = resetElements[i].style.getPropertyValue(value) || 0;
-				}
-				resetElements[i].setAttribute("data-counter-"+ counter.name +"-reset", value);
+				resetElements[i].setAttribute("data-counter-"+ counter.name +"-reset", reset.number);
 				if (resetElements[i].getAttribute("data-counter-reset")) {
 					resetElements[i].setAttribute("data-counter-reset", resetElements[i].getAttribute("data-counter-reset") + " " + counter.name);
 				} else {
@@ -30537,7 +30280,7 @@ class Counters extends Handler {
 
 	addFootnoteMarkerCounter(list) {
 		let markers = [];
-		csstree.walk(list, {
+		lib.walk(list, {
 			visit: "Identifier",
 			enter: (identNode, iItem, iList) => {
 				markers.push(identNode.name);
@@ -30574,40 +30317,22 @@ class Counters extends Handler {
 		if (!element || !incrementArray || incrementArray.length === 0) return;
 
 		const ref = element.dataset.ref;
-		const increments = Array.from(this.styleSheet.cssRules).filter((rule) => {
+		const prevIncrements = Array.from(this.styleSheet.cssRules).filter((rule) => {
 			return rule.selectorText === `[data-ref="${element.dataset.ref}"]:not([data-split-from])`
 						 && rule.style[0] === "counter-increment";
-		}).map(rule => rule.style.counterIncrement);
-
-		// Merge the current increments by summing the values because we generate both a decrement and an increment when the
-		// element resets and increments the counter at the same time. E.g. ['c1 -7', 'c1 1'] should lead to 'c1 -6'.
-		increments.push(this.mergeIncrements(incrementArray,
-			(prev, next) => (parseInt(prev) || 0) + (parseInt(next) || 0)));
-
-		// Keep the last value for each counter when merging with the previous increments. E.g. ['c1 -7 c2 3', 'c1 1']
-		// should lead to 'c1 1 c2 3'.
-		const counterIncrement = this.mergeIncrements(increments, (prev, next) => next);
-		this.insertRule(`[data-ref="${ref}"]:not([data-split-from]) { counter-increment: ${counterIncrement} }`);
-	}
-
-	/**
-	 * Merge multiple values of a counter-increment CSS rule, using the specified operator.
-	 *
-	 * @param {Array} incrementArray the values to merge, e.g. ['c1 1', 'c1 -7 c2 1']
-	 * @param {Function} operator the function used to merge counter values (e.g. keep the last value of a counter or sum
-	 *					the counter values)
-	 * @return {string} the merged value of the counter-increment CSS rule
-	 */
-	mergeIncrements(incrementArray, operator) {
-		const increments = {};
-		incrementArray.forEach(increment => {
-			let values = increment.split(" ");
-			for (let i = 0; i < values.length; i+=2) {
-				increments[values[i]] = operator(increments[values[i]], values[i + 1]);
-			}
 		});
 
-		return Object.entries(increments).map(([key, value]) => `${key} ${value}`).join(" ");
+		const increments = [];
+		for (let styleRule of prevIncrements) {
+			let values = styleRule.style.counterIncrement.split(" ");
+			for (let i = 0; i < values.length; i+=2) {
+				increments.push(values[i] + " " + values[i+1]);
+			}
+		}
+
+		Array.prototype.push.apply(increments, incrementArray);
+
+		this.insertRule(`[data-ref="${ref}"]:not([data-split-from]) { counter-increment: ${increments.join(" ")} }`);
 	}
 
 	afterPageLayout(pageElement, page) {
@@ -30686,7 +30411,7 @@ class PositionFixed extends Handler {
 
 	onDeclaration(declaration, dItem, dList, rule) {
 		if (declaration.property === "position" && declaration.value.children.first().name === "fixed") {
-			let selector = csstree.generate(rule.ruleNode.prelude);
+			let selector = lib.generate(rule.ruleNode.prelude);
 			this.fixedElementsSelector.push(selector);
 			dList.remove(dItem);
 		}
@@ -30758,7 +30483,7 @@ class PageCounterIncrement extends Handler {
 		if (rule.ruleNode.name === "page" && rule.ruleNode.type === "Atrule") {
 			return;
 		}
-		const selector = csstree.generate(rule.ruleNode.prelude);
+		const selector = lib.generate(rule.ruleNode.prelude);
 		return this.pageCounter.increments[selector] = {
 			selector: selector,
 			number
@@ -30779,10 +30504,10 @@ class NthOfType extends Handler {
 	}
 
 	onRule(ruleNode, ruleItem, rulelist) {
-		let selector = csstree.generate(ruleNode.prelude);
+		let selector = lib.generate(ruleNode.prelude);
 		if (selector.match(/:(first|last|nth)-of-type/)) {
 			
-			let declarations = csstree.generate(ruleNode.block);
+			let declarations = lib.generate(ruleNode.block);
 			declarations = declarations.replace(/[{}]/g,"");
 
 			let uuid = "nth-of-type-" + UUID();
@@ -30834,10 +30559,10 @@ class Following extends Handler {
 	}
 
 	onRule(ruleNode, ruleItem, rulelist) {
-		let selector = csstree.generate(ruleNode.prelude);
+		let selector = lib.generate(ruleNode.prelude);
 		if (selector.match(/\+/)) {
 			
-			let declarations = csstree.generate(ruleNode.block);
+			let declarations = lib.generate(ruleNode.block);
 			declarations = declarations.replace(/[{}]/g,"");
 
 			let uuid = "following-" + UUID();
@@ -30894,7 +30619,7 @@ class Footnotes extends Handler {
 			let identifier = declaration.value.children && declaration.value.children.first();
 			let location = identifier && identifier.name;
 			if (location === "footnote") {
-				let selector = csstree.generate(rule.ruleNode.prelude);
+				let selector = lib.generate(rule.ruleNode.prelude);
 				this.footnotes[selector] = {
 					selector: selector,
 					policy: "auto",
@@ -30907,7 +30632,7 @@ class Footnotes extends Handler {
 			let identifier = declaration.value.children && declaration.value.children.first();
 			let policy = identifier && identifier.name;
 			if (policy) {
-				let selector = csstree.generate(rule.ruleNode.prelude);
+				let selector = lib.generate(rule.ruleNode.prelude);
 				let note = this.footnotes[selector];
 				if (note) {
 					note.policy = policy;
@@ -30917,7 +30642,7 @@ class Footnotes extends Handler {
 		if (property === "footnote-display") {
 			let identifier = declaration.value.children && declaration.value.children.first();
 			let display = identifier && identifier.name;
-			let selector = csstree.generate(rule.ruleNode.prelude);
+			let selector = lib.generate(rule.ruleNode.prelude);
 			if (display && this.footnotes[selector]) {
 				let note = this.footnotes[selector];
 				if (note) {
@@ -30932,7 +30657,7 @@ class Footnotes extends Handler {
 		if (name === "footnote-marker") {
 			// switch ::footnote-marker to [data-footnote-marker]::before
 			let prelude = rule.ruleNode.prelude;
-			let newPrelude = new csstree.List();
+			let newPrelude = new lib.List();
 
 			// Can't get remove to work, so just copying everything else
 			prelude.children.first().children.each((node) => {
@@ -30969,7 +30694,7 @@ class Footnotes extends Handler {
 			// switch ::footnote-call to [data-footnote-call]::after
 
 			let prelude = rule.ruleNode.prelude;
-			let newPrelude = new csstree.List();
+			let newPrelude = new lib.List();
 
 			// Can't get remove to work, so just copying everything else
 			prelude.children.first().children.each((node) => {
@@ -31423,9 +31148,9 @@ class Footnotes extends Handler {
 }
 
 var pagedMediaHandlers = [
-	PrintMedia,
 	AtPage,
 	Breaks,
+	PrintMedia,
 	Splits,
 	Counters,
 	Lists,
@@ -31446,12 +31171,12 @@ class RunningHeaders extends Handler {
 
 	onDeclaration(declaration, dItem, dList, rule) {
 		if (declaration.property === "position") {
-			let selector = csstree.generate(rule.ruleNode.prelude);
+			let selector = lib.generate(rule.ruleNode.prelude);
 			let identifier = declaration.value.children.first().name;
 
 			if (identifier === "running") {
 				let value;
-				csstree.walk(declaration, {
+				lib.walk(declaration, {
 					visit: "Function",
 					enter: (node, item, list) => {
 						value = node.children.first().name;
@@ -31468,13 +31193,13 @@ class RunningHeaders extends Handler {
 
 		if (declaration.property === "content") {
 
-			csstree.walk(declaration, {
+			lib.walk(declaration, {
 				visit: "Function",
 				enter: (funcNode, fItem, fList) => {
 
 					if (funcNode.name.indexOf("element") > -1) {
 
-						let selector = csstree.generate(rule.ruleNode.prelude);
+						let selector = lib.generate(rule.ruleNode.prelude);
 
 						let func = funcNode.name;
 
@@ -31522,16 +31247,18 @@ class RunningHeaders extends Handler {
 	afterPageLayout(fragment) {
 		for (let name of Object.keys(this.runningSelectors)) {
 			let set = this.runningSelectors[name];
-			let selected = fragment.querySelector(set.selector);
-			if (selected) {
-				// let cssVar;
-				if (set.identifier === "running") {
-					// cssVar = selected.textContent.replace(/\\([\s\S])|(["|'])/g,"\\$1$2");
-					// this.styleSheet.insertRule(`:root { --string-${name}: "${cssVar}"; }`, this.styleSheet.cssRules.length);
-					// fragment.style.setProperty(`--string-${name}`, `"${cssVar}"`);
-					set.first = selected;
-				} else {
-					console.warn(set.value + "needs css replacement");
+			if (!set.first) {
+				let selected = fragment.querySelector(set.selector);
+				if (selected) {
+					// let cssVar;
+					if (set.identifier === "running") {
+						// cssVar = selected.textContent.replace(/\\([\s\S])|(["|'])/g,"\\$1$2");
+						// this.styleSheet.insertRule(`:root { --string-${name}: "${cssVar}"; }`, this.styleSheet.cssRules.length);
+						// fragment.style.setProperty(`--string-${name}`, `"${cssVar}"`);
+						set.first = selected;
+					} else {
+						console.warn(set.value + "needs css replacement");
+					}
 				}
 			}
 		}
@@ -31682,44 +31409,30 @@ class StringSets extends Handler {
 
 		this.stringSetSelectors = {};
 		this.type;
-		// pageLastString = last string variable defined on the page
+		// pageLastString = last string variable defined on the page 
 		this.pageLastString;
 
 	}
 	
 	onDeclaration(declaration, dItem, dList, rule) {
 		if (declaration.property === "string-set") {
-			let selector = csstree.generate(rule.ruleNode.prelude);
+			let selector = lib.generate(rule.ruleNode.prelude);
 
-			let identifiers = [];
-			let functions = [];
-			let values = [];
+			let identifier = declaration.value.children.first().name;
 
-			declaration.value.children.forEach((child) => {
-				if (child.type === "Identifier") {
-					identifiers.push(child.name);
-				}
-				if (child.type === "Function") {
-					functions.push(child.name);
-					child.children.forEach((subchild) => {
-						if (subchild.type === "Identifier") {
-							values.push(subchild.name);
-						}
-					});
+			let value;
+			lib.walk(declaration, {
+				visit: "Function",
+				enter: (node, item, list) => {
+					value = lib.generate(node);
 				}
 			});
 
-			identifiers.forEach((identifier, index) => {
-				let func = functions[index];
-				let value = values[index];
-				this.stringSetSelectors[identifier] = {
-					identifier,
-					func,
-					value,
-					selector
-				};
-			});
-
+			this.stringSetSelectors[identifier] = {
+				identifier,
+				value,
+				selector
+			};
 		}
 	}
 
@@ -31729,7 +31442,7 @@ class StringSets extends Handler {
 			let identifier = funcNode.children && funcNode.children.first().name;
 			this.type = funcNode.children.last().name;
 			funcNode.name = "var";
-			funcNode.children = new csstree.List();
+			funcNode.children = new lib.List();
 
  
 			if(this.type === "first" || this.type === "last" || this.type === "start" || this.type === "first-except"){
@@ -31759,13 +31472,11 @@ class StringSets extends Handler {
 		{
 			this.pageLastString = {};
 		}
-
+	
 		
 		for (let name of Object.keys(this.stringSetSelectors)) {
 	
 			let set = this.stringSetSelectors[name];
-			let value = set.value;
-			let func = set.func;
 			let selected = fragment.querySelectorAll(set.selector);
 
 			// Get the last found string for the current identifier
@@ -31783,36 +31494,18 @@ class StringSets extends Handler {
 
 				selected.forEach((sel) => {
 					// push each content into the array to define in the variable the first and the last element of the page.
-					if (func === "content") {
-						this.pageLastString[name] = selected[selected.length - 1].textContent;
-					}
-
-					if (func === "attr") {
-						this.pageLastString[name] = selected[selected.length - 1].getAttribute(value) || "";
-					}
-
+					this.pageLastString[name] = selected[selected.length - 1].textContent;
+				
 				});	
 
 				/* FIRST */
 	
-				if (func === "content") {
-					varFirst = selected[0].textContent;
-				}
-
-				if (func === "attr") {
-					varFirst = selected[0].getAttribute(value) || "";
-				}
+				varFirst = selected[0].textContent;
 
 
 				/* LAST */
 
-				if (func === "content") {
-					varLast = selected[selected.length - 1].textContent;
-				}
-
-				if (func === "attr") {
-					varLast = selected[selected.length - 1].getAttribute(value) || "";
-				}
+				varLast = selected[selected.length - 1].textContent;
 
 
 				/* START */
@@ -31857,12 +31550,12 @@ class TargetCounters extends Handler {
 
 	onContent(funcNode, fItem, fList, declaration, rule) {
 		if (funcNode.name === "target-counter") {
-			let selector = csstree.generate(rule.ruleNode.prelude);
+			let selector = lib.generate(rule.ruleNode.prelude);
 
 			let first = funcNode.children.first();
 			let func = first.name;
 
-			let value = csstree.generate(funcNode);
+			let value = lib.generate(funcNode);
 
 			let args = [];
 
@@ -31882,7 +31575,7 @@ class TargetCounters extends Handler {
 					if (!counter) {
 						counter = child.name;
 					} else if (!style) {
-						styleIdentifier = csstree.clone(child);
+						styleIdentifier = lib.clone(child);
 						style = child.name;
 					}
 				}
@@ -31905,7 +31598,7 @@ class TargetCounters extends Handler {
 
 			// Replace with counter
 			funcNode.name = "counter";
-			funcNode.children = new csstree.List();
+			funcNode.children = new lib.List();
 			funcNode.children.appendData({
 				type: "Identifier",
 				loc: 0,
@@ -31999,12 +31692,12 @@ class TargetText extends Handler {
 
 	onContent(funcNode, fItem, fList, declaration, rule) {
 		if (funcNode.name === "target-text") {
-			this.selector = csstree.generate(rule.ruleNode.prelude);
+			this.selector = lib.generate(rule.ruleNode.prelude);
 			let first = funcNode.children.first();
 			let last = funcNode.children.last();
 			let func = first.name;
 
-			let value = csstree.generate(funcNode);
+			let value = lib.generate(funcNode);
 
 			let args = [];
 
@@ -32035,7 +31728,7 @@ class TargetText extends Handler {
 
 			// Replace with variable
 			funcNode.name = "var";
-			funcNode.children = new csstree.List();
+			funcNode.children = new lib.List();
 			funcNode.children.appendData({
 				type: "Identifier",
 				loc: 0,
@@ -32217,120 +31910,120 @@ var clearCut = {};
  */
 
 (function (exports) {
-	// The following regular expressions assume that selectors matching the preceding regular expressions have been removed
-	var attributeRegex = /(\[[^\]]+\])/g;
-	var idRegex = /(#[^\s\+>~\.\[:]+)/g;
-	var classRegex = /(\.[^\s\+>~\.\[:]+)/g;
-	var pseudoElementRegex = /(::[^\s\+>~\.\[:]+|:first-line|:first-letter|:before|:after)/g;
-	var pseudoClassRegex = /(:[^\s\+>~\.\[:]+)/g;
-	var elementRegex = /([^\s\+>~\.\[:]+)/g;
-	var notRegex = /:not\(([^\)]*)\)/g;
-	var ruleRegex = /\{[^]*/gm;
-	var separatorRegex = /[\*\s\+>~]/g;
-	var straysRegex = /[#\.]/g;
+// The following regular expressions assume that selectors matching the preceding regular expressions have been removed
+var attributeRegex = /(\[[^\]]+\])/g;
+var idRegex = /(#[^\s\+>~\.\[:]+)/g;
+var classRegex = /(\.[^\s\+>~\.\[:]+)/g;
+var pseudoElementRegex = /(::[^\s\+>~\.\[:]+|:first-line|:first-letter|:before|:after)/g;
+var pseudoClassRegex = /(:[^\s\+>~\.\[:]+)/g;
+var elementRegex = /([^\s\+>~\.\[:]+)/g;
+var notRegex = /:not\(([^\)]*)\)/g;
+var ruleRegex = /\{[^]*/gm;
+var separatorRegex = /[\*\s\+>~]/g;
+var straysRegex = /[#\.]/g;
 
-	// Find matches for a regular expression in a string and push their details to parts
-	// Type is "a" for IDs, "b" for classes, attributes and pseudo-classes and "c" for elements and pseudo-elements
-	var findMatch = function(regex, type, types, selector) {
-	  var matches = selector.match(regex);
-	  if (matches) {
-	    for (var i = 0; i < matches.length; i++) {
-	      types[type]++;
-	      // Replace this simple selector with whitespace so it won't be counted in further simple selectors
-	      selector = selector.replace(matches[i], ' ');
-	    }
-	  }
+// Find matches for a regular expression in a string and push their details to parts
+// Type is "a" for IDs, "b" for classes, attributes and pseudo-classes and "c" for elements and pseudo-elements
+var findMatch = function(regex, type, types, selector) {
+  var matches = selector.match(regex);
+  if (matches) {
+    for (var i = 0; i < matches.length; i++) {
+      types[type]++;
+      // Replace this simple selector with whitespace so it won't be counted in further simple selectors
+      selector = selector.replace(matches[i], ' ');
+    }
+  }
 
-	  return selector;
-	};
+  return selector;
+};
 
-	// Calculate the specificity for a selector by dividing it into simple selectors and counting them
-	var calculate = function(selector) {
-	  var commaIndex = selector.indexOf(',');
-	  if (commaIndex !== -1) {
-	    selector = selector.substring(0, commaIndex);
-	  }
+// Calculate the specificity for a selector by dividing it into simple selectors and counting them
+var calculate = function(selector) {
+  var commaIndex = selector.indexOf(',');
+  if (commaIndex !== -1) {
+    selector = selector.substring(0, commaIndex);
+  }
 
-	  var  types = {
-	    a: 0,
-	    b: 0,
-	    c: 0
-	  };
+  var  types = {
+    a: 0,
+    b: 0,
+    c: 0
+  };
 
-	  // Remove the negation psuedo-class (:not) but leave its argument because specificity is calculated on its argument
-	  selector = selector.replace(notRegex, ' $1 ');
+  // Remove the negation psuedo-class (:not) but leave its argument because specificity is calculated on its argument
+  selector = selector.replace(notRegex, ' $1 ');
 
-	  // Remove anything after a left brace in case a user has pasted in a rule, not just a selector
-	  selector = selector.replace(ruleRegex, ' ');
+  // Remove anything after a left brace in case a user has pasted in a rule, not just a selector
+  selector = selector.replace(ruleRegex, ' ');
 
-	  // Add attribute selectors to parts collection (type b)
-	  selector = findMatch(attributeRegex, 'b', types, selector);
+  // Add attribute selectors to parts collection (type b)
+  selector = findMatch(attributeRegex, 'b', types, selector);
 
-	  // Add ID selectors to parts collection (type a)
-	  selector = findMatch(idRegex, 'a', types, selector);
+  // Add ID selectors to parts collection (type a)
+  selector = findMatch(idRegex, 'a', types, selector);
 
-	  // Add class selectors to parts collection (type b)
-	  selector = findMatch(classRegex, 'b', types, selector);
+  // Add class selectors to parts collection (type b)
+  selector = findMatch(classRegex, 'b', types, selector);
 
-	  // Add pseudo-element selectors to parts collection (type c)
-	  selector = findMatch(pseudoElementRegex, 'c', types, selector);
+  // Add pseudo-element selectors to parts collection (type c)
+  selector = findMatch(pseudoElementRegex, 'c', types, selector);
 
-	  // Add pseudo-class selectors to parts collection (type b)
-	  selector = findMatch(pseudoClassRegex, 'b', types, selector);
+  // Add pseudo-class selectors to parts collection (type b)
+  selector = findMatch(pseudoClassRegex, 'b', types, selector);
 
-	  // Remove universal selector and separator characters
-	  selector = selector.replace(separatorRegex, ' ');
+  // Remove universal selector and separator characters
+  selector = selector.replace(separatorRegex, ' ');
 
-	  // Remove any stray dots or hashes which aren't attached to words
-	  // These may be present if the user is live-editing this selector
-	  selector = selector.replace(straysRegex, ' ');
+  // Remove any stray dots or hashes which aren't attached to words
+  // These may be present if the user is live-editing this selector
+  selector = selector.replace(straysRegex, ' ');
 
-	  // The only things left should be element selectors (type c)
-	  findMatch(elementRegex, 'c', types, selector);
+  // The only things left should be element selectors (type c)
+  findMatch(elementRegex, 'c', types, selector);
 
-	  return (types.a * 100) + (types.b * 10) + (types.c * 1);
-	};
+  return (types.a * 100) + (types.b * 10) + (types.c * 1);
+};
 
-	var specificityCache = {};
+var specificityCache = {};
 
-	exports.calculateSpecificity = function(selector) {
-	  var specificity = specificityCache[selector];
-	  if (specificity === undefined) {
-	    specificity = calculate(selector);
-	    specificityCache[selector] = specificity;
-	  }
-	  return specificity;
-	};
+exports.calculateSpecificity = function(selector) {
+  var specificity = specificityCache[selector];
+  if (specificity === undefined) {
+    specificity = calculate(selector);
+    specificityCache[selector] = specificity;
+  }
+  return specificity;
+};
 
-	var validSelectorCache = {};
-	var testSelectorElement = null;
+var validSelectorCache = {};
+var testSelectorElement = null;
 
-	exports.isSelectorValid = function(selector) {
-	  var valid = validSelectorCache[selector];
-	  if (valid === undefined) {
-	    if (testSelectorElement == null) {
-	      testSelectorElement = document.createElement('div');
-	    }
+exports.isSelectorValid = function(selector) {
+  var valid = validSelectorCache[selector];
+  if (valid === undefined) {
+    if (testSelectorElement == null) {
+      testSelectorElement = document.createElement('div');
+    }
 
-	    try {
-	      testSelectorElement.querySelector(selector);
-	      valid = true;
-	    } catch (error) {
-	      valid = false;
-	    }
-	    validSelectorCache[selector] = valid;
-	  }
-	  return valid;
-	};
+    try {
+      testSelectorElement.querySelector(selector);
+      valid = true;
+    } catch (error) {
+      valid = false;
+    }
+    validSelectorCache[selector] = valid;
+  }
+  return valid;
+};
 
-	exports.validateSelector = function(selector) {
-	  if (!exports.isSelectorValid(selector)) {
-	    var error = new SyntaxError(selector + ' is not a valid selector');
-	    error.code = 'EBADSELECTOR';
-	    throw error;
-	  }
-	}; 
-} (clearCut));
+exports.validateSelector = function(selector) {
+  if (!exports.isSelectorValid(selector)) {
+    var error = new SyntaxError(selector + ' is not a valid selector');
+    error.code = 'EBADSELECTOR';
+    throw error;
+  }
+};
+}(clearCut));
 
 class UndisplayedFilter extends Handler {
 	constructor(chunker, polisher, caller) {
@@ -32340,7 +32033,7 @@ class UndisplayedFilter extends Handler {
 
 	onDeclaration(declaration, dItem, dList, rule) {
 		if (declaration.property === "display") {
-			let selector = csstree.generate(rule.ruleNode.prelude);
+			let selector = lib.generate(rule.ruleNode.prelude);
 			let value = declaration.value.children.first().name;
 
 			selector.split(",").forEach((s) => {
@@ -32447,233 +32140,170 @@ var isImplemented$3 = function () {
 	return Boolean(result && (result !== arr) && (result[1] === "dwa"));
 };
 
-var isImplemented$2;
-var hasRequiredIsImplemented;
+var validTypes = { object: true, symbol: true };
 
-function requireIsImplemented () {
-	if (hasRequiredIsImplemented) return isImplemented$2;
-	hasRequiredIsImplemented = 1;
+var isImplemented$2 = function () {
+	var symbol;
+	if (typeof Symbol !== 'function') return false;
+	symbol = Symbol('test symbol');
+	try { String(symbol); } catch (e) { return false; }
 
-	var validTypes = { object: true, symbol: true };
+	// Return 'true' also for polyfills
+	if (!validTypes[typeof Symbol.iterator]) return false;
+	if (!validTypes[typeof Symbol.toPrimitive]) return false;
+	if (!validTypes[typeof Symbol.toStringTag]) return false;
 
-	isImplemented$2 = function () {
-		var symbol;
-		if (typeof Symbol !== 'function') return false;
-		symbol = Symbol('test symbol');
-		try { String(symbol); } catch (e) { return false; }
+	return true;
+};
 
-		// Return 'true' also for polyfills
-		if (!validTypes[typeof Symbol.iterator]) return false;
-		if (!validTypes[typeof Symbol.toPrimitive]) return false;
-		if (!validTypes[typeof Symbol.toStringTag]) return false;
+var isSymbol$1 = function (x) {
+	if (!x) return false;
+	if (typeof x === 'symbol') return true;
+	if (!x.constructor) return false;
+	if (x.constructor.name !== 'Symbol') return false;
+	return (x[x.constructor.toStringTag] === 'Symbol');
+};
 
-		return true;
-	};
-	return isImplemented$2;
+var isSymbol = isSymbol$1;
+
+var validateSymbol$1 = function (value) {
+	if (!isSymbol(value)) throw new TypeError(value + " is not a symbol");
+	return value;
+};
+
+var d$1              = d$3.exports
+  , validateSymbol = validateSymbol$1
+
+  , create = Object.create, defineProperties = Object.defineProperties
+  , defineProperty$2 = Object.defineProperty, objPrototype = Object.prototype
+  , NativeSymbol, SymbolPolyfill, HiddenSymbol, globalSymbols = create(null)
+  , isNativeSafe;
+
+if (typeof Symbol === 'function') {
+	NativeSymbol = Symbol;
+	try {
+		String(NativeSymbol());
+		isNativeSafe = true;
+	} catch (ignore) {}
 }
 
-var isSymbol;
-var hasRequiredIsSymbol;
-
-function requireIsSymbol () {
-	if (hasRequiredIsSymbol) return isSymbol;
-	hasRequiredIsSymbol = 1;
-
-	isSymbol = function (x) {
-		if (!x) return false;
-		if (typeof x === 'symbol') return true;
-		if (!x.constructor) return false;
-		if (x.constructor.name !== 'Symbol') return false;
-		return (x[x.constructor.toStringTag] === 'Symbol');
+var generateName = (function () {
+	var created = create(null);
+	return function (desc) {
+		var postfix = 0, name, ie11BugWorkaround;
+		while (created[desc + (postfix || '')]) ++postfix;
+		desc += (postfix || '');
+		created[desc] = true;
+		name = '@@' + desc;
+		defineProperty$2(objPrototype, name, d$1.gs(null, function (value) {
+			// For IE11 issue see:
+			// https://connect.microsoft.com/IE/feedbackdetail/view/1928508/
+			//    ie11-broken-getters-on-dom-objects
+			// https://github.com/medikoo/es6-symbol/issues/12
+			if (ie11BugWorkaround) return;
+			ie11BugWorkaround = true;
+			defineProperty$2(this, name, d$1(value));
+			ie11BugWorkaround = false;
+		}));
+		return name;
 	};
-	return isSymbol;
-}
+}());
 
-var validateSymbol;
-var hasRequiredValidateSymbol;
+// Internal constructor (not one exposed) for creating Symbol instances.
+// This one is used to ensure that `someSymbol instanceof Symbol` always return false
+HiddenSymbol = function Symbol(description) {
+	if (this instanceof HiddenSymbol) throw new TypeError('Symbol is not a constructor');
+	return SymbolPolyfill(description);
+};
 
-function requireValidateSymbol () {
-	if (hasRequiredValidateSymbol) return validateSymbol;
-	hasRequiredValidateSymbol = 1;
-
-	var isSymbol = requireIsSymbol();
-
-	validateSymbol = function (value) {
-		if (!isSymbol(value)) throw new TypeError(value + " is not a symbol");
-		return value;
-	};
-	return validateSymbol;
-}
-
-var polyfill;
-var hasRequiredPolyfill;
-
-function requirePolyfill () {
-	if (hasRequiredPolyfill) return polyfill;
-	hasRequiredPolyfill = 1;
-
-	var d              = dExports
-	  , validateSymbol = requireValidateSymbol()
-
-	  , create = Object.create, defineProperties = Object.defineProperties
-	  , defineProperty = Object.defineProperty, objPrototype = Object.prototype
-	  , NativeSymbol, SymbolPolyfill, HiddenSymbol, globalSymbols = create(null)
-	  , isNativeSafe;
-
-	if (typeof Symbol === 'function') {
-		NativeSymbol = Symbol;
-		try {
-			String(NativeSymbol());
-			isNativeSafe = true;
-		} catch (ignore) {}
-	}
-
-	var generateName = (function () {
-		var created = create(null);
-		return function (desc) {
-			var postfix = 0, name, ie11BugWorkaround;
-			while (created[desc + (postfix || '')]) ++postfix;
-			desc += (postfix || '');
-			created[desc] = true;
-			name = '@@' + desc;
-			defineProperty(objPrototype, name, d.gs(null, function (value) {
-				// For IE11 issue see:
-				// https://connect.microsoft.com/IE/feedbackdetail/view/1928508/
-				//    ie11-broken-getters-on-dom-objects
-				// https://github.com/medikoo/es6-symbol/issues/12
-				if (ie11BugWorkaround) return;
-				ie11BugWorkaround = true;
-				defineProperty(this, name, d(value));
-				ie11BugWorkaround = false;
-			}));
-			return name;
-		};
-	}());
-
-	// Internal constructor (not one exposed) for creating Symbol instances.
-	// This one is used to ensure that `someSymbol instanceof Symbol` always return false
-	HiddenSymbol = function Symbol(description) {
-		if (this instanceof HiddenSymbol) throw new TypeError('Symbol is not a constructor');
-		return SymbolPolyfill(description);
-	};
-
-	// Exposed `Symbol` constructor
-	// (returns instances of HiddenSymbol)
-	polyfill = SymbolPolyfill = function Symbol(description) {
-		var symbol;
-		if (this instanceof Symbol) throw new TypeError('Symbol is not a constructor');
-		if (isNativeSafe) return NativeSymbol(description);
-		symbol = create(HiddenSymbol.prototype);
-		description = (description === undefined ? '' : String(description));
-		return defineProperties(symbol, {
-			__description__: d('', description),
-			__name__: d('', generateName(description))
-		});
-	};
-	defineProperties(SymbolPolyfill, {
-		for: d(function (key) {
-			if (globalSymbols[key]) return globalSymbols[key];
-			return (globalSymbols[key] = SymbolPolyfill(String(key)));
-		}),
-		keyFor: d(function (s) {
-			var key;
-			validateSymbol(s);
-			for (key in globalSymbols) if (globalSymbols[key] === s) return key;
-		}),
-
-		// To ensure proper interoperability with other native functions (e.g. Array.from)
-		// fallback to eventual native implementation of given symbol
-		hasInstance: d('', (NativeSymbol && NativeSymbol.hasInstance) || SymbolPolyfill('hasInstance')),
-		isConcatSpreadable: d('', (NativeSymbol && NativeSymbol.isConcatSpreadable) ||
-			SymbolPolyfill('isConcatSpreadable')),
-		iterator: d('', (NativeSymbol && NativeSymbol.iterator) || SymbolPolyfill('iterator')),
-		match: d('', (NativeSymbol && NativeSymbol.match) || SymbolPolyfill('match')),
-		replace: d('', (NativeSymbol && NativeSymbol.replace) || SymbolPolyfill('replace')),
-		search: d('', (NativeSymbol && NativeSymbol.search) || SymbolPolyfill('search')),
-		species: d('', (NativeSymbol && NativeSymbol.species) || SymbolPolyfill('species')),
-		split: d('', (NativeSymbol && NativeSymbol.split) || SymbolPolyfill('split')),
-		toPrimitive: d('', (NativeSymbol && NativeSymbol.toPrimitive) || SymbolPolyfill('toPrimitive')),
-		toStringTag: d('', (NativeSymbol && NativeSymbol.toStringTag) || SymbolPolyfill('toStringTag')),
-		unscopables: d('', (NativeSymbol && NativeSymbol.unscopables) || SymbolPolyfill('unscopables'))
+// Exposed `Symbol` constructor
+// (returns instances of HiddenSymbol)
+var polyfill = SymbolPolyfill = function Symbol(description) {
+	var symbol;
+	if (this instanceof Symbol) throw new TypeError('Symbol is not a constructor');
+	if (isNativeSafe) return NativeSymbol(description);
+	symbol = create(HiddenSymbol.prototype);
+	description = (description === undefined ? '' : String(description));
+	return defineProperties(symbol, {
+		__description__: d$1('', description),
+		__name__: d$1('', generateName(description))
 	});
+};
+defineProperties(SymbolPolyfill, {
+	for: d$1(function (key) {
+		if (globalSymbols[key]) return globalSymbols[key];
+		return (globalSymbols[key] = SymbolPolyfill(String(key)));
+	}),
+	keyFor: d$1(function (s) {
+		var key;
+		validateSymbol(s);
+		for (key in globalSymbols) if (globalSymbols[key] === s) return key;
+	}),
 
-	// Internal tweaks for real symbol producer
-	defineProperties(HiddenSymbol.prototype, {
-		constructor: d(SymbolPolyfill),
-		toString: d('', function () { return this.__name__; })
-	});
+	// To ensure proper interoperability with other native functions (e.g. Array.from)
+	// fallback to eventual native implementation of given symbol
+	hasInstance: d$1('', (NativeSymbol && NativeSymbol.hasInstance) || SymbolPolyfill('hasInstance')),
+	isConcatSpreadable: d$1('', (NativeSymbol && NativeSymbol.isConcatSpreadable) ||
+		SymbolPolyfill('isConcatSpreadable')),
+	iterator: d$1('', (NativeSymbol && NativeSymbol.iterator) || SymbolPolyfill('iterator')),
+	match: d$1('', (NativeSymbol && NativeSymbol.match) || SymbolPolyfill('match')),
+	replace: d$1('', (NativeSymbol && NativeSymbol.replace) || SymbolPolyfill('replace')),
+	search: d$1('', (NativeSymbol && NativeSymbol.search) || SymbolPolyfill('search')),
+	species: d$1('', (NativeSymbol && NativeSymbol.species) || SymbolPolyfill('species')),
+	split: d$1('', (NativeSymbol && NativeSymbol.split) || SymbolPolyfill('split')),
+	toPrimitive: d$1('', (NativeSymbol && NativeSymbol.toPrimitive) || SymbolPolyfill('toPrimitive')),
+	toStringTag: d$1('', (NativeSymbol && NativeSymbol.toStringTag) || SymbolPolyfill('toStringTag')),
+	unscopables: d$1('', (NativeSymbol && NativeSymbol.unscopables) || SymbolPolyfill('unscopables'))
+});
 
-	// Proper implementation of methods exposed on Symbol.prototype
-	// They won't be accessible on produced symbol instances as they derive from HiddenSymbol.prototype
-	defineProperties(SymbolPolyfill.prototype, {
-		toString: d(function () { return 'Symbol (' + validateSymbol(this).__description__ + ')'; }),
-		valueOf: d(function () { return validateSymbol(this); })
-	});
-	defineProperty(SymbolPolyfill.prototype, SymbolPolyfill.toPrimitive, d('', function () {
-		var symbol = validateSymbol(this);
-		if (typeof symbol === 'symbol') return symbol;
-		return symbol.toString();
-	}));
-	defineProperty(SymbolPolyfill.prototype, SymbolPolyfill.toStringTag, d('c', 'Symbol'));
+// Internal tweaks for real symbol producer
+defineProperties(HiddenSymbol.prototype, {
+	constructor: d$1(SymbolPolyfill),
+	toString: d$1('', function () { return this.__name__; })
+});
 
-	// Proper implementaton of toPrimitive and toStringTag for returned symbol instances
-	defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toStringTag,
-		d('c', SymbolPolyfill.prototype[SymbolPolyfill.toStringTag]));
+// Proper implementation of methods exposed on Symbol.prototype
+// They won't be accessible on produced symbol instances as they derive from HiddenSymbol.prototype
+defineProperties(SymbolPolyfill.prototype, {
+	toString: d$1(function () { return 'Symbol (' + validateSymbol(this).__description__ + ')'; }),
+	valueOf: d$1(function () { return validateSymbol(this); })
+});
+defineProperty$2(SymbolPolyfill.prototype, SymbolPolyfill.toPrimitive, d$1('', function () {
+	var symbol = validateSymbol(this);
+	if (typeof symbol === 'symbol') return symbol;
+	return symbol.toString();
+}));
+defineProperty$2(SymbolPolyfill.prototype, SymbolPolyfill.toStringTag, d$1('c', 'Symbol'));
 
-	// Note: It's important to define `toPrimitive` as last one, as some implementations
-	// implement `toPrimitive` natively without implementing `toStringTag` (or other specified symbols)
-	// And that may invoke error in definition flow:
-	// See: https://github.com/medikoo/es6-symbol/issues/13#issuecomment-164146149
-	defineProperty(HiddenSymbol.prototype, SymbolPolyfill.toPrimitive,
-		d('c', SymbolPolyfill.prototype[SymbolPolyfill.toPrimitive]));
-	return polyfill;
-}
+// Proper implementaton of toPrimitive and toStringTag for returned symbol instances
+defineProperty$2(HiddenSymbol.prototype, SymbolPolyfill.toStringTag,
+	d$1('c', SymbolPolyfill.prototype[SymbolPolyfill.toStringTag]));
 
-var es6Symbol;
-var hasRequiredEs6Symbol;
+// Note: It's important to define `toPrimitive` as last one, as some implementations
+// implement `toPrimitive` natively without implementing `toStringTag` (or other specified symbols)
+// And that may invoke error in definition flow:
+// See: https://github.com/medikoo/es6-symbol/issues/13#issuecomment-164146149
+defineProperty$2(HiddenSymbol.prototype, SymbolPolyfill.toPrimitive,
+	d$1('c', SymbolPolyfill.prototype[SymbolPolyfill.toPrimitive]));
 
-function requireEs6Symbol () {
-	if (hasRequiredEs6Symbol) return es6Symbol;
-	hasRequiredEs6Symbol = 1;
+var es6Symbol = isImplemented$2() ? Symbol : polyfill;
 
-	es6Symbol = requireIsImplemented()() ? Symbol : requirePolyfill();
-	return es6Symbol;
-}
+var objToString$2 = Object.prototype.toString
+  , id$2 = objToString$2.call(
+	(function () {
+		return arguments;
+	})()
+);
 
-var isArguments;
-var hasRequiredIsArguments;
+var isArguments$1 = function (value) {
+	return objToString$2.call(value) === id$2;
+};
 
-function requireIsArguments () {
-	if (hasRequiredIsArguments) return isArguments;
-	hasRequiredIsArguments = 1;
+var objToString$1 = Object.prototype.toString, id$1 = objToString$1.call(noop$4);
 
-	var objToString = Object.prototype.toString
-	  , id = objToString.call(
-		(function () {
-			return arguments;
-		})()
-	);
-
-	isArguments = function (value) {
-		return objToString.call(value) === id;
-	};
-	return isArguments;
-}
-
-var isFunction;
-var hasRequiredIsFunction;
-
-function requireIsFunction () {
-	if (hasRequiredIsFunction) return isFunction;
-	hasRequiredIsFunction = 1;
-
-	var objToString = Object.prototype.toString, id = objToString.call(noop$4);
-
-	isFunction = function (value) {
-		return typeof value === "function" && objToString.call(value) === id;
-	};
-	return isFunction;
-}
+var isFunction$1 = function (value) {
+	return typeof value === "function" && objToString$1.call(value) === id$1;
+};
 
 var isImplemented$1 = function () {
 	var sign = Math.sign;
@@ -32681,24 +32311,15 @@ var isImplemented$1 = function () {
 	return (sign(10) === 1) && (sign(-20) === -1);
 };
 
-var shim$2;
-var hasRequiredShim$2;
-
-function requireShim$2 () {
-	if (hasRequiredShim$2) return shim$2;
-	hasRequiredShim$2 = 1;
-
-	shim$2 = function (value) {
-		value = Number(value);
-		if (isNaN(value) || (value === 0)) return value;
-		return value > 0 ? 1 : -1;
-	};
-	return shim$2;
-}
+var shim$2 = function (value) {
+	value = Number(value);
+	if (isNaN(value) || (value === 0)) return value;
+	return value > 0 ? 1 : -1;
+};
 
 var sign$1 = isImplemented$1()
 	? Math.sign
-	: requireShim$2();
+	: shim$2;
 
 var sign = sign$1
 
@@ -32719,157 +32340,139 @@ var toPosInteger = function (value) {
  return max(0, toInteger(value));
 };
 
-var isString;
-var hasRequiredIsString;
+var objToString = Object.prototype.toString, id = objToString.call("");
 
-function requireIsString () {
-	if (hasRequiredIsString) return isString;
-	hasRequiredIsString = 1;
+var isString$1 = function (value) {
+	return (
+		typeof value === "string" ||
+		(value &&
+			typeof value === "object" &&
+			(value instanceof String || objToString.call(value) === id)) ||
+		false
+	);
+};
 
-	var objToString = Object.prototype.toString, id = objToString.call("");
+var iteratorSymbol = es6Symbol.iterator
+  , isArguments    = isArguments$1
+  , isFunction     = isFunction$1
+  , toPosInt$1       = toPosInteger
+  , callable       = validCallable
+  , validValue     = validValue$1
+  , isValue$1        = isValue$5
+  , isString       = isString$1
+  , isArray        = Array.isArray
+  , call           = Function.prototype.call
+  , desc           = { configurable: true, enumerable: true, writable: true, value: null }
+  , defineProperty$1 = Object.defineProperty;
 
-	isString = function (value) {
-		return (
-			typeof value === "string" ||
-			(value &&
-				typeof value === "object" &&
-				(value instanceof String || objToString.call(value) === id)) ||
-			false
-		);
-	};
-	return isString;
-}
+// eslint-disable-next-line complexity
+var shim$1 = function (arrayLike /*, mapFn, thisArg*/) {
+	var mapFn = arguments[1]
+	  , thisArg = arguments[2]
+	  , Context
+	  , i
+	  , j
+	  , arr
+	  , length
+	  , code
+	  , iterator
+	  , result
+	  , getIterator
+	  , value;
 
-var shim$1;
-var hasRequiredShim$1;
+	arrayLike = Object(validValue(arrayLike));
 
-function requireShim$1 () {
-	if (hasRequiredShim$1) return shim$1;
-	hasRequiredShim$1 = 1;
-
-	var iteratorSymbol = requireEs6Symbol().iterator
-	  , isArguments    = requireIsArguments()
-	  , isFunction     = requireIsFunction()
-	  , toPosInt       = toPosInteger
-	  , callable       = validCallable
-	  , validValue$1     = validValue
-	  , isValue        = isValue$3
-	  , isString       = requireIsString()
-	  , isArray        = Array.isArray
-	  , call           = Function.prototype.call
-	  , desc           = { configurable: true, enumerable: true, writable: true, value: null }
-	  , defineProperty = Object.defineProperty;
-
-	// eslint-disable-next-line complexity
-	shim$1 = function (arrayLike /*, mapFn, thisArg*/) {
-		var mapFn = arguments[1]
-		  , thisArg = arguments[2]
-		  , Context
-		  , i
-		  , j
-		  , arr
-		  , length
-		  , code
-		  , iterator
-		  , result
-		  , getIterator
-		  , value;
-
-		arrayLike = Object(validValue$1(arrayLike));
-
-		if (isValue(mapFn)) callable(mapFn);
-		if (!this || this === Array || !isFunction(this)) {
-			// Result: Plain array
-			if (!mapFn) {
-				if (isArguments(arrayLike)) {
-					// Source: Arguments
-					length = arrayLike.length;
-					if (length !== 1) return Array.apply(null, arrayLike);
-					arr = new Array(1);
-					arr[0] = arrayLike[0];
-					return arr;
-				}
-				if (isArray(arrayLike)) {
-					// Source: Array
-					arr = new Array(length = arrayLike.length);
-					for (i = 0; i < length; ++i) arr[i] = arrayLike[i];
-					return arr;
-				}
-			}
-			arr = [];
-		} else {
-			// Result: Non plain array
-			Context = this;
-		}
-
-		if (!isArray(arrayLike)) {
-			if ((getIterator = arrayLike[iteratorSymbol]) !== undefined) {
-				// Source: Iterator
-				iterator = callable(getIterator).call(arrayLike);
-				if (Context) arr = new Context();
-				result = iterator.next();
-				i = 0;
-				while (!result.done) {
-					value = mapFn ? call.call(mapFn, thisArg, result.value, i) : result.value;
-					if (Context) {
-						desc.value = value;
-						defineProperty(arr, i, desc);
-					} else {
-						arr[i] = value;
-					}
-					result = iterator.next();
-					++i;
-				}
-				length = i;
-			} else if (isString(arrayLike)) {
-				// Source: String
+	if (isValue$1(mapFn)) callable(mapFn);
+	if (!this || this === Array || !isFunction(this)) {
+		// Result: Plain array
+		if (!mapFn) {
+			if (isArguments(arrayLike)) {
+				// Source: Arguments
 				length = arrayLike.length;
-				if (Context) arr = new Context();
-				for (i = 0, j = 0; i < length; ++i) {
-					value = arrayLike[i];
-					if (i + 1 < length) {
-						code = value.charCodeAt(0);
-						// eslint-disable-next-line max-depth
-						if (code >= 0xd800 && code <= 0xdbff) value += arrayLike[++i];
-					}
-					value = mapFn ? call.call(mapFn, thisArg, value, j) : value;
-					if (Context) {
-						desc.value = value;
-						defineProperty(arr, j, desc);
-					} else {
-						arr[j] = value;
-					}
-					++j;
-				}
-				length = j;
+				if (length !== 1) return Array.apply(null, arrayLike);
+				arr = new Array(1);
+				arr[0] = arrayLike[0];
+				return arr;
+			}
+			if (isArray(arrayLike)) {
+				// Source: Array
+				arr = new Array(length = arrayLike.length);
+				for (i = 0; i < length; ++i) arr[i] = arrayLike[i];
+				return arr;
 			}
 		}
-		if (length === undefined) {
-			// Source: array or array-like
-			length = toPosInt(arrayLike.length);
-			if (Context) arr = new Context(length);
-			for (i = 0; i < length; ++i) {
-				value = mapFn ? call.call(mapFn, thisArg, arrayLike[i], i) : arrayLike[i];
+		arr = [];
+	} else {
+		// Result: Non plain array
+		Context = this;
+	}
+
+	if (!isArray(arrayLike)) {
+		if ((getIterator = arrayLike[iteratorSymbol]) !== undefined) {
+			// Source: Iterator
+			iterator = callable(getIterator).call(arrayLike);
+			if (Context) arr = new Context();
+			result = iterator.next();
+			i = 0;
+			while (!result.done) {
+				value = mapFn ? call.call(mapFn, thisArg, result.value, i) : result.value;
 				if (Context) {
 					desc.value = value;
-					defineProperty(arr, i, desc);
+					defineProperty$1(arr, i, desc);
 				} else {
 					arr[i] = value;
 				}
+				result = iterator.next();
+				++i;
+			}
+			length = i;
+		} else if (isString(arrayLike)) {
+			// Source: String
+			length = arrayLike.length;
+			if (Context) arr = new Context();
+			for (i = 0, j = 0; i < length; ++i) {
+				value = arrayLike[i];
+				if (i + 1 < length) {
+					code = value.charCodeAt(0);
+					// eslint-disable-next-line max-depth
+					if (code >= 0xd800 && code <= 0xdbff) value += arrayLike[++i];
+				}
+				value = mapFn ? call.call(mapFn, thisArg, value, j) : value;
+				if (Context) {
+					desc.value = value;
+					defineProperty$1(arr, j, desc);
+				} else {
+					arr[j] = value;
+				}
+				++j;
+			}
+			length = j;
+		}
+	}
+	if (length === undefined) {
+		// Source: array or array-like
+		length = toPosInt$1(arrayLike.length);
+		if (Context) arr = new Context(length);
+		for (i = 0; i < length; ++i) {
+			value = mapFn ? call.call(mapFn, thisArg, arrayLike[i], i) : arrayLike[i];
+			if (Context) {
+				desc.value = value;
+				defineProperty$1(arr, i, desc);
+			} else {
+				arr[i] = value;
 			}
 		}
-		if (Context) {
-			desc.value = null;
-			arr.length = length;
-		}
-		return arr;
-	};
-	return shim$1;
-}
+	}
+	if (Context) {
+		desc.value = null;
+		arr.length = length;
+	}
+	return arr;
+};
 
 var from = isImplemented$3()
 	? Array.from
-	: requireShim$1();
+	: shim$1;
 
 var isImplemented = function () {
 	var numberIsNaN = Number.isNaN;
@@ -32877,27 +32480,18 @@ var isImplemented = function () {
 	return !numberIsNaN({}) && numberIsNaN(NaN) && !numberIsNaN(34);
 };
 
-var shim;
-var hasRequiredShim;
-
-function requireShim () {
-	if (hasRequiredShim) return shim;
-	hasRequiredShim = 1;
-
-	shim = function (value) {
-		// eslint-disable-next-line no-self-compare
-		return value !== value;
-	};
-	return shim;
-}
+var shim = function (value) {
+	// eslint-disable-next-line no-self-compare
+	return value !== value;
+};
 
 var isNan = isImplemented()
 	? Number.isNaN
-	: requireShim();
+	: shim;
 
 var numberIsNaN       = isNan
   , toPosInt          = toPosInteger
-  , value$1             = validValue
+  , value$1             = validValue$1
   , indexOf$1           = Array.prototype.indexOf
   , objHasOwnProperty = Object.prototype.hasOwnProperty
   , abs               = Math.abs
@@ -32938,7 +32532,7 @@ var remove$1 = function (itemToRemove /*, …item*/) {
 	);
 };
 
-var isValue = isValue$3;
+var isValue = isValue$5;
 
 var map = { function: true, object: true };
 
@@ -32956,8 +32550,8 @@ var validObject = function (value) {
 var aFrom          = from
   , remove         = remove$1
   , value          = validObject
-  , d              = dExports
-  , emit           = eventEmitterExports.methods.emit
+  , d              = d$3.exports
+  , emit           = eventEmitter.exports.methods.emit
 
   , defineProperty = Object.defineProperty
   , hasOwnProperty$1 = Object.prototype.hasOwnProperty
@@ -32994,8 +32588,6 @@ var pipe = function (e1, e2/*, name*/) {
 	return pipe;
 };
 
-var pipe$1 = /*@__PURE__*/getDefaultExportFromCjs(pipe);
-
 let registeredHandlers = [...pagedMediaHandlers, ...generatedContentHandlers, ...filters];
 
 class Handlers {
@@ -33003,7 +32595,7 @@ class Handlers {
 
 		registeredHandlers.forEach((Handler) => {
 			let handler = new Handler(chunker, polisher, caller);
-			pipe$1(handler, this);
+			pipe(handler, this);
 		});
 	}
 }
@@ -33116,9 +32708,9 @@ class Previewer {
 
 	removeStyles(doc=document) {
 		// Get all stylesheets
-		const stylesheets = Array.from(doc.querySelectorAll("link[rel='stylesheet']:not([data-pagedjs-ignore], [media~='screen'])"));
+		const stylesheets = Array.from(doc.querySelectorAll("link[rel='stylesheet']"));
 		// Get inline styles
-		const inlineStyles = Array.from(doc.querySelectorAll("style:not([data-pagedjs-inserted-styles], [data-pagedjs-ignore], [media~='screen'])"));
+		const inlineStyles = Array.from(doc.querySelectorAll("style:not([data-pagedjs-inserted-styles])"));
 		const elements = [...stylesheets, ...inlineStyles];
 		return elements
 			// preserve order
@@ -33186,4 +32778,4 @@ class Previewer {
 
 EventEmitter(Previewer.prototype);
 
-export { Chunker, Handler, Polisher, Previewer, initializeHandlers, registerHandlers, registeredHandlers };
+export { Chunker, Handler, Polisher, Previewer, initializeHandlers, registerHandlers };

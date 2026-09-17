@@ -117,57 +117,6 @@ registerHandlers(class backgroundImageCover extends Handler {
 })
 
 /**
- * Copies the @media rules matching the browser window out of their block.
- *
- * Paged.js drops every @media block that is not print or all, so a responsive
- * grid loses the very rules that make it a grid and every column ends up on its
- * own line. Copying the matching ones freezes the layout at the width the page
- * was rendered with. Blocks without a condition, `@media screen` and
- * `@media print`, are left to Paged.js, which already handles them.
- */
-function freezeMatchingMediaQueries () {
-  const frozen = []
-
-  const collect = (rules) => {
-    Array.from(rules).forEach((rule) => {
-      if (rule.type !== CSSRule.MEDIA_RULE) {
-        return
-      }
-
-      const condition = rule.conditionText || rule.media.mediaText
-      if (!condition.includes('(') || !window.matchMedia(condition).matches) {
-        return
-      }
-
-      Array.from(rule.cssRules).forEach((inner) => {
-        if (inner.type === CSSRule.MEDIA_RULE) {
-          collect([inner])
-        } else {
-          frozen.push(inner.cssText)
-        }
-      })
-    })
-  }
-
-  Array.from(document.styleSheets).forEach((sheet) => {
-    try {
-      collect(sheet.cssRules)
-    } catch (error) {
-      // a cross origin stylesheet cannot be read from here
-    }
-  })
-
-  if (frozen.length === 0) {
-    return
-  }
-
-  const style = document.createElement('style')
-  style.dataset.publication = 'frozen-media-queries'
-  style.textContent = frozen.join('\n')
-  document.head.appendChild(style)
-}
-
-/**
  * Resolves on the next animation frame, or after a second if the browser draws none
  */
 function nextAnimationFrame () {
@@ -195,12 +144,6 @@ function atMost (promise, delay, onTimeout) {
 }
 
 window.addEventListener('load', async () => {
-  // only the standalone page layout wants the screen layout on paper, a book
-  // cancels the grid on purpose to keep its narrow measure readable
-  if (document.body.classList.contains('publication--page')) {
-    freezeMatchingMediaQueries()
-  }
-
   // Paged.js waits for every image it lays out. A lazy image lands outside the
   // viewport once paginated, so the browser never loads it and the pagination
   // never finishes. Nothing is below the fold in a document meant to be printed.

@@ -1,5 +1,8 @@
 import {Previewer, registerHandlers, Handler} from '../../javascripts/vendor/pagedjs/paged.esm.js'
 
+// give up on the paged layout after this, rather than never marking the page ready
+const PAGINATION_TIMEOUT = 20000
+
 /**
  * Returns true if the second array contains all the selectors of the first array
  *
@@ -113,38 +116,62 @@ registerHandlers(class backgroundImageCover extends Handler {
   }
 })
 
-window.addEventListener('load', () => {
-  // wait two animation frames to be sure high resolution images are rendered after loaded
-  // src: https://stackoverflow.com/questions/14578356/how-to-detect-when-an-image-has-finished-rendering-in-the-browser-i-e-painted
-  let previousTime = null;
-  const waitNextAnimationIframe = new Promise((resolve,reject) =>{
-    const timeoutId = setTimeout(reject,1000) // not more than 1 s
-    window.requestAnimationFrame((t)=>{
-      if (previousTime === t){
-        waitNextAnimationIframe.then((t)=>{
-          clearTimeout(timeoutId)
-          resolve(t)
-        })
-      } else {
-        previousTime = t
-        clearTimeout(timeoutId)
-        resolve(t)
-      }
+/**
+ * Resolves on the next animation frame, or after a second if the browser draws none
+ */
+function nextAnimationFrame () {
+  return new Promise((resolve) => {
+    const timeoutId = setTimeout(resolve, 1000)
+
+    window.requestAnimationFrame(() => {
+      clearTimeout(timeoutId)
+      resolve()
     })
   })
-  
-  // TODO be able to detec ready state for VueJs bazarliste dynamic 
-  //   and end of rendering of Leaflet map
-  waitNextAnimationIframe
-    .then((t)=>waitNextAnimationIframe)
-    .finally(()=>{
-      new Previewer().preview().then(() => {
-        document.body.dataset.publication = 'ready'
-        
-        if (browserPrintAfterRendered === true){
-          // print page with browser
-          window.print();
-        }
-      })
-    })
+}
+
+/**
+ * Resolves with the promise, or after `delay` ms whatever it is doing
+ */
+function atMost (promise, delay, onTimeout) {
+  return Promise.race([
+    promise,
+    new Promise((resolve) => setTimeout(() => {
+      onTimeout()
+      resolve()
+    }, delay))
+  ])
+}
+
+window.addEventListener('load', async () => {
+  // Paged.js waits for every image it lays out. A lazy image lands outside the
+  // viewport once paginated, so the browser never loads it and the pagination
+  // never finishes. Nothing is below the fold in a document meant to be printed.
+  document.querySelectorAll('img[loading="lazy"]').forEach((image) => {
+    image.loading = 'eager'
+  })
+
+  // wait two animation frames to be sure high resolution images are rendered after loaded
+  // src: https://stackoverflow.com/questions/14578356/how-to-detect-when-an-image-has-finished-rendering-in-the-browser-i-e-painted
+  await nextAnimationFrame()
+  await nextAnimationFrame()
+
+  // Whatever else keeps the layout pending, the export only waits for
+  // data-publication, so never marking it would hang the whole export.
+  try {
+    await atMost(
+      new Previewer().preview(),
+      PAGINATION_TIMEOUT,
+      () => console.error(`Pagination did not finish within ${PAGINATION_TIMEOUT}ms, printing the page as it is.`)
+    )
+  } catch (error) {
+    console.error(error)
+  }
+
+  document.body.dataset.publication = 'ready'
+
+  if (browserPrintAfterRendered === true) {
+    // print page with browser
+    window.print()
+  }
 })

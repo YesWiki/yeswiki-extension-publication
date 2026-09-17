@@ -465,6 +465,7 @@ plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informat
 | `htmltopdf_service_url`                |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
 | `htmltopdf_service_authorized_domains` |                                    | Si votre serveur partage les fonction de générateur de pdf, il faut lui indique les nom de domaines autorisés
 | `htmltopdf_base_url` |                 | Si votre serveur n'a pas accès au wiki via la valeur de `base_url`
+| `page_load_timeout`                    | `60000`                            | Temps laissé au navigateur, en millisecondes, pour charger la page et terminer sa mise en page
 
 ### … avec Chrome sur votre serveur
 
@@ -495,6 +496,26 @@ Vous devez indiquer les noms de domaine que vous autorisez :
 array(
     ...
     'htmltopdf_service_authorized_domains' => ['example.org', 'youpi.com', 'toto.fr'],
+    ...
+);
+```
+
+### Si la génération s'arrête sur une erreur 504
+
+Le serveur web coupe la requête au bout d'un certain temps (`fastcgi_read_timeout`
+chez nginx, `ProxyTimeout` ou `Timeout` chez Apache), souvent 60 secondes. PHP, lui,
+continue de travailler dans le vide et la personne ne reçoit qu'une page d'erreur du
+serveur web, sans message de l'extension.
+
+La génération prend au plus `page_load_timeout` plus 30 secondes pour le rendu du PDF.
+Gardez donc `page_load_timeout` sous le délai de votre serveur web, ou allongez ce
+dernier.
+
+```php
+array(
+    ...
+    // 25 s de chargement + 30 s de rendu, sous une coupure à 60 s
+    'page_load_timeout' => 25000,
     ...
 );
 ```

@@ -1,12 +1,11 @@
 import SpinnerLoader from './components/SpinnerLoader.js'
 import Step from './components/Step.js'
-import Translations from './components/Translations.js'
 
 let rootsElements = ['.pdf-handler-container'];
 let isVueJS3 = (typeof Vue.createApp == "function");
 
 let appParams = {
-    components: { Translations, Step, SpinnerLoader },
+    components: { Step, SpinnerLoader },
     data: function() {
         return {
             abortController : null,
@@ -320,6 +319,14 @@ let appParams = {
             let newUrl = this.appendSourceUrl(this.urls.external);
             window.location = newUrl;
         },
+        parseJson: function(value){
+            try {
+                let parsed = JSON.parse(value);
+                return (parsed !== null && typeof parsed == "object") ? parsed : {};
+            } catch (error) {
+                return {};
+            }
+        },
         renderDefaultError: function(error){
             this.finish = true;
             if (error.message === '===Do Nothing==='){
@@ -454,6 +461,7 @@ let appParams = {
         this.pageTag = baseEl.dataset.pageTag ?? '';
         this.sourceUrl = baseEl.dataset.sourceUrl ?? '';
         this.refresh = (baseEl.dataset.refresh === true || baseEl.dataset.refresh === "true");
+        this.translations = this.parseJson(baseEl.dataset.translations);
         this.buttonTitle = this.t('preview');
         this.buttonType = 'info'
         this.buttonAction = this.viewPreview;

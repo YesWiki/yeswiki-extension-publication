@@ -91,10 +91,10 @@ class PreviewHandler extends YesWikiHandler
                     '{{linkstyle}}{{linkjavascript}}',
                 ),
 
+                // isPaged returns a bool, twig used to print it as '1'
                 'initialPublicationState' => $this->publicationService->isPaged(
                     $metadatas['publication-mode'],
-                ) ?:
-                    'ready',
+                ) ? 'awaiting-layout' : 'ready',
                 'stylesModifiers' => $this->publicationService->getStyles(
                     $metadatas,
                     ['debug' => $this->wiki->config['debug']],

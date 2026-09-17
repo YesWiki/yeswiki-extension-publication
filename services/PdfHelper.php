@@ -422,20 +422,19 @@ class PdfHelper
             }
 
 
-            $timeout = (
-                empty(intval($this->params->get('page_load_timeout'))) ||
-                intval($this->params->get('page_load_timeout')) < 30000 // in ms
-            ) ? 60 // in sec
-                : ceil(intval($this->params->get('page_load_timeout')) * 2 / 1000); // in s
-            // (twice to be sure that page manages timeout and not php)
-            set_time_limit($timeout);
+            // one budget for the whole browser job, so it can be kept under the gateway
+            // timeout of the web server, which answers a 504 whatever php is still doing
+            $budget = max(30000, intval($this->params->get('page_load_timeout'))); // in ms
+            $deadline = microtime(true) + $budget / 1000;
+            set_time_limit(intval(ceil($budget / 1000)) + 30);
 
-            $page->navigate($sourceUrl)->waitForNavigation(Page::NETWORK_IDLE, intval($this->params->get('page_load_timeout')) > 30000 ? $this->params->get('page_load_timeout') : 30000);
+            // NETWORK_IDLE never settles on a page holding a map or any polling script,
+            // and print.js only starts on 'load' anyway
+            $page->navigate($sourceUrl)->waitForNavigation(Page::LOAD, $budget);
             $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 2);
 
-            set_time_limit($timeout);
-
-            $value = $page->evaluate('__is_yw_publication_ready()')->getReturnValue($this->params->get('page_load_timeout'));
+            $remaining = max(5000, intval(($deadline - microtime(true)) * 1000));
+            $page->evaluate('__is_yw_publication_ready()')->getReturnValue($remaining);
             $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 4);
 
             // reset timer for time limit and give 30 sec more to render pdf

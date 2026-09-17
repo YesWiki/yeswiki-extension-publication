@@ -10,24 +10,24 @@
         data-hash="{{ hash }}" 
         data-page-tag="{{ pageTag }}"
         data-refresh="{{ refresh|json_encode }}"
+        data-translations="{{ {
+            'creatingpdf': _t('PUBLICATION_CREATING_PDF'),
+            'errorforadmin': _t('PUBLICATION_ERROR_FOR_ADMIN'),
+            'errorforexternaleurlcheck': _t('PUBLICATION_ERROR_FOR_EXTERNAL_URL_DOMAIN_CHECK'),
+            'errorforexternaleurldomainnotauthorized': _t('PUBLICATION_ERROR_FOR_EXTERNAL_DOMAIN_NOT_AUTHORIZED'),
+            'errorforexternaleurlhtmlformat': _t('PUBLICATION_ERROR_FOR_EXTERNAL_HTML_FORMAT'),
+            'errorforexternaleurlnotconfigured': _t('PUBLICATION_ERROR_FOR_EXTERNAL_NOT_CONFIGURED'),
+            'errorforexternalwhilecreatingpdf': _t('PUBLICATION_ERROR_WHILE_GENERATING_PDF'),
+            'errorforexternalwithoutchromium': _t('PUBLICATION_ERROR_FOR_EXTERNAL_WITHOUT_CHROMIUM'),
+            'errorforurls': _t('PUBLICATION_ERROR_FOR_URLS'),
+            'errorforuser': _t('PUBLICATION_ERROR_FOR_USER'),
+            'errorreloading': _t('PUBLICATION_ERROR_RELOADING'),
+            'opendefaultlink': _t('PUBLICATION_OPEN_DEFAULT_LINK'),
+            'popuptovalidate': _t('PUBLICATION_POPUP_TO_VALIDATE'),
+            'preview': _t('PUBLICATION_PREVIEW'),
+            'printviapreview': _t('PUBLICATION_PRINT_VIA_PREVIEW')
+        }|json_encode }}"
     >
-    <translations>
-        <template #errorforadmin>{{ _t('PUBLICATION_ERROR_FOR_ADMIN') }}</template>
-        <template #errorforexternalwithoutchromium>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_WITHOUT_CHROMIUM') }}</template>
-        <template #errorforuser>{{ _t('PUBLICATION_ERROR_FOR_USER') }}</template>
-        <template #errorforurls>{{ _t('PUBLICATION_ERROR_FOR_URLS') }}</template>
-        <template #errorforexternaleurlcheck>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_URL_DOMAIN_CHECK') }}</template>
-        <template #errorforexternaleurlhtmlformat>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_HTML_FORMAT') }}</template>
-        <template #errorforexternaleurldomainnotauthorized>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_DOMAIN_NOT_AUTHORIZED') }}</template>
-        <template #errorforexternaleurlnotconfigured>{{ _t('PUBLICATION_ERROR_FOR_EXTERNAL_NOT_CONFIGURED') }}</template>
-        <template #errorforexternalwhilecreatingpdf>{{ _t('PUBLICATION_ERROR_WHILE_GENERATING_PDF') }}</template>
-        <template #errorreloading>{{ _t('PUBLICATION_ERROR_RELOADING') }}</template>
-        <template #creatingpdf>{{ _t('PUBLICATION_CREATING_PDF') }}</template>
-        <template #popuptovalidate>{{ _t('PUBLICATION_POPUP_TO_VALIDATE') }}</template>
-        <template #preview>{{ _t('PUBLICATION_PREVIEW') }}</template>
-        <template #printviapreview>{{ _t('PUBLICATION_PRINT_VIA_PREVIEW') }}</template>
-        <template #opendefaultlink>{{ _t('PUBLICATION_OPEN_DEFAULT_LINK') }}</template>
-    </translations>
     <h2>{{ _t('PUBLICATION_PDF_CREATION',{pageTag:pageTag|length < 12 ? pageTag : pageTag|slice(0,11)~'…'}) }}</h2>
     <div>
       {% if isAdmin == true %}

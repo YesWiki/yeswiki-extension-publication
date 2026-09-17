@@ -463,7 +463,12 @@ Elles sortaient en aplat gris. Deux choses s'y opposaient.
 Leaflet cache ses tuiles par défaut, `.leaflet-tile { visibility: hidden }`, et ne
 les révèle qu'en posant `leaflet-tile-loaded` depuis son code, sur les balises
 qu'il a créées lui-même. Paged.js recopie la carte dans la page, et les copies
-n'obtiennent jamais cette classe. `page.css` les rend visibles.
+n'obtiennent jamais cette classe.
+
+Leaflet fait aussi apparaître chaque tuile en fondu, en animant une opacité posée
+en style en ligne. La copie fige ce fondu où il en était, souvent près de zéro.
+`page.css` remet les deux à plat, avec un `!important` pour le second puisque rien
+d'autre ne passe devant un style en ligne.
 
 Leaflet cadre ensuite sa vue sur la largeur de son conteneur au moment où il
 démarre, soit la fenêtre du navigateur, 1855 px ici. Paged.js rogne ensuite cette

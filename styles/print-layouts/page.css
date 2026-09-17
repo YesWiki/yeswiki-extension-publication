@@ -182,6 +182,16 @@ hr.page-break {
   visibility: inherit;
 }
 
+/**
+ * Leaflet fades a tile in by animating an inline opacity, and the copy freezes
+ * at whatever the fade had reached, often close to zero. Only !important gets
+ * past an inline style, and a printed page has no animation to respect.
+ */
+.publication--page .leaflet-tile,
+.publication--page .leaflet-tile-container {
+  opacity: 1 !important;
+}
+
 /* a printed map has nothing to click on, the attribution stays, it is the licence */
 .publication--page .leaflet-control-container .leaflet-control:not(.leaflet-control-attribution) {
   display: none;

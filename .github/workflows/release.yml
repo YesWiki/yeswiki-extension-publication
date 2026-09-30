@@ -1,8 +1,9 @@
 name: Release extension
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       tag:
@@ -14,12 +15,14 @@ env:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
 
       - uses: shivammathur/setup-php@v2
         if: hashFiles('composer.json') != ''
@@ -45,7 +48,7 @@ jobs:
       - name: Create release archive
         run: |
           EXTENSION="publication"
-          TAG="${{ github.event.inputs.tag || github.event.release.tag_name }}"
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
           ARCHIVE_NAME="yeswiki-extension-${EXTENSION}-${TAG}.zip"
           mkdir -p /tmp/release/${EXTENSION}
           rsync -a \
@@ -64,5 +67,6 @@ jobs:
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           files: ${{ env.ARCHIVE_NAME }}
+          generate_release_notes: true

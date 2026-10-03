@@ -2,6 +2,8 @@
 
 namespace YesWiki\Test\Core\Service;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Depends;
 use Exception;
 use YesWiki\Test\Core\YesWikiTestCase;
 use YesWiki\Wiki;
@@ -20,15 +22,8 @@ class Bazar2PublicationActionTest extends YesWikiTestCase
         return $wiki;
     }
 
-    /**
-     * @depends testWikiExisting
-     * @covers Bazar2PublicationAction::run
-     * @dataProvider providerTestRun
-     * @param string $templatepage
-     * @param bool $displayTemplateAlert
-     * @param bool $throwException
-     * @param Wiki $wiki
-     */
+    #[Depends('testWikiExisting')]
+    #[DataProvider('providerTestRun')]
     public function testRun(string $templatepage, bool $displayTemplateAlert, bool $throwException, Wiki $wiki)
     {
         $templateString = empty($templatepage) ? '' : " templatepage=\"$templatepage\"";
@@ -55,9 +50,9 @@ class Bazar2PublicationActionTest extends YesWikiTestCase
         }
     }
 
-    public function providerTestRun()
+    public static function providerTestRun()
     {
-        return [
+        return array_map('array_values', [
             'default behaviour' => [
                 'templatepage' => '',
                 'templatepage alert displayed' => false,
@@ -73,6 +68,6 @@ class Bazar2PublicationActionTest extends YesWikiTestCase
                 'templatepage alert displayed' => false,
                 'exception thrown' => false
             ],
-        ];
+        ]);
     }
 }

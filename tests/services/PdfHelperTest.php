@@ -2,6 +2,8 @@
 
 namespace YesWiki\Test\Publication\Service;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Depends;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Publication\Service\PdfHelper;
@@ -28,18 +30,8 @@ class PdfHelperTest extends YesWikiTestCase
         return $wiki;
     }
 
-    /**
-     * @depends testPdfHelperExisting
-     * @covers PdfHelper::getPageEntriesContent
-     * @dataProvider dataProvider
-     * @param string $pageTagMode
-     * @param string|null $via
-     * @param array $bazarlisteIds
-     * @param bool $withTemplate
-     * @param mixed $expected
-     * @param bool $clean
-     * @param Wiki $wiki
-     */
+    #[Depends('testPdfHelperExisting')]
+    #[DataProvider('dataProvider')]
     public function testGetPageEntriesContent(string $pageTagMode, ?string $via, array $bazarlisteIds, bool $withTemplate, bool $clean, $expected, Wiki $wiki)
     {
         if ($pageTagMode === 'entry') {
@@ -114,10 +106,10 @@ class PdfHelperTest extends YesWikiTestCase
         }
     }
 
-    public function dataProvider()
+    public static function dataProvider()
     {
         // pageTagMode ,via, bazarlisteIds, withTemplate, clean,expected
-        return [
+        return array_map('array_values', [
             'page not entry' => [
                 'mode' => 'page',
                 'via' => null,
@@ -206,7 +198,7 @@ class PdfHelperTest extends YesWikiTestCase
                 'clean' => true,
                 'expected' => ["template content" => "{{content}}"]
             ]
-        ];
+        ]);
     }
 
     /**
@@ -363,15 +355,8 @@ class PdfHelperTest extends YesWikiTestCase
         }
     }
 
-    /**
-     * @depends testPdfHelperExisting
-     * @covers PdfHelper::getFullFileName
-     * @dataProvider dataProviderGetFullFileName
-     * @param array $get
-     * @param array $server
-     * @param array $expected
-     * @param Wiki $wiki
-     */
+    #[Depends('testPdfHelperExisting')]
+    #[DataProvider('dataProviderGetFullFileName')]
     public function testGetFullFileName(array $get, array $server, array $expected, Wiki $wiki)
     {
         $previousPage = $this->setRootPage($wiki);
@@ -402,9 +387,9 @@ class PdfHelperTest extends YesWikiTestCase
         }
     }
 
-    public function dataProviderGetFullFileName()
+    public static function dataProviderGetFullFileName()
     {
-        return [
+        return array_map('array_values', [
             'first test' => [
                 'get' => [],
                 'server' => [
@@ -449,7 +434,7 @@ class PdfHelperTest extends YesWikiTestCase
                     'sourceUrl' => 'regexp:/^http:\/\/localhost\/\?TesT\/preview$/'
                 ],
             ],
-        ];
+        ]);
     }
 
     protected function setRootPage(Wiki $wiki): array

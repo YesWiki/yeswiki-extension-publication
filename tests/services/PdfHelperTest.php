@@ -6,6 +6,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use YesWiki\Bazar\Service\EntryManager;
+use YesWiki\Bazar\Service\FormManager;
 use YesWiki\Publication\Service\PdfHelper;
 use YesWiki\Core\Service\DbService;
 use YesWiki\Core\Service\PageManager;
@@ -19,6 +20,34 @@ require_once 'tests/YesWikiTestCase.php';
 
 class PdfHelperTest extends YesWikiTestCase
 {
+    /** @var list<array{formId: string, tag: string}> */
+    private array $seededEntries = [];
+
+    protected function tearDown(): void
+    {
+        $entryManager = $this->getWiki()->services->get(EntryManager::class);
+        foreach ($this->seededEntries as $seeded) {
+            $entryManager->delete($seeded['tag'], true);
+        }
+        $this->seededEntries = [];
+    }
+
+    private function ensureFormHasEntry(Wiki $wiki, string $formId): void
+    {
+        $GLOBALS['wiki'] = $wiki;
+        $entryManager = $wiki->services->get(EntryManager::class);
+        if ($wiki->services->get(FormManager::class)->getOne($formId) === null) {
+            return;
+        }
+        if (count($entryManager->search(['formsIds' => [$formId]])) > 0) {
+            return;
+        }
+        $entry = $entryManager->create($formId, ['antispam' => 1, 'bf_titre' => 'PdfHelperTest seed ' . $formId]);
+        if (!empty($entry['id_fiche'])) {
+            $this->seededEntries[] = ['formId' => $formId, 'tag' => $entry['id_fiche']];
+        }
+    }
+
     /**
      * @covers PdfHelper::__construct
      * @return Wiki
@@ -34,6 +63,11 @@ class PdfHelperTest extends YesWikiTestCase
     #[DataProvider('dataProvider')]
     public function testGetPageEntriesContent(string $pageTagMode, ?string $via, array $bazarlisteIds, bool $withTemplate, bool $clean, $expected, Wiki $wiki)
     {
+        if ($via === 'bazarliste' && !empty($expected['entries last-date'])) {
+            foreach ($bazarlisteIds as $bazarlisteId) {
+                $this->ensureFormHasEntry($wiki, (string)$bazarlisteId);
+            }
+        }
         if ($pageTagMode === 'entry') {
             $pageTag = $this->getEntryPageName($withTemplate);
             if ($withTemplate) {

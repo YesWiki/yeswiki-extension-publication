@@ -1,0 +1,16 @@
+name: Tests
+
+on:
+  push:
+    branches: [doryphore]
+  pull_request:
+    branches: [doryphore]
+  workflow_dispatch:
+
+jobs:
+  phpunit:
+    permissions:
+      contents: read
+    uses: YesWiki/yeswiki/.github/workflows/phpunit.yml@doryphore
+    with:
+      extension: publication

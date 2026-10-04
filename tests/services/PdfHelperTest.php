@@ -7,386 +7,225 @@ use PHPUnit\Framework\Attributes\Depends;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Bazar\Service\FormManager;
-use YesWiki\Publication\Service\PdfHelper;
-use YesWiki\Core\Service\DbService;
+use YesWiki\Core\Service\AclService;
 use YesWiki\Core\Service\PageManager;
-use YesWiki\Core\Service\TemplateEngine;
+use YesWiki\Publication\Service\PdfHelper;
 use YesWiki\Test\Core\YesWikiTestCase;
 use YesWiki\Wiki;
 
 require_once 'tests/YesWikiTestCase.php';
 
-// TODO update tests with new pdfHelper
-
+/**
+ * PdfHelper finds the entries and fiche templates a page publishes, on forms, entries and pages the test creates itself.
+ */
 class PdfHelperTest extends YesWikiTestCase
 {
-    /** @var list<array{formId: string, tag: string}> */
-    private array $seededEntries = [];
+    private const TEMPLATE_FOLDER = 'custom/templates/bazar/';
+    private const TEMPLATE_CONTENT = 'test';
 
-    protected function tearDown(): void
+    private static array $formIds = [];
+    private static array $entryTags = [];
+    private static array $pageTags = [];
+    private static array $templateFiles = [];
+
+    /**
+     * Keeps every created form until the end, so no two cases share a form id the template loader already looked up.
+     */
+    public static function tearDownAfterClass(): void
     {
-        $entryManager = $this->getWiki()->services->get(EntryManager::class);
-        foreach ($this->seededEntries as $seeded) {
-            $entryManager->delete($seeded['tag'], true);
+        $wiki = self::getWiki();
+        $GLOBALS['wiki'] = $wiki;
+        $aclService = $wiki->services->get(AclService::class);
+        foreach (self::$entryTags as $tag) {
+            $wiki->services->get(EntryManager::class)->delete($tag, true);
+            $aclService->delete($tag);
         }
-        $this->seededEntries = [];
+        foreach (self::$pageTags as $tag) {
+            $wiki->services->get(PageManager::class)->deleteOrphaned($tag);
+            $aclService->delete($tag);
+        }
+        foreach (self::$formIds as $formId) {
+            $wiki->services->get(FormManager::class)->delete($formId);
+        }
+        foreach (self::$templateFiles as $file) {
+            @unlink($file);
+        }
+        self::$formIds = self::$entryTags = self::$pageTags = self::$templateFiles = [];
     }
 
-    private function ensureFormHasEntry(Wiki $wiki, string $formId): void
+    /**
+     * Creates a form holding one readable entry, with a fiche template when asked, and returns the form id.
+     */
+    private function createFormWithEntry(Wiki $wiki, bool $withTemplate): string
     {
         $GLOBALS['wiki'] = $wiki;
-        $entryManager = $wiki->services->get(EntryManager::class);
-        if ($wiki->services->get(FormManager::class)->getOne($formId) === null) {
-            return;
+        $formId = $wiki->services->get(FormManager::class)->create([
+            'bn_label_nature' => 'PdfHelperTest form',
+            'bn_template' => 'texte***bf_titre***Titre***60***255*** *** ***text***1*** *** *** * *** * *** *** *** ***',
+            'bn_condition' => '',
+        ]);
+        self::$formIds[] = $formId;
+        $entry = $wiki->services->get(EntryManager::class)->create($formId, ['bf_titre' => 'PdfHelperTest entry ' . $formId]);
+        self::$entryTags[] = $entry['id_fiche'];
+        $wiki->services->get(AclService::class)->save($entry['id_fiche'], 'read', '*');
+        if ($withTemplate) {
+            $this->createTemplate('fiche-' . $formId . '.tpl.html');
         }
-        if (count($entryManager->search(['formsIds' => [$formId]])) > 0) {
-            return;
+
+        return $formId;
+    }
+
+    private function createTemplate(string $templateName): void
+    {
+        $file = self::TEMPLATE_FOLDER . $templateName;
+        $this->assertFileDoesNotExist($file, 'the test would overwrite a template of this wiki');
+        if (!is_dir(self::TEMPLATE_FOLDER)) {
+            mkdir(self::TEMPLATE_FOLDER, 0777, true);
         }
-        $entry = $entryManager->create($formId, ['antispam' => 1, 'bf_titre' => 'PdfHelperTest seed ' . $formId]);
-        if (!empty($entry['id_fiche'])) {
-            $this->seededEntries[] = ['formId' => $formId, 'tag' => $entry['id_fiche']];
-        }
+        file_put_contents($file, self::TEMPLATE_CONTENT);
+        self::$templateFiles[] = $file;
+    }
+
+    private function createPage(Wiki $wiki, string $body): string
+    {
+        $pageManager = $wiki->services->get(PageManager::class);
+        do {
+            $tag = 'PdfHelperTest' . bin2hex(random_bytes(4));
+        } while (!empty($pageManager->getOne($tag)));
+        $pageManager->save($tag, $body, '', true);
+        $wiki->services->get(AclService::class)->save($tag, 'read', '*');
+        self::$pageTags[] = $tag;
+
+        return $tag;
     }
 
     /**
      * @covers PdfHelper::__construct
-     * @return Wiki
      */
     public function testPdfHelperExisting(): Wiki
     {
         $wiki = $this->getWiki();
         $this->assertTrue($wiki->services->has(PdfHelper::class));
+
         return $wiki;
     }
 
     #[Depends('testPdfHelperExisting')]
     #[DataProvider('dataProvider')]
-    public function testGetPageEntriesContent(string $pageTagMode, ?string $via, array $bazarlisteIds, bool $withTemplate, bool $clean, $expected, Wiki $wiki)
+    public function testGetPageEntriesContent(string $pageTagMode, ?string $via, array $forms, bool $withTemplate, array $expected, Wiki $wiki)
     {
-        if ($via === 'bazarliste' && !empty($expected['entries last-date'])) {
-            foreach ($bazarlisteIds as $bazarlisteId) {
-                $this->ensureFormHasEntry($wiki, (string)$bazarlisteId);
-            }
-        }
         if ($pageTagMode === 'entry') {
-            $pageTag = $this->getEntryPageName($withTemplate);
-            if ($withTemplate) {
-                if (!empty($pageTag)) {
-                    list($templateName, $templateContent) = $this->getCustomTemplate($pageTag, false);
-                }
-                // do not use temporary template because it will not been registered by TemplateEngine
-                // if (empty($pageTag) || ($templateContent === '{{template not found}}')) {
-                //     // create template for next tests
-                //     $pageTag = $this->getEntryPageName(false);
-                //     list($templateName, $templateContent) = $this->getCustomTemplate($pageTag, true);
-                // }
-                if ($templateContent === 'test') {
-                    $templatesNameToDelete[] = $templateName;
-                }
-                if ($templateContent == '{{template not found}}' && isset($expected["template content"])) {
-                    unset($expected["template content"]);
-                } else {
-                    $expected["template content"] = $templateContent;
-                }
+            $formId = $this->createFormWithEntry($wiki, $withTemplate);
+            $pageTag = end(self::$entryTags);
+        } elseif ($pageTagMode === 'page' && $via === 'bazarliste') {
+            $ids = [];
+            foreach ($forms as $slot => $hasTemplate) {
+                $ids[$slot] = $this->createFormWithEntry($wiki, $hasTemplate);
             }
+            $pageTag = $this->createPage($wiki, "{{bazarliste id=\"" . implode(',', $ids) . "\"}}\n{{bazar2publication}}");
+            $expected = array_combine(
+                array_map(fn ($key) => preg_replace_callback('/\{(\w)\}/', fn ($m) => $ids[$m[1]], $key), array_keys($expected)),
+                $expected
+            );
         } elseif ($pageTagMode === 'page') {
-            if ($via === 'bazarliste') {
-                // $pageTag = $this->getPageTagWithBazar2Publication($bazarlisteIds);
-                // if (empty($pageTage)) {
-                $pageTag = $this->createPageTagWithBazar2Publication($bazarlisteIds);
-                $pageToDelete = $pageTag;
-                $bazarlisteIdsCopy = $bazarlisteIds;
-                $bazarlisteIds = [];
-                foreach ($bazarlisteIdsCopy as $bazarlisteId) {
-                    if (isset($expected['template fiche-'.$bazarlisteId])) {
-                        $templateName = 'fiche-'.$bazarlisteId.'.tpl.html';
-                        $templateContent = $this->createCustomTemplate($templateName);
-                        $expected['template fiche-'.$bazarlisteId] = $templateContent;
-                        $bazarlisteIds[] = $bazarlisteId;
-                        $templatesNameToDelete[] = $templateName;
-                    }
-                }
-                // }
-            } else {
-                $pageTag = $this->getPageTagWithoutBazar2Publication();
-            }
+            $pageTag = $this->createPage($wiki, 'A page without any entry list');
         } else {
-            // not existing page
             $pageTag = '\/aa';
         }
-        $pdfHelper = $wiki->services->get(PdfHelper::class);
-        try {
-            $results = $pdfHelper->getPageEntriesContent($pageTag, $via);
-        } finally {
-            if (!empty($pageToDelete)) {
-                $this->deletePage($pageToDelete);
-            }
-            if ($clean && !empty($templatesNameToDelete)) {
-                foreach ($templatesNameToDelete as $templateNameToDelete) {
-                    $this->deleteCustomEmptyTemplate($templateNameToDelete);
-                }
-            }
+
+        $results = $wiki->services->get(PdfHelper::class)->getPageEntriesContent($pageTag, $via);
+
+        if (isset($expected['entries last-date'])) {
+            $this->assertIsString($results['entries last-date'] ?? null);
+            $this->assertNotEmpty($results['entries last-date']);
+            unset($expected['entries last-date'], $results['entries last-date']);
         }
-        if (!empty($expected['entries last-date'])) {
-            $this->assertArrayHasKey('entries last-date', $results);
-            $this->assertTrue(!empty($results['entries last-date']));
-            $this->assertIsString($results['entries last-date']);
-            foreach ($bazarlisteIds as $bazarlisteId) {
-                $this->assertArrayHasKey('template fiche-'.$bazarlisteId, $results);
-                $this->assertSame($expected['template fiche-'.$bazarlisteId], $results['template fiche-'.$bazarlisteId]);
-            }
-        } else {
-            $this->assertSame($expected, $results);
-        }
+        $this->assertSame($expected, $results);
     }
 
     public static function dataProvider()
     {
-        // pageTagMode ,via, bazarlisteIds, withTemplate, clean,expected
+        $content = self::TEMPLATE_CONTENT;
+
         return array_map('array_values', [
             'page not entry' => [
                 'mode' => 'page',
                 'via' => null,
-                'bazarlisteIds' => [],
+                'forms' => [],
                 'withTemplate' => false,
-                'clean' => false,
-                'expected' => []
+                'expected' => [],
             ],
             'page not entry with via without template' => [
                 'mode' => 'page',
                 'via' => 'bazarliste',
-                'bazarlisteIds' => ['3'],
+                'forms' => ['a' => false],
                 'withTemplate' => false,
-                'clean' => false,
-                'expected' => ['entries last-date' => '{{date}}']
+                'expected' => ['entries last-date' => ''],
             ],
             'page not entry with via with template' => [
                 'mode' => 'page',
                 'via' => 'bazarliste',
-                'bazarlisteIds' => ['1'],
+                'forms' => ['a' => true],
                 'withTemplate' => true,
-                'clean' => true,
-                'expected' => ['entries last-date' => '{{date}}','template fiche-1' => '{{content}}']
+                'expected' => ['entries last-date' => '', 'template fiche-{a}' => $content],
             ],
             'page not entry with via 2 ids with template' => [
                 'mode' => 'page',
                 'via' => 'bazarliste',
-                'bazarlisteIds' => ['1','3'],
+                'forms' => ['a' => true, 'b' => false],
                 'withTemplate' => true,
-                'clean' => true,
-                'expected' => ['entries last-date' => '{{date}}','template fiche-1' => '{{content}}']
+                'expected' => ['entries last-date' => '', 'template fiche-{a}' => $content],
             ],
             'page not entry with via 2 ids with templates' => [
                 'mode' => 'page',
                 'via' => 'bazarliste',
-                'bazarlisteIds' => ['1','4'],
+                'forms' => ['a' => true, 'b' => true],
                 'withTemplate' => true,
-                'clean' => true,
-                'expected' => ['entries last-date' => '{{date}}','template fiche-1' => '{{content}}','template fiche-4' => '{{content}}']
+                'expected' => ['entries last-date' => '', 'template fiche-{a}' => $content, 'template fiche-{b}' => $content],
             ],
             'not existing page' => [
                 'mode' => 'no page',
                 'via' => null,
-                'bazarlisteIds' => [],
+                'forms' => [],
                 'withTemplate' => false,
-                'clean' => false,
-                'expected' => []
+                'expected' => [],
             ],
             'not existing page with via' => [
                 'mode' => 'no page',
                 'via' => 'bazarliste',
-                'bazarlisteIds' => [],
+                'forms' => [],
                 'withTemplate' => false,
-                'clean' => false,
-                'expected' => []
+                'expected' => [],
             ],
             'entry without template' => [
                 'mode' => 'entry',
                 'via' => null,
-                'bazarlisteIds' => [],
+                'forms' => [],
                 'withTemplate' => false,
-                'clean' => false,
-                'expected' => []
+                'expected' => [],
             ],
             'entry with via without template' => [
                 'mode' => 'entry',
                 'via' => 'bazarliste',
-                'bazarlisteIds' => [],
+                'forms' => [],
                 'withTemplate' => false,
-                'clean' => false,
-                'expected' => []
+                'expected' => [],
             ],
             'entry with template' => [
                 'mode' => 'entry',
                 'via' => null,
-                'bazarlisteIds' => [],
+                'forms' => [],
                 'withTemplate' => true,
-                'clean' => true,
-                'expected' => ["template content" => "{{content}}"]
+                'expected' => ['template content' => $content],
             ],
             'entry with via with template' => [
                 'mode' => 'entry',
                 'via' => 'bazarliste',
-                'bazarlisteIds' => [],
+                'forms' => [],
                 'withTemplate' => true,
-                'clean' => true,
-                'expected' => ["template content" => "{{content}}"]
-            ]
+                'expected' => ['template content' => $content],
+            ],
         ]);
-    }
-
-    /**
-     * @param bool $withTemplate
-     * @return string
-     */
-    protected function getEntryPageName(bool $withTemplate): string
-    {
-        $wiki = $this->getWiki();
-        $entryManager = $wiki->services->get(EntryManager::class);
-        $templateEngine = $wiki->services->get(TemplateEngine::class);
-        $GLOBALS['wiki'] = $wiki; // for bazar.fonct.php:82
-        $entries = $entryManager->search([]);
-        foreach ($entries as $tag => $entry) {
-            $formId = $entry['id_typeannonce'];
-            if (strval($formId) == strval(intval($formId))) {
-                $templateName = '@bazar/fiche-'.trim($formId).'.tpl.html';
-                $templateName2 = '@bazar/fiche-'.trim($formId).'.twig';
-                if ($withTemplate == ($templateEngine->hasTemplate($templateName) || $templateEngine->hasTemplate($templateName2))) {
-                    return $tag;
-                }
-            }
-        }
-        return '';
-    }
-    /**
-     * @eturn null|string
-     */
-    private function getPageTagWithBazar2Publication(): ?string
-    {
-        $wiki = $this->getWiki();
-        $dbService = $wiki->services->get(DbService::class);
-        $sqlRequest = 'SELECT tag FROM ' . $dbService->prefixTable('pages') . ' '.
-            'WHERE latest = \'Y\' AND comment_on=\'\' AND '.
-            'body LIKE \'%{{bazarliste%\' AND '.
-            'body LIKE \'%{{bazar2publication}}%\' AND '.
-            'tag NOT IN (SELECT DISTINCT resource FROM ' . $dbService->prefixTable('triples') . ' '.'
-                WHERE value = "fiche_bazar" AND '.
-                'property = "http://outils-reseaux.org/_vocabulary/type"'.
-            ') LIMIT 1';
-        $pages = $dbService->loadAll($sqlRequest);
-        return empty($pages) ? null : $pages[array_key_first($pages)]['tag'] ;
-    }
-
-    /**
-     * @eturn null|string
-     */
-    private function getPageTagWithoutBazar2Publication(): ?string
-    {
-        $wiki = $this->getWiki();
-        $dbService = $wiki->services->get(DbService::class);
-        $sqlRequest = 'SELECT tag FROM ' . $dbService->prefixTable('pages') . ' '.
-            'WHERE latest = \'Y\' AND comment_on=\'\' AND '.
-            'body NOT LIKE \'%{{bazarliste%\' AND '.
-            'body NOT LIKE \'%{{bazar2publication}}%\' AND '.
-            'tag NOT IN (SELECT DISTINCT resource FROM ' . $dbService->prefixTable('triples') . ' '.'
-                WHERE value = "fiche_bazar" AND '.
-                'property = "http://outils-reseaux.org/_vocabulary/type"'.
-            ') LIMIT 1';
-        $pages = $dbService->loadAll($sqlRequest);
-        return empty($pages) ? null : $pages[array_key_first($pages)]['tag'] ;
-    }
-
-    /**
-     * @param array $bazarlisteIds
-     * @return string $pageTag
-     */
-    private function createPageTagWithBazar2Publication(array $bazarlisteIds): string
-    {
-        $wiki = $this->getWiki();
-        $pageManager = $wiki->services->get(PageManager::class);
-        $ids = implode(',', $bazarlisteIds);
-        $pageContent = "{{bazarliste id=\"".$ids."\"}}\n{{bazar2publication}}";
-        $pageContent = _convert($pageContent, YW_CHARSET, true);
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersUpperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        do {
-            $pageTag = '';
-
-            $index = rand(0, strlen($charactersUpperCase) - 1);
-            $pageTag .= $charactersUpperCase[$index];
-
-            for ($i = 0; $i < 8; $i++) {
-                $index = rand(0, strlen($characters) - 1);
-                $pageTag .= $characters[$index];
-            }
-
-            $index = rand(0, strlen($charactersUpperCase) - 1);
-            $pageTag .= $charactersUpperCase[$index];
-        } while (!empty($pageManager->getOne($pageTag)));
-        $pageManager->save($pageTag, $pageContent, "", true);
-        return $pageTag;
-    }
-    /**
-     * @param string $pageTag
-     */
-    private function deletePage(string $pageTag)
-    {
-        $wiki = $this->getWiki();
-        $pageManager = $wiki->services->get(PageManager::class);
-        $pageManager->deleteOrphaned($pageTag);
-    }
-
-    /**
-     * @param string $pageTag
-     * @param bool $createTemplate
-     * @return array [string $templateName, string $templateContent]
-     */
-    protected function getCustomTemplate(string $pageTag, bool $createTemplate = false): array
-    {
-        $wiki = $this->getWiki();
-        $entryManager = $wiki->services->get(EntryManager::class);
-        $entry = $entryManager->getOne($pageTag);
-        $formId = trim($entry['id_typeannonce']);
-        $templateName = 'fiche-'.$formId.'.tpl.html';
-        if ($createTemplate) {
-            $templateContent = $this->createCustomTemplate($templateName);
-        } else {
-            $paths = [
-                    'custom/templates/bazar/',
-                    'custom/templates/bazar/templates/',
-                    'themes/tools/bazar/templates/',
-                    'themes/tools/bazar/presentation/templates/',
-                    'tools/bazar/templates/',
-                    'tools/bazar/presentation/templates/',
-                ];
-            $templateContent = '{{template not found}}' ; // default if template not found
-            foreach ($paths as $path) {
-                if (file_exists($path.$templateName)) {
-                    $templateContent = file_get_contents($path.$templateName);
-                    return [$templateName,$templateContent];
-                }
-            }
-        }
-        return [$templateName,$templateContent];
-    }
-    private function createCustomTemplate(string $templateName): string
-    {
-        if (!file_exists('custom/templates/bazar')) {
-            mkdir('custom/templates/bazar', 0777, true);
-        }
-        $templateContent = 'test';
-        file_put_contents('custom/templates/bazar/'.$templateName, $templateContent);
-        return $templateContent;
-    }
-
-    /**
-     * @param string $templateName
-     */
-    protected function deleteCustomEmptyTemplate(string $templateName)
-    {
-        if (file_exists('custom/templates/bazar/'.$templateName)) {
-            unlink('custom/templates/bazar/'.$templateName);
-        }
     }
 
     #[Depends('testPdfHelperExisting')]

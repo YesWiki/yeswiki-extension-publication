@@ -65,7 +65,7 @@ class PdfHelperTest extends YesWikiTestCase
             'bn_condition' => '',
         ]);
         self::$formIds[] = $formId;
-        $entry = $wiki->services->get(EntryManager::class)->create($formId, ['bf_titre' => 'PdfHelperTest entry ' . $formId]);
+        $entry = $wiki->services->get(EntryManager::class)->create($formId, ['antispam' => 1, 'bf_titre' => 'PdfHelperTest entry ' . $formId]);
         self::$entryTags[] = $entry['id_fiche'];
         $wiki->services->get(AclService::class)->save($entry['id_fiche'], 'read', '*');
         if ($withTemplate) {

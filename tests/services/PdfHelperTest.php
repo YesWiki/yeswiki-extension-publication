@@ -9,6 +9,7 @@ use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Bazar\Service\FormManager;
 use YesWiki\Core\Service\AclService;
 use YesWiki\Core\Service\PageManager;
+use YesWiki\Core\Service\TemplateEngine;
 use YesWiki\Publication\Service\PdfHelper;
 use YesWiki\Test\Core\YesWikiTestCase;
 use YesWiki\Wiki;
@@ -27,6 +28,7 @@ class PdfHelperTest extends YesWikiTestCase
     private static array $entryTags = [];
     private static array $pageTags = [];
     private static array $templateFiles = [];
+    private static array $createdFolders = [];
 
     /**
      * Keeps every created form until the end, so no two cases share a form id the template loader already looked up.
@@ -50,7 +52,10 @@ class PdfHelperTest extends YesWikiTestCase
         foreach (self::$templateFiles as $file) {
             @unlink($file);
         }
-        self::$formIds = self::$entryTags = self::$pageTags = self::$templateFiles = [];
+        foreach (array_reverse(self::$createdFolders) as $folder) {
+            @rmdir($folder);
+        }
+        self::$formIds = self::$entryTags = self::$pageTags = self::$templateFiles = self::$createdFolders = [];
     }
 
     /**
@@ -79,8 +84,15 @@ class PdfHelperTest extends YesWikiTestCase
     {
         $file = self::TEMPLATE_FOLDER . $templateName;
         $this->assertFileDoesNotExist($file, 'the test would overwrite a template of this wiki');
-        if (!is_dir(self::TEMPLATE_FOLDER)) {
-            mkdir(self::TEMPLATE_FOLDER, 0777, true);
+        foreach (['custom/templates/', self::TEMPLATE_FOLDER] as $folder) {
+            if (!is_dir($folder)) {
+                mkdir($folder, 0777, true);
+                self::$createdFolders[] = $folder;
+            }
+        }
+        $loader = (new \ReflectionProperty(TemplateEngine::class, 'twigLoader'))->getValue($GLOBALS['wiki']->services->get(TemplateEngine::class));
+        if (!in_array(rtrim(self::TEMPLATE_FOLDER, '/'), array_map(fn ($path) => rtrim($path, '/'), $loader->getPaths('bazar')), true)) {
+            $loader->prependPath(self::TEMPLATE_FOLDER, 'bazar');
         }
         file_put_contents($file, self::TEMPLATE_CONTENT);
         self::$templateFiles[] = $file;
@@ -100,7 +112,7 @@ class PdfHelperTest extends YesWikiTestCase
     }
 
     /**
-     * @covers PdfHelper::__construct
+     * @covers \PdfHelper::__construct
      */
     public function testPdfHelperExisting(): Wiki
     {
@@ -122,7 +134,7 @@ class PdfHelperTest extends YesWikiTestCase
             foreach ($forms as $slot => $hasTemplate) {
                 $ids[$slot] = $this->createFormWithEntry($wiki, $hasTemplate);
             }
-            $pageTag = $this->createPage($wiki, "{{bazarliste id=\"" . implode(',', $ids) . "\"}}\n{{bazar2publication}}");
+            $pageTag = $this->createPage($wiki, '{{bazarliste id="' . implode(',', $ids) . "\"}}\n{{bazar2publication}}");
             $expected = array_combine(
                 array_map(fn ($key) => preg_replace_callback('/\{(\w)\}/', fn ($m) => $ids[$m[1]], $key), array_keys($expected)),
                 $expected
@@ -242,8 +254,8 @@ class PdfHelperTest extends YesWikiTestCase
         $hash = $results['hash'] ?? 'unset-hash';
         $expected = array_map(function ($value) use ($wiki, $hash) {
             return str_replace(
-                ['{{rootPageTag}}','{{hash}}'],
-                [$wiki->tag,$hash],
+                ['{{rootPageTag}}', '{{hash}}'],
+                [$wiki->tag, $hash],
                 $value
             );
         }, $expected);
@@ -266,45 +278,45 @@ class PdfHelperTest extends YesWikiTestCase
             'first test' => [
                 'get' => [],
                 'server' => [
-                    'QUERY_STRING' => '{{rootPageTag}}'
+                    'QUERY_STRING' => '{{rootPageTag}}',
                 ],
                 'expected' => [
                     'pageTag' => '{{rootPageTag}}',
                     'dlFilename' => 'regexp:/^{{rootPageTag}}-{{hash}}\.pdf$/',
                     'fullFilename' => 'regexp:/.+\/yeswiki-[A-Za-z0-9\-]+\/{{rootPageTag}}-publication-{{hash}}\.pdf$/',
                     'hash' => 'regexp:/^[A-Fa-f0-9]{10,}$/',
-                    'sourceUrl' => 'regexp:/^https?:\/\/.+\/\??{{rootPageTag}}\/preview.*$/'
+                    'sourceUrl' => 'regexp:/^https?:\/\/.+\/\??{{rootPageTag}}\/preview.*$/',
                 ],
             ],
             'test with url' => [
                 'get' => [
-                    'url' => 'http://localhost/?TesT/preview'
+                    'url' => 'http://localhost/?TesT/preview',
                 ],
                 'server' => [
-                    'QUERY_STRING' => '{{rootPageTag}}&url=http%3A%2F%2Flocalhost%2F%3FTesT%2Fpreview'
+                    'QUERY_STRING' => '{{rootPageTag}}&url=http%3A%2F%2Flocalhost%2F%3FTesT%2Fpreview',
                 ],
                 'expected' => [
                     'pageTag' => 'publication',
                     'dlFilename' => 'regexp:/^publication-{{hash}}\.pdf$/',
                     'fullFilename' => 'regexp:/.+\/yeswiki-[A-Za-z0-9\-]+\/publication-publication-{{hash}}\.pdf$/',
                     'hash' => 'regexp:/^[A-Fa-f0-9]{10,}$/',
-                    'sourceUrl' => 'regexp:/^http:\/\/localhost\/\?TesT\/preview$/'
+                    'sourceUrl' => 'regexp:/^http:\/\/localhost\/\?TesT\/preview$/',
                 ],
             ],
             'test with url and urlPageTag' => [
                 'get' => [
                     'url' => 'http://localhost/?TesT/preview',
-                    'urlPageTag' => 'TesT'
+                    'urlPageTag' => 'TesT',
                 ],
                 'server' => [
-                    'QUERY_STRING' => '{{rootPageTag}}&url=http%3A%2F%2Flocalhost%2F%3FTesT%2Fpreview&urlPageTag=TesT'
+                    'QUERY_STRING' => '{{rootPageTag}}&url=http%3A%2F%2Flocalhost%2F%3FTesT%2Fpreview&urlPageTag=TesT',
                 ],
                 'expected' => [
                     'pageTag' => 'TesT',
                     'dlFilename' => 'regexp:/^TesT-{{hash}}\.pdf$/',
                     'fullFilename' => 'regexp:/.+\/yeswiki-[A-Za-z0-9\-]+\/TesT-publication-{{hash}}\.pdf$/',
                     'hash' => 'regexp:/^[A-Fa-f0-9]{10,}$/',
-                    'sourceUrl' => 'regexp:/^http:\/\/localhost\/\?TesT\/preview$/'
+                    'sourceUrl' => 'regexp:/^http:\/\/localhost\/\?TesT\/preview$/',
                 ],
             ],
         ]);
@@ -317,11 +329,12 @@ class PdfHelperTest extends YesWikiTestCase
         $rootPageTag = $this->getParam($wiki, 'root_page');
         $this->setPage($wiki, [
             'tag' => $rootPageTag,
-            'content' => $this->getService($wiki, PageManager::class)->getOne($rootPageTag)
+            'content' => $this->getService($wiki, PageManager::class)->getOne($rootPageTag),
         ]);
+
         return [
             'tag' => $previousPageTag,
-            'content' => $previousPageContent
+            'content' => $previousPageContent,
         ];
     }
 
@@ -339,6 +352,7 @@ class PdfHelperTest extends YesWikiTestCase
     protected function getParam(Wiki $wiki, string $name): ?string
     {
         $params = $this->getService($wiki, ParameterBagInterface::class);
+
         return $params->get($name);
     }
 }

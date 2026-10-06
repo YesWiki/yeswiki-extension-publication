@@ -1,66 +1,58 @@
 <?php
 
-namespace YesWiki\Publication;
+namespace YesWiki\Publication\Action;
 
-use YesWiki\Core\Service\PageManager;
+use YesWiki\Content\Entity\PageBody;
+use YesWiki\Content\Service\PageManager;
 use YesWiki\Core\YesWikiAction;
+use YesWiki\Kernel\Performable\RegisteredAction;
+use YesWiki\Kernel\Service\InclusionStack;
+use YesWiki\Kernel\Service\PageContext;
 
-class ListContribAction extends YesWikiAction
+/** `{{listcontrib field="bf_nom"}}`: the names held by that field in every page a publication includes, in alphabetical order. */
+class ListContribAction extends YesWikiAction implements RegisteredAction
 {
-    public const INCLUSION_ANCHOR = '/\{\{include\s*page="(.+)".*\}\}/mU';
-    public const FIELD_ANCHOR = '/"{field}":"(.*)"/mU';
+    private const INCLUSION = '/\{\{include\s*page="(.+)".*\}\}/mU';
 
-    protected $pageManager;
+    public static function performableName(): string
+    {
+        return 'listcontrib';
+    }
 
-    public function formatArguments($args)
+    public function formatArguments($arg): array
     {
         return [
-            'field' => (empty($args['field']) || !is_string($args['field'])) ? 'bf_nom' : $args['field'],
+            'field' => (empty($arg['field']) || !is_string($arg['field'])) ? 'bf_nom' : $arg['field'],
         ];
     }
 
-    public function run()
+    public function run(): string
     {
-        // get Service
-        $this->pageManager = $this->getService(PageManager::class);
-        // common
-        $anchor = str_replace('{field}', preg_quote($this->arguments['field'], '/'), self::FIELD_ANCHOR);
-        $output = '';
+        $pageManager = $this->getService(PageManager::class);
+        $mainTag = $this->getService(PageContext::class)->getRequestedTag();
+        if ($mainTag === '') {
+            $inclusions = $this->getService(InclusionStack::class)->getAll();
+            $mainTag = (string)end($inclusions);
+        }
+        $mainPage = $mainTag === '' ? null : $pageManager->getOne($mainTag);
+        if ($mainPage === null || !preg_match_all(self::INCLUSION, PageBody::content($mainPage['body'] ?? []), $matches)) {
+            return '';
+        }
 
-        if (!empty($this->arguments['field'])) {
-            $inclusions = $this->wiki->GetAllInclusions();
-            if (!empty($inclusions)) {
-                $mainPageTag = array_pop($inclusions);
-                $mainPage = $this->pageManager->getOne($mainPageTag);
-                if (!empty($mainPage)) {
-                    $matches = [];
-                    if (preg_match_all(self::INCLUSION_ANCHOR, $mainPage['body'], $matches)) {
-                        $contributors = [];
-                        foreach ($matches[1] as $pageTag) {
-                            $page = $this->pageManager->getOne($pageTag);
-                            if (!empty($page)) {
-                                $name = [];
-                                if (preg_match_all($anchor, $page['body'], $name)) {
-                                    if (!empty($name[1][0])) {
-                                        $v = ucwords(strtolower(trim(strval(json_decode("\"{$name[1][0]}\"")))));
-                                        $v = str_replace(' Et ', ' et ', $v);
-                                        $contributors[$v] = $v;
-                                    }
-                                }
-                            }
-                        }
-                        if (!empty($contributors)) {
-                            ksort($contributors);
-                            $output = '<ol>';
-                            $output .= implode('', array_map(function ($c) {
-                                return "<li>$c</li>";
-                            }, $contributors));
-                            $output .= '</ol>';
-                        }
-                    }
-                }
+        $contributors = [];
+        foreach ($matches[1] as $tag) {
+            $body = $pageManager->getOne($tag)['body'] ?? [];
+            $value = is_array($body) ? ($body[$this->arguments['field']] ?? '') : '';
+            if (is_string($value) && trim($value) !== '') {
+                $name = str_replace(' Et ', ' et ', ucwords(mb_strtolower(trim($value))));
+                $contributors[$name] = $name;
             }
         }
-        return $output;
+        if ($contributors === []) {
+            return '';
+        }
+        ksort($contributors);
+
+        return '<ol>' . implode('', array_map(static fn (string $name): string => '<li>' . htmlspecialchars($name) . '</li>', $contributors)) . '</ol>';
     }
 }

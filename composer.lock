@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b4da661172c6d80f2eed7eced096cd30",
+    "content-hash": "10227f82c71311e2b54ac36cc0e5397c",
     "packages": [
         {
             "name": "chrome-php/chrome",
@@ -739,12 +739,9 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.2",
+        "php": ">=8.3",
         "ext-sockets": "*"
     },
     "platform-dev": {},
-    "platform-overrides": {
-        "php": "8.2.0"
-    },
     "plugin-api-version": "2.9.0"
 }

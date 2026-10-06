@@ -1,43 +1,21 @@
+# Publication: services, and the settings of the headless browser that prints PDFs.
+# Every parameter can be overridden in yeswiki.config.php; README.md describes each one.
 parameters:
-  htmltopdf_path: '/usr/bin/chromium'   # MacOs: /Applications/Chromium.app/Contents/MacOS/Chromium
-  htmltopdf_service_url: ''             # Should be a complete url like https://example.org/yeswiki/?PagePrincipale/pdf
-  # duration before considering the pageload completed (60000ms = 1 minute)
+  htmltopdf_path: '/usr/bin/chromium'
+  htmltopdf_service_url: ''
   page_load_timeout: 60000
-
-  # Advanced Configuration
-  # Has to comply with HeadlessChromium::createBrowser() options
-  # See https://github.com/chrome-php/headless-chromium-php#options
   htmltopdf_options:
     windowSize: [1920, 1080]
     noSandbox: true
     headless: true
-    userAgent: 'YesWiki/4.0'
-    # maximum time to wait for the browser to start, before navigating to a page
+    userAgent: 'YesWiki/5'
     startupTimeout: 30
-    # maximum time in ms to wait for synchronous messages to send to the browser
     sendSyncDefaultTimeout: 10000
     customFlags:
     - '--crash-dumps-dir=/tmp'
-    - '--remote-allow-origins=*' # try to be more compatible with chromium 111 and +
-    # uncomment to view browser logs in PHP/Apache logs
-    # debugLogger: 'php://stdout'
-
-  # Advanced Configuration
-  # if you want to propose this website as a service for other domains
-  htmltopdf_service_authorized_domains:
-  #  - 'example.org'
-  #  - 'another-one.com'
-
-  # Advanced Configuration
-  # Configure this when the HTTP server does not have access to the YesWiki via its public URL.
-  #
-  # Eg, if Docker/base_url is https://example.com/? and Apache runs as http://localhost:8000,
-  # … then `htmltopdf_base_url` value should be `http://localhost:8000/?`.
-  # Use cases: reverse-proxy, within a YesWiki Docker container.
+    - '--remote-allow-origins=*'
+  htmltopdf_service_authorized_domains: []
   htmltopdf_base_url: ~
-  #htmltopdf_base_url: http://localhost:8000/?
-  #
-  # for edit config action
   publication_editable_config_params:
     - 'htmltopdf_path'
     - 'htmltopdf_options':
@@ -49,7 +27,14 @@ parameters:
 services:
   _defaults:
     autowire: true
+    autoconfigure: true
     public: true
+
+  YesWiki\Publication\Action\:
+    resource: 'actions/*'
+
+  YesWiki\Publication\Handler\:
+    resource: 'handlers/*'
 
   YesWiki\Publication\Service\:
     resource: 'services/*'

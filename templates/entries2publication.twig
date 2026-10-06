@@ -1,0 +1,14 @@
+{{ include_css('extensions/publication/styles/publication.css') }}
+{{ include_javascript('extensions/publication/javascripts/entries2publication.js') }}
+
+{% if templatePageMissing %}
+  <div class="yw-alert yw-alert--warning">
+    {{ _t('PUBLICATION_TEMPLATE_PAGE_NOT_FOUND') ~ options.templatepage }}
+  </div>
+{% endif %}
+
+<a href="{{ href }}" class="yw-btn yw-btn--primary entries2publication-action hide-from-print {{ options.class }}"
+   data-message="{{ _t('PUBLICATION_PDF_GENERATION_LANCHED') }}">
+  {{ iconFromLegacy(options.icon) }}
+  <span>{{ options.title }}</span>
+</a>

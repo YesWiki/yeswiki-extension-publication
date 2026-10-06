@@ -1,478 +1,416 @@
 <?php
 
-namespace YesWiki\Publication;
+namespace YesWiki\Publication\Action;
 
-use Exception;
-use YesWiki\Bazar\Service\EntryManager;
-use YesWiki\Bazar\Service\FormManager;
-use YesWiki\Core\Service\DbService;
-use YesWiki\Core\Service\PageManager;
+use Symfony\Component\String\Slugger\AsciiSlugger;
+use Tamtamchik\SimpleFlash\Flash;
+use YesWiki\Content\Entity\FieldRole;
+use YesWiki\Content\Entity\PageBody;
+use YesWiki\Content\Entity\PageType;
+use YesWiki\Content\Service\EntryManager;
+use YesWiki\Content\Service\FieldRoleResolver;
+use YesWiki\Content\Service\FormManager;
+use YesWiki\Content\Service\PageManager;
 use YesWiki\Core\YesWikiAction;
-use YesWiki\Tags\Service\TagsManager;
+use YesWiki\Kernel\Component\Category;
+use YesWiki\Kernel\Component\Component;
+use YesWiki\Kernel\Component\ProvidesComponents;
+use YesWiki\Kernel\Component\Setting;
+use YesWiki\Kernel\Performable\RegisteredAction;
+use YesWiki\Kernel\Service\PageContext;
+use YesWiki\Kernel\Service\Redirector;
+use YesWiki\Kernel\Service\UrlFormatter;
 use YesWiki\Publication\Service\Publication;
+use YesWiki\Render\Service\MarkdownFormatterService;
+use YesWiki\Search\Service\TagsManager;
 
-class PublicationGeneratorAction extends YesWikiAction
+/** `{{publicationgenerator}}`: pick pages and entries, order them, and save them as an ebook page or a newsletter entry. */
+class PublicationGeneratorAction extends YesWikiAction implements RegisteredAction, ProvidesComponents
 {
-    public const COMPATIBILITY_CORRESPONDANCES = [
-        ['ebookpagenameprefix', 'pagenameprefix'],
-        ['fields', 'readonly'],
-        ['ebookstart', 'pagestart'],
-        ['ebookend', 'pageend'],
-        ['publicationstart', 'pagestart'],
-        ['publicationend', 'pageend']
+    private const DEPRECATED = [
+        'ebookpagenameprefix' => 'pagenameprefix',
+        'fields' => 'readonly',
+        'ebookstart' => 'pagestart',
+        'ebookend' => 'pageend',
+        'publicationstart' => 'pagestart',
+        'publicationend' => 'pageend',
     ];
-    public const ACCEPTED_TAGS = '<h1><h2><h3><h4><h5><h6><hr><hr/><br><br/><span><blockquote><i><u><b><strong>'.
-    '<ol><ul><li><small><div><p><a><table><tr><th><td><img><figure><caption><iframe><style>';
 
-    protected $dbService;
-    protected $entryManager;
-    protected $formManager;
-    protected $pageManager;
-    protected $publicationService;
+    private const ACCEPTED_TAGS = '<h1><h2><h3><h4><h5><h6><hr><br><span><blockquote><i><u><b><strong>'
+        . '<ol><ul><li><small><div><p><a><table><tr><th><td><img><figure><caption><iframe><style>';
 
-    public function formatArguments($args)
+    private const BLANK_PAGE = '{{blankpage}}';
+
+    public static function performableName(): string
     {
-        // deprecated parameters for checkDeprecated
-        $deprecatedParameters = [];
-        foreach ($this->getFormattedCorrespondances() as $correspondance) {
-            $deprecatedParameters[$correspondance['oldName']] = $args[$correspondance['oldName']] ?? null;
-        }
+        return 'publicationgenerator';
+    }
 
-        return $deprecatedParameters + [
-            'outputformat' => $this->formatString($args, 'outputformat', 'ebook'),
-            'formid' => (!empty($args['formid']) && is_scalar($args['formid']) && intval($args['formid']) > 0) ? strval($args['formid']) : '',
-            // Indicates if fields and elements are "read only"
-            'readonly' => isset($args['readonly']) && in_array($args['readonly'], ['',true], true),
-            // Pages used for intro and outro
-            'pagestart' => $this->formatString($args, 'pagestart', ''),
-            'pageend' => $this->formatString($args, 'pageend', ''),
-            // prefix for created pages
-            // Only used when outputformat="ebook"
-            'pagenameprefix' => $this->formatString($args, 'pagenameprefix', 'Ebook'),
-            // include default pages in page listing ?
-            'addinstalledpage' => $this->formatBoolean($args, false, 'addinstalledpage'),
-            // defaults from the action
-            'coverimage' => $this->formatString($args, 'coverimage', ''),
-            'title' => $this->formatString($args, 'title', ''),
-            'desc' => $this->formatString($args, 'desc', ''),
-            'authors' => $this->formatString($args, isset($args['author']) ? 'author' : 'authors', ''),
-            // default added pages that can be used to separate content
-            'chapterpages' => array_map('trim', $this->formatArray($args['chapterpages'] ?? [])),
-            // titles for groups
-            'titles' => array_map('trim', $this->formatArray($args['titles'] ?? [])),
-            // groups of pages or bazar entries
-            'groupselector' => $this->formatString($args, 'groupselector', ''),
+    public function components(): array
+    {
+        $prefix = 'AB_publication_publicationgenerator_';
+
+        return [
+            Component::for('publicationgenerator')
+                ->category(Category::Other)
+                ->label(_t($prefix . 'label'))
+                ->hint(_t($prefix . 'hint'))
+                ->icon('book')
+                ->adminOnly()
+                ->settings(
+                    Setting::choice('outputformat', [
+                        'ebook' => _t($prefix . 'outputformat_ebook'),
+                        'newsletter' => _t($prefix . 'outputformat_newsletter'),
+                    ])->label(_t($prefix . 'outputformat_label'))->default('ebook'),
+                    Setting::form('formid')->label(_t($prefix . 'formid_label'))->showIf(['outputformat' => 'newsletter']),
+                    Setting::text('groupselector')->label(_t($prefix . 'groupselector_label'))->hint(_t($prefix . 'groupselector_hint')),
+                    Setting::text('titles')->label(_t($prefix . 'titles_label'))->showIf('groupselector'),
+                    Setting::page('pagestart')->label(_t($prefix . 'pagestart_label'))->hint(_t($prefix . 'pagestart_hint')),
+                    Setting::page('pageend')->label(_t($prefix . 'pageend_label'))->hint(_t($prefix . 'pageend_hint')),
+                    Setting::text('pagenameprefix')->label(_t($prefix . 'pagenameprefix_label'))->hint(_t($prefix . 'pagenameprefix_hint'))->showIf(['outputformat' => 'ebook']),
+                    Setting::checkbox('readonly')->label(_t($prefix . 'readonly_label'))->hint(_t($prefix . 'readonly_hint'))->showIf(['outputformat' => 'ebook']),
+                    Setting::url('coverimage')->label(_t($prefix . 'coverimage_label'))->hint(_t($prefix . 'coverimage_hint')),
+                    Setting::text('title')->label(_t($prefix . 'title_label'))->hint(_t($prefix . 'title_hint')),
+                    Setting::text('desc')->label(_t($prefix . 'desc_label'))->hint(_t($prefix . 'desc_hint')),
+                    Setting::text('author')->label(_t($prefix . 'author_label'))->hint(_t($prefix . 'author_hint')),
+                    Setting::text('chapterpages')->label(_t($prefix . 'chapterpages_label'))->hint(_t($prefix . 'chapterpages_hint')),
+                ),
         ];
     }
 
-    public function run()
+    public function formatArguments($arg): array
     {
-        // get Services
-        $this->dbService = $this->getService(DbService::class);
-        $this->entryManager = $this->getService(EntryManager::class);
-        $this->formManager = $this->getService(FormManager::class);
-        $this->pageManager = $this->getService(PageManager::class);
-        $this->publicationService = $this->getService(Publication::class);
+        $deprecated = array_intersect_key($arg, self::DEPRECATED);
+        $text = static fn (string $key, string $default = ''): string => is_string($arg[$key] ?? null) ? $arg[$key] : $default;
+        $formId = is_scalar($arg['formid'] ?? null) ? (string)$arg['formid'] : '';
 
-        include_once 'tools/tags/libs/tags.functions.php';
+        return [
+            'deprecated' => array_keys($deprecated),
+            'outputformat' => strtolower($text('outputformat', 'ebook')),
+            'formid' => ctype_digit($formId) && (int)$formId > 0 ? $formId : '',
+            'readonly' => in_array($arg['readonly'] ?? null, ['', '1', 'true', true, 1], true),
+            'pagestart' => $text('pagestart'),
+            'pageend' => $text('pageend'),
+            'pagenameprefix' => $text('pagenameprefix', 'Ebook'),
+            'coverimage' => $text('coverimage'),
+            'title' => $text('title'),
+            'desc' => $text('desc'),
+            'authors' => $text(isset($arg['author']) ? 'author' : 'authors'),
+            'chapterpages' => array_values(array_filter(array_map('trim', $this->formatArray($arg['chapterpages'] ?? [])))),
+            'titles' => array_map('trim', $this->formatArray($arg['titles'] ?? [])),
+            'groupselector' => $text('groupselector'),
+        ];
+    }
 
-        if ($this->isNewsletter() &&
-            empty($this->arguments['formid'])) {
-            throw new Exception(_t('PUBLICATION_MISSING_NEWSLETTER_FORM'));
+    public function run(): string
+    {
+        if ($this->isNewsletter() && $this->arguments['formid'] === '') {
+            return '<div class="yw-alert yw-alert--danger">' . _t('PUBLICATION_MISSING_NEWSLETTER_FORM') . '</div>';
         }
 
-        $messages = $this->checkDeprecated();
+        $messages = array_values(array_map(
+            fn (string $old): array => [
+                'type' => 'warning',
+                'message' => _t('PUBLICATION_PARAMETER_DEPRECATED', ['oldName' => $old, 'newName' => self::DEPRECATED[$old]]),
+            ],
+            $this->arguments['deprecated']
+        ));
 
-        $results = $this->getResults();
-
-        list(
-            'ebookPageName' => $ebookPageName,
-            'selectedPages' => $selectedPages,
-            'publicationStart' => $publicationStart,
-            'publicationEnd' => $publicationEnd,
-        ) = $this->getEbookPageName($results);
-
-        try {
-            $this->managePost($_POST ?? [], $messages, $ebookPageName);
-        } catch (Exception $th) {
-            if ($th->getCode() ==  1) {
-                return $th->getMessage();
-            } else {
-                throw $th;
+        $existing = $this->existingPublication();
+        $request = $this->getRequest();
+        if ($request->isMethod('POST')) {
+            $failure = $this->managePost($request->request->all(), $messages, $existing['tag']);
+            if ($failure !== null) {
+                return $failure;
             }
         }
+
+        $pageManager = $this->getService(PageManager::class);
+        $pageContext = $this->getService(PageContext::class);
+        $start = $existing['start'] ?? $this->arguments['pagestart'];
+        $end = $existing['end'] ?? $this->arguments['pageend'];
 
         return $this->render('@publication/publicationgenerator.twig', [
             'messages' => $messages,
-            'entries' => $results,
+            'groups' => $this->getGroups(),
             'areParamsReadonly' => $this->arguments['readonly'],
-            'publicationStart' => $this->pageManager->getOne($publicationStart),
-            'publicationEnd' => $this->pageManager->getOne($publicationEnd),
-            'addInstalledPages' => $this->arguments['addinstalledpage'],
-            'installedPageNames' => $this->getInstalledPageNames(),
-            'ebookPageName' => $ebookPageName,
-            'metadatas' => $this->publicationService->getOptions([
-                "publication-cover-image" => $this->arguments['coverimage'],
-                "publication" => [
-                  "title" => $this->arguments['title'],
-                  "description" => $this->arguments['desc'],
-                  "authors" => $this->arguments['authors'],
-                ]
-              ], $_POST, is_array($this->wiki->page['metadatas'] ?? null) ? $this->wiki->page['metadatas'] : []),
-            'selectedPages' => $selectedPages,
+            'publicationStart' => $start === '' ? null : $pageManager->getOne($start),
+            'publicationEnd' => $end === '' ? null : $pageManager->getOne($end),
+            'metadatas' => $this->getService(Publication::class)->getOptions(
+                [
+                    'publication-cover-image' => $this->arguments['coverimage'],
+                    'publication' => [
+                        'title' => $this->arguments['title'],
+                        'description' => $this->arguments['desc'],
+                        'authors' => $this->arguments['authors'],
+                    ],
+                ],
+                $pageContext->getMetadata(),
+                $request->isMethod('POST') ? $request->request->all() : []
+            ),
+            'selectedPages' => $existing['selected'],
             'chapterCoverPages' => $this->getChapterCoverPages(),
-            'url' => $this->wiki->href('', $this->wiki->GetPageTag()),
-            'name' => $this->getName(),
+            'url' => $this->getService(UrlFormatter::class)->href('', $pageContext->getTag(), null, false),
+            'name' => $this->isNewsletter() ? _t('PUBLICATION_NEWSLETTER') : _t('PUBLICATION_EBOOK'),
             'outputFormat' => $this->arguments['outputformat'],
-          ]);
-    }
-
-    protected function formatString(array $args, string $key, string $default): string
-    {
-        return (isset($args[$key]) && is_string($args[$key])) ? $args[$key] : $default;
-    }
-
-    protected function formatArray($param)
-    {
-        return (is_string($param) || is_array($param)) ? parent::formatArray($param) : [];
-    }
-
-    protected function checkDeprecated(): array
-    {
-        $messages = [];
-        foreach ($this->getFormattedCorrespondances() as $correspondance) {
-            if (!is_null($this->arguments[$correspondance['oldName']])) {
-                $messages[] = [
-                    'message' => _t('PUBLICATION_PARAMETER_DEPRECATED', $correspondance),
-                    'type' => 'warning'
-                ];
-            }
-        }
-        return $messages;
-    }
-
-    protected function getChapterCoverPages(): array
-    {
-        $chapterCoverPages = [];
-        foreach ($this->arguments['chapterpages'] as $pageTag) {
-            $chapterCoverPages[$pageTag] = $this->pageManager->getOne($pageTag);
-        }
-        return $chapterCoverPages;
-    }
-
-    protected function getEbookPageName(array $results): array
-    {
-        $ebookPageName = '';
-        $selectedPages = [];
-        $publicationStart = $this->arguments['pagestart'];
-        $publicationEnd = $this->arguments['pageend'];
-        if (isset($this->wiki->page["metadatas"]["publication"]["title"])
-            || isset($this->wiki->page["metadatas"]["publication-title"])) {
-            $ebookPageName = $this->wiki->GetPageTag();
-            $matches = [];
-            if (preg_match_all('/{{include page="(.*)".*}}/Ui', $this->wiki->page['body'], $matches)) {
-                $publicationStart = $matches[1][0];
-                $last = count($matches[1]) - 1;
-                $publicationEnd = $matches[1][$last];
-                unset($matches[1][0]);
-                unset($matches[1][$last]);
-                foreach ($matches[1] as $key => $value) {
-                    $pagesFiltre = filter_by_value($results, 'tag', $value);
-                    $selectedPages[] = array_shift($pagesFiltre);
-                    $key = array_keys($pagesFiltre);
-                    if ($key && isset($pages[$key[0]])) {
-                        unset($pages[$key[0]]);
-                    }
-                }
-            }
-        }
-
-        return compact(['ebookPageName','selectedPages','publicationStart','publicationEnd']);
-    }
-
-    protected function getFormattedCorrespondances(): array
-    {
-        return array_map(
-            function ($correspondance) {
-                return [
-                    'oldName' => $correspondance[0],
-                    'newName' => $correspondance[1],
-                ];
-            },
-            self::COMPATIBILITY_CORRESPONDANCES
-        );
-    }
-
-    protected function getInstalledPageNames(): array
-    {
-        // recuperation des pages creees a l'installation
-        $installedPageNames = [];
-        if ($this->arguments['addinstalledpage'] && is_dir("setup/doc/")) {
-            $d = dir("setup/doc/");
-            while ($doc = $d->read()) {
-                if ($doc == '.' || $doc == '..' || is_dir($doc) || substr($doc, -4) != '.txt') {
-                    continue;
-                }
-
-                if ($doc == '_root_page.txt') {
-                    $installedPageNames[$this->params->get("root_page")] = $this->params->get("root_page");
-                } else {
-                    $pageName = substr($doc, 0, strpos($doc, '.txt'));
-                    $installedPageNames[$pageName] = $pageName;
-                }
-            }
-        }
-        return $installedPageNames;
-    }
-
-    protected function getResults(): array
-    {
-        $results = [];
-        if (!empty($this->arguments['groupselector'])) {
-            $matches = [];
-            if (preg_match_all('/(\d+|pages)(\(([^\(\)]*)\))?/m', $this->arguments['groupselector'], $matches)) {
-                foreach ($matches[1] as $i => $formId) {
-                    // bazar entries
-                    if (strval($formId) == strval(intval($formId)) && intval($formId) > 0) {
-                        $results[$i]['type'] = 'bazar';
-                        $formValues = $this->formManager->getOne(strval($formId));
-                        if (!empty($this->arguments['titles'][$i])) {
-                            $results[$i]['name'] = $this->arguments['titles'][$i];
-                        } else {
-                            $results[$i]['name'] = $formValues['bn_label_nature'] ?? strval($formId);
-                        }
-                        $tabQuery = [];
-                        if (isset($matches[3][$i])) {
-                            $tab = explode('|', $matches[3][$i]); // splits the query using |
-                            foreach ($tab as $req) {
-                                $tabdecoup = explode('=', $req, 2);
-                                $value = isset($tabdecoup[1]) ? trim($tabdecoup[1]) : '';
-                                if (!empty($tabQuery[$tabdecoup[0]])) {
-                                    $tabQuery[$tabdecoup[0]] = $tabQuery[$tabdecoup[0]].','.$value;
-                                } else {
-                                    $tabQuery[$tabdecoup[0]] = $value;
-                                }
-                            }
-                        }
-                        $results[$i]['entries'] = $this->entryManager->search(['queries' => $tabQuery, 'formsIds' => [strval($formId)]]);
-
-                        // tri des fiches
-                        $this->fieldSort($results[$i]['entries'], 'asc', 'bf_titre');
-                    } elseif ($formId == 'pages') {
-                        $results[$i]['type'] = 'pages';
-                        if (!empty($this->arguments['titles'][$i])) {
-                            $results[$i]['name'] = $this->arguments['titles'][$i];
-                        } else {
-                            $results[$i]['name'] = 'Pages wikis';
-                        }
-                        if (!empty($matches[3][$i])) {
-                            $tags = explode(',', $matches[3][$i]);
-                            $tags = array_map('trim', $tags);
-                            $tagList = '"'.implode('","', $tags).'"';
-                        } else {
-                            $tagList = '';
-                        }
-
-                        $results[$i]['entries'] = $this->loadPages($tagList);
-                    }
-                }
-            }
-        } else {
-            // we take everything if nothing is specified
-            $results[0]['entries'] = $this->loadPages('');
-            // wiki pages
-            $results[0]['type'] = 'pages';
-            $results[0]['name'] = 'Pages wikis';
-
-            // bazar entries
-            $results[1]['type'] = 'bazar';
-            $results[1]['name'] = 'Fiches bazar';
-            $results[1]['entries'] = $this->entryManager->search();
-            $this->fieldSort($results[1]['entries'], 'asc', 'bf_titre');
-        }
-        return $results;
-    }
-
-    protected function isEbook(): bool
-    {
-        return strcasecmp($this->arguments['outputformat'], 'ebook') == 0;
-    }
-
-    protected function isNewsletter(): bool
-    {
-        return strcasecmp($this->arguments['outputformat'], 'newsletter') === 0;
-    }
-
-    protected function getName(): string
-    {
-        return $this->isNewsletter() ? _t('PUBLICATION_NEWSLETTER') : _t('PUBLICATION_EBOOK');
-    }
-
-    protected function fieldSort(array &$data, string $order, string $field)
-    {
-        usort($data, function ($a, $b) use ($order, $field) {
-            $first = mb_strtolower(strval($a[$field] ?? ''));
-            $second = mb_strtolower(strval($b[$field] ?? ''));
-
-            return ($order == 'desc') ? strcoll($second, $first) : strcoll($first, $second);
-        });
-    }
-
-    protected function loadPages(string $tagList = ""): ?array
-    {
-        // wiki pages
-        // very similar to TagsManager::getPagesByTags
-        $tripleTableSelection = empty($tagList) ? '' : ", {$this->dbService->prefixTable('triples')} tags";
-        $tagListSQL = empty($tagList) ? '' :
-            <<<SQL
-            AND tags.value IN ($tagList) AND tags.property = "http://outils-reseaux.org/_vocabulary/tag" AND tags.resource = tag
-            SQL;
-
-        $sql =
-        <<<SQL
-        SELECT DISTINCT tag,body FROM {$this->dbService->prefixTable('pages')} $tripleTableSelection
-          WHERE latest="Y"
-          AND comment_on="" AND tag NOT LIKE "LogDesActionsAdministratives%"
-          AND tag NOT IN (
-            SELECT resource FROM {$this->dbService->prefixTable('triples')}
-              WHERE property="http://outils-reseaux.org/_vocabulary/type"
-          )
-          $tagListSQL
-          ORDER BY tag ASC
-        SQL;
-
-        return $this->dbService->loadAll($sql);
+        ]);
     }
 
     /**
-     * Handling of data submitted by the form
-     * page creation
+     * The page being shown, when it already is an ebook this generator made: its tag, its first and last pages and what lies between.
+     *
+     * @return array{tag: string, start: ?string, end: ?string, selected: list<array{tag: string, label: string, blank: bool}>}
      */
-    protected function managePost(array $post, array &$messages, string $ebookPageName)
+    private function existingPublication(): array
     {
-        if (!empty($post) && $this->checkPostValues($post, $messages)) {
-            if ($this->isEbook()) {
-                // We want to produce an ebook (default behaviour)
-                if (!empty($post["publication-cover-image"]) && (
-                    !is_string($post["publication-cover-image"]) ||
-                    preg_match("/.(jpe?g|png|svg)$/i", $post["publication-cover-image"]) != 1
-                )) {
-                    // there is no publication-cover-image
-                    $messages[] = [
-                        'message' => _t('PUBLICATION_NOT_IMAGE_FILE'),
-                        'type' => 'danger'
-                    ];
-                } else {
-                    $ebookPageNamePrefix = $this->arguments['pagenameprefix'];
-                    $pageName = !empty($ebookPageName) ? $ebookPageName : generatePageName("$ebookPageNamePrefix {$post["publication"]["title"]}");
-
-                    $output = '';
-                    // Generate the content of the page body
-                    // @todo refactor it to share its logic with newsletter
-                    foreach ($post["page"] as $page) {
-                        // we turn some actions into explicit content
-                        // for now, {{blankpage}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
-                        if (preg_match('#{{\s*blankpage\s*}}#U', $page)) {
-                            $output .= $page . "\n";
-                        }
-                        // we assume it is a page tag otherwise
-                        // maybe we should also explicitly check it is a valid page tag instead?
-                        // $page can be 'SomeTag' or 'SomeTag?parameter=value'
-                        // the query string is used to parametrize book creation
-                        else {
-                            $includeCode = $this->publicationService->getIncludeActionFromPageTag($page);
-                            $output .= $includeCode;
-                        }
-                    }
-                    unset($post['page']);
-                    unset($post['antispam']);
-
-                    if ($this->pageManager->save($pageName, $output) === 0) {
-                        $this->pageManager->setMetadata($pageName, $post);
-                        $this->wiki->SetMessage(_t('PUBLICATION_EBOOK_PAGE_CREATED'));
-                        $this->wiki->Redirect($this->wiki->Href('', $pageName));
-                    } else {
-                        $t = [
-                            'PUBLICATION_EBOOK_PAGE_CREATION_FAILED' => _t('PUBLICATION_EBOOK_PAGE_CREATION_FAILED'),
-                            'PUBLICATION_GOTO_EBOOK_CREATION_PAGE' => _t('PUBLICATION_GOTO_EBOOK_CREATION_PAGE')
-                        ];
-                        $errorContent = $this->wiki->Format(
-                            <<<STR
-                            ""<div class="alert alert-danger alert-error">{$t['PUBLICATION_EBOOK_PAGE_CREATION_FAILED']}""\n
-                            {{button class="btn-primary" link="{$this->wiki->GetPageTag()}" text="{$t['PUBLICATION_GOTO_EBOOK_CREATION_PAGE']} {$this->wiki->GetPageTag()}"}}""</div>""\n
-                            STR
-                        );
-                        throw new Exception($errorContent, 1);
-                    }
-                }
-            } elseif ($this->isNewsletter()) {
-                $fiche = [
-                    'id_typeannonce' => $this->arguments['formid'],
-                    'bf_titre' => implode(' ', [$this->arguments['outputformat'], $post["publication"]["title"]]),
-                    'bf_description' => $post["publication"]["bf_description"] ?? '',
-                    'bf_author' => $post["publication"]["authors"] ?? '',
-                    'bf_content' => '',
-                ];
-
-                // Generate the content of the page body
-                // @todo Refactor this as a function to share it with Ebook logic
-                foreach ($post["page"] as $page) {
-                    // we turn some actions into explicit content
-                    // for now, {{blankpage}}, but later maybe some specific handlers like {{publicationcover}}, {{publicationbookend}}
-                    if (preg_match('#{{\s*blankpage\s*}}#U', $page)) {
-                        $fiche['bf_content'] .= $this->wiki->Format($page . "\n");
-                    }
-                    // we assume it is a page tag otherwise
-                    // maybe we should also explicitly check it is a valid page tag instead?
-                    else {
-                        $includeCode = $this->publicationService->getIncludeActionFromPageTag($page);
-                        $fiche['bf_content'] .= $this->wiki->Format($includeCode);
-                    }
-                }
-                $fiche['bf_content'] = strip_tags($fiche['bf_content'], self::ACCEPTED_TAGS);
-                $fiche['antispam'] = 1;
-                $fiche = $this->entryManager->create($this->arguments['formid'], $fiche);
-                if (!empty($fiche)) {
-                    $messages[] = [
-                        'message' => _t('PUBLICATION_NEWSLETTER_CREATED'),
-                        'type' => 'success'
-                    ];
-                } else {
-                    $messages[] = [
-                        'message' => 'error when creating entry',
-                        'type' => 'warning'
-                    ];
-                }
+        $pageContext = $this->getService(PageContext::class);
+        $none = ['tag' => '', 'start' => null, 'end' => null, 'selected' => []];
+        if (!$this->isEbook() || !$this->getService(Publication::class)->isPublication($pageContext->getMetadata())) {
+            return $none;
+        }
+        $content = PageBody::content(($pageContext->getPage() ?? [])['body'] ?? []);
+        $found = ['tag' => $pageContext->getTag(), 'start' => null, 'end' => null, 'selected' => []];
+        preg_match_all('/\{\{\s*(?:blankpage\s*|include\s+page="([^"]*)"[^}]*?(?:type="([^"]*)")?[^}]*)\}\}/U', $content, $calls, PREG_SET_ORDER);
+        foreach ($calls as $call) {
+            $tag = $call[1] ?? '';
+            $type = $call[2] ?? '';
+            if ($tag === '') {
+                $found['selected'][] = ['tag' => self::BLANK_PAGE, 'label' => _t('PUBLICATION_BLANK_PAGE'), 'blank' => true];
+            } elseif ($type === 'publication-start') {
+                $found['start'] = $tag;
+            } elseif ($type === 'publication-end') {
+                $found['end'] = $tag;
+            } else {
+                $found['selected'][] = ['tag' => $tag, 'label' => $tag, 'blank' => false];
             }
         }
+
+        return $found;
     }
 
-    protected function checkPostValues(array $post, array &$messages): bool
+    /**
+     * @return array<string, array<string, mixed>|null>
+     */
+    private function getChapterCoverPages(): array
     {
-        if (!isset($post['antispam']) || $post['antispam'] != 1) {
-            // There may be a spamming problem
-            $messages[] = [
-                'message' => _t('PUBLICATION_SPAM_RISK'),
-                'type' => 'danger'
+        $pages = [];
+        foreach ($this->arguments['chapterpages'] as $tag) {
+            $pages[$tag] = $this->getService(PageManager::class)->getOne($tag);
+        }
+
+        return array_filter($pages);
+    }
+
+    /**
+     * What may be picked, in groups: pages, possibly by keyword, and the entries of a form, possibly by query.
+     *
+     * @return list<array{type: string, name: string, items: list<array{tag: string, label: string}>}>
+     */
+    private function getGroups(): array
+    {
+        if ($this->arguments['groupselector'] === '') {
+            return [
+                ['type' => 'pages', 'name' => _t('PUBLICATION_WIKI_PAGES'), 'items' => $this->pages([])],
+                ['type' => 'entries', 'name' => _t('PUBLICATION_ENTRIES'), 'items' => $this->entries('', [])],
             ];
+        }
+
+        $groups = [];
+        preg_match_all('/(\d+|pages)(\(([^()]*)\))?/m', $this->arguments['groupselector'], $matches);
+        foreach ($matches[1] as $i => $selector) {
+            $title = $this->arguments['titles'][$i] ?? '';
+            $filter = $matches[3][$i] ?? '';
+            if ($selector === 'pages') {
+                $groups[] = [
+                    'type' => 'pages',
+                    'name' => $title !== '' ? $title : _t('PUBLICATION_WIKI_PAGES'),
+                    'items' => $this->pages(array_values(array_filter(array_map('trim', explode(',', $filter))))),
+                ];
+                continue;
+            }
+            $form = $this->getService(FormManager::class)->getOne($selector);
+            $groups[] = [
+                'type' => 'entries',
+                'name' => $title !== '' ? $title : (string)($form['label'] ?? $selector),
+                'items' => $this->entries($selector, $this->query($filter)),
+            ];
+        }
+
+        return $groups;
+    }
+
+    /**
+     * `bf_a=x|bf_b=y` as the query array the entry search takes, repeated fields joined by a comma.
+     *
+     * @return array<string, string>
+     */
+    private function query(string $filter): array
+    {
+        $query = [];
+        foreach (array_filter(explode('|', $filter), static fn (string $part): bool => trim($part) !== '') as $condition) {
+            [$field, $value] = array_pad(explode('=', $condition, 2), 2, '');
+            $field = trim($field);
+            $query[$field] = isset($query[$field]) ? $query[$field] . ',' . trim($value) : trim($value);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Readable pages, those carrying every keyword given when there are some.
+     *
+     * @param list<string> $keywords
+     *
+     * @return list<array{tag: string, label: string}>
+     */
+    private function pages(array $keywords): array
+    {
+        $rows = $this->getService(TagsManager::class)->getPagesByTags(implode(',', $keywords), 'wiki', '', 'alpha');
+        $items = [];
+        foreach ($rows as $row) {
+            if (($row['type'] ?? PageType::PAGE) !== PageType::PAGE || !empty($row['parent'])) {
+                continue;
+            }
+            $tag = (string)$row['tag'];
+            $items[$tag] = ['tag' => $tag, 'label' => $tag];
+        }
+        ksort($items, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return array_values($items);
+    }
+
+    /**
+     * Readable entries, of one form or of all, in the order of their titles.
+     *
+     * @param array<string, string> $query
+     *
+     * @return list<array{tag: string, label: string}>
+     */
+    private function entries(string $formId, array $query): array
+    {
+        $params = ['queries' => $query];
+        if ($formId !== '') {
+            $params['formsIds'] = [$formId];
+        }
+        $items = array_map(
+            static fn (array $entry): array => [
+                'tag' => (string)($entry['tag'] ?? ''),
+                'label' => (string)($entry['title'] ?? $entry['tag'] ?? ''),
+            ],
+            array_values($this->getService(EntryManager::class)->search($params, true))
+        );
+        usort($items, static fn (array $a, array $b): int => strcoll(mb_strtolower($a['label']), mb_strtolower($b['label'])));
+
+        return $items;
+    }
+
+    private function isEbook(): bool
+    {
+        return $this->arguments['outputformat'] === 'ebook';
+    }
+
+    private function isNewsletter(): bool
+    {
+        return $this->arguments['outputformat'] === 'newsletter';
+    }
+
+    /**
+     * What the form submitted: an ebook page, saved and redirected to, or a newsletter entry.
+     *
+     * @param array<string, mixed>                       $post
+     * @param list<array{type: string, message: string}> $messages
+     *
+     * @return string|null an error to show instead of the generator
+     */
+    private function managePost(array $post, array &$messages, string $existingTag): ?string
+    {
+        if (!$this->checkPostValues($post, $messages)) {
+            return null;
+        }
+        $items = array_values(array_filter($post['page'], 'is_string'));
+
+        if ($this->isNewsletter()) {
+            $this->createNewsletter($post, $items, $messages);
+
+            return null;
+        }
+        if (!$this->isEbook()) {
+            return null;
+        }
+
+        $cover = $post['publication-cover-image'] ?? '';
+        if ($cover !== '' && (!is_string($cover) || preg_match('/\.(jpe?g|png|svg|webp)$/i', $cover) !== 1)) {
+            $messages[] = ['type' => 'danger', 'message' => _t('PUBLICATION_NOT_IMAGE_FILE')];
+
+            return null;
+        }
+
+        $pageManager = $this->getService(PageManager::class);
+        $tag = $existingTag !== '' ? $existingTag : $pageManager->suggestFreeTag(
+            (new AsciiSlugger())->slug($this->arguments['pagenameprefix'] . ' ' . $post['publication']['title'])->lower()->toString()
+        );
+        $content = implode('', array_map(
+            fn (string $item): string => preg_match('/\{\{\s*blankpage\s*\}\}/', $item) === 1
+                ? self::BLANK_PAGE . "\n"
+                : $this->getService(Publication::class)->getIncludeActionFromPageTag($item),
+            $items
+        ));
+
+        if ($pageManager->save($tag, [PageBody::CONTENT => $content]) !== 0) {
+            return '<div class="yw-alert yw-alert--danger">' . _t('PUBLICATION_EBOOK_PAGE_CREATION_FAILED') . '</div>';
+        }
+        $pageManager->setMetadata($tag, $this->getService(Publication::class)->storable($post));
+        Flash::success(_t('PUBLICATION_EBOOK_PAGE_CREATED'));
+        $this->getService(Redirector::class)->redirect($this->getService(UrlFormatter::class)->href('', $tag, null, false));
+    }
+
+    /**
+     * @param array<string, mixed>                       $post
+     * @param list<string>                               $items
+     * @param list<array{type: string, message: string}> $messages
+     */
+    private function createNewsletter(array $post, array $items, array &$messages): void
+    {
+        $formatter = $this->getService(MarkdownFormatterService::class);
+        $html = implode('', array_map(
+            fn (string $item): string => $formatter->format(
+                preg_match('/\{\{\s*blankpage\s*\}\}/', $item) === 1 ? self::BLANK_PAGE . "\n" : $this->getService(Publication::class)->getIncludeActionFromPageTag($item)
+            ),
+            $items
+        ));
+        $form = $this->getService(FormManager::class)->getOne($this->arguments['formid']);
+        $descriptionField = $this->getService(FieldRoleResolver::class)->propertyName($form, FieldRole::DESCRIPTION) ?? 'bf_description';
+
+        $entry = $this->getService(EntryManager::class)->create($this->arguments['formid'], [
+            'bf_titre' => trim($this->arguments['outputformat'] . ' ' . $post['publication']['title']),
+            $descriptionField => (string)($post['publication']['description'] ?? ''),
+            'bf_author' => (string)($post['publication']['authors'] ?? ''),
+            'bf_content' => strip_tags($html, self::ACCEPTED_TAGS),
+            'antispam' => 1,
+        ]);
+        $messages[] = empty($entry)
+            ? ['type' => 'warning', 'message' => _t('PUBLICATION_NEWSLETTER_NOT_CREATED')]
+            : ['type' => 'success', 'message' => _t('PUBLICATION_NEWSLETTER_CREATED')];
+    }
+
+    /**
+     * @param array<string, mixed>                       $post
+     * @param list<array{type: string, message: string}> $messages
+     */
+    private function checkPostValues(array $post, array &$messages): bool
+    {
+        if (($post['antispam'] ?? null) != 1) {
+            $messages[] = ['type' => 'danger', 'message' => _t('PUBLICATION_SPAM_RISK')];
+
             return false;
         }
-        if (!isset($post["page"]) || !is_array($post["page"]) || count($post["page"]) === 0) {
-            // There is no page selected
-            $messages[] = [
-                'message' => _t('PUBLICATION_NO_PAGE_FOUND'),
-                'type' => 'danger'
-            ];
+        if (!is_array($post['page'] ?? null) || $post['page'] === []
+            || !is_array($post['publication'] ?? null) || !is_string($post['publication']['title'] ?? null) || trim($post['publication']['title']) === '') {
+            $messages[] = ['type' => 'danger', 'message' => _t('PUBLICATION_NO_PAGE_FOUND')];
+
             return false;
         }
-        if (!isset($post["publication"]["title"]) || trim($post["publication"]["title"]) === '') {
-            // There is no publication-title
-            $messages[] = [
-                'message' => _t('PUBLICATION_NO_PAGE_FOUND'),
-                'type' => 'danger'
-            ];
-            return false;
-        }
+
         return true;
     }
 }

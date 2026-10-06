@@ -1,127 +1,106 @@
-/**
- * +------------------------------------------------------------------------------------------------------+
- * | Copyright (C) 2013 Outils-Reseaux (accueil@outils-reseaux.org)                                       |
- * +------------------------------------------------------------------------------------------------------+
- * | This library is free software; you can redistribute it and/or                                        |
- * | modify it under the terms of the GNU Lesser General Public                                           |
- * | License as published by the Free Software Foundation; either                                         |
- * | version 2.1 of the License, or (at your option) any later version.                                   |
- * |                                                                                                      |
- * | This library is distributed in the hope that it will be useful,                                      |
- * | but WITHOUT ANY WARRANTY; without even the implied warranty of                                       |
- * | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU                                    |
- * | Lesser General Public License for more details.                                                      |
- * |                                                                                                      |
- * | You should have received a copy of the GNU Lesser General Public                                     |
- * | License along with this library; if not, write to the Free Software                                  |
- * | Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA                            |
- * +------------------------------------------------------------------------------------------------------+
- *
- * javascript for pages export
- *
- *
- * @package 	publication
- * @author		Florian Schmitt <florian@outils-reseaux.org>
- *
- *
- **/
+ywInitEach('.publication-generator', (generator) => {
+  const selection = generator.querySelector('#publication-selection-container')
+  const available = generator.querySelector('.publication-generator__available')
+  const filter = generator.querySelector('#publication-filter')
+  const filterCount = generator.querySelector('#publication-filter-count')
 
-$(document).ready(function () {
-    $('.export-table-form').on('submit', function() {
-        $(this).append('<input type="hidden" name="antispam" value="1" />')
+  const show = (element, visible) => { if (element) element.hidden = !visible }
+
+  const setSelected = (item, selected) => {
+    show(item.querySelector('.movable'), selected)
+    show(item.querySelector('.remove-page-item'), selected)
+    show(item.querySelector('.select-page-item'), !selected)
+    const input = item.querySelector('input[type="hidden"]')
+    if (input) input.disabled = !selected
+  }
+
+  const select = (item) => {
+    setSelected(item, true)
+    item.hidden = false
+    selection.append(item)
+  }
+
+  const unselect = (item) => {
+    if (item.dataset.group === 'blank' || item.dataset.group === 'selected') {
+      item.remove()
+      return
+    }
+    const list = available.querySelector(`.page-groups[data-group="${item.dataset.group}"] .list-entries-to-export`)
+    if (!list) {
+      item.remove()
+      return
+    }
+    setSelected(item, false)
+    list.prepend(item)
+    applyFilter()
+  }
+
+  const applyFilter = () => {
+    if (!filter) return
+    const needle = filter.value.trim().toLowerCase()
+    let count = 0
+    available.querySelectorAll('.publication-item').forEach((item) => {
+      const visible = needle === '' || item.textContent.toLowerCase().includes(needle)
+      item.hidden = !visible
+      if (visible) count++
     })
+    if (filterCount) filterCount.textContent = needle === '' ? '' : `${filterCount.dataset.label} : ${count}`
+  }
 
-    $("#publication-selection-container").sortable();
+  generator.addEventListener('click', (event) => {
+    const button = event.target.closest('button')
+    if (!button || !generator.contains(button)) return
+    const item = button.closest('.publication-item')
 
-	$('.btn-erase-filter').on('click', function() {
-        $("#filter").val('').keyup();
-    });
+    if (button.classList.contains('select-page-item') && item) {
+      event.preventDefault()
+      select(item)
+    } else if (button.classList.contains('remove-page-item') && item) {
+      event.preventDefault()
+      unselect(item)
+    } else if (button.classList.contains('select-all')) {
+      event.preventDefault()
+      button.closest('.page-groups').querySelectorAll('.publication-item:not([hidden])').forEach(select)
+    } else if (button.classList.contains('page-break')) {
+      event.preventDefault()
+      const template = document.createElement('template')
+      template.innerHTML = `<li class="yw-list-group__item publication-item blank-page" data-group="blank">
+        <span class="publication-item__handle movable"></span>
+        <input type="hidden" name="page[]" value="{{blankpage}}">
+        <span class="page-label"></span>
+        <button type="button" class="yw-btn yw-btn--sm yw-btn--danger remove-page-item"></button>
+      </li>`
+      const blank = template.content.firstElementChild
+      blank.querySelector('.page-label').textContent = button.dataset.label
+      blank.querySelector('.movable').innerHTML = available.querySelector('.movable')?.innerHTML ?? '↕'
+      blank.querySelector('.remove-page-item').innerHTML = available.querySelector('.remove-page-item')?.innerHTML ?? '×'
+      blank.querySelector('.remove-page-item').title = button.dataset.label
+      selection.append(blank)
+    }
+  })
 
-	$('#publication-selection-container').on('click', '.remove-page-break', function() {
-        $(this).parent().remove();
-        return false;
-    });
+  if (filter) filter.addEventListener('input', applyFilter)
 
-    $('.page-break').on('click', function() {
-        const label = this.dataset.label
-        $("#publication-selection-container").append(`<li class="list-group-item blank-page">
-            <button class="pull-right btn btn-sm btn-danger remove-page-break" title="Enlever le saut de page" href="#">
-                <i class="fas fa-trash"></i>
-            </button>
-            <span class="movable">
-                <i class="fas fa-arrows-alt-v"></i>
-            </span>
-            <input type="hidden" name="page[]" value="{{blankpage}}">
-            <span class="page-label">${label}</span>
-        </li>`);
-        return false;
-    });
+  if (typeof Sortable !== 'undefined') {
+    Sortable.create(selection, { handle: '.movable', animation: 150 })
+  }
 
-    $('.select-all').on('click', function() {
-        $(this).parent().next('.list-entries-to-export').find('.select-page-item:visible').click();
-        return false;
-    });
+  const form = generator.querySelector('.export-table-form')
+  form.addEventListener('submit', () => {
+    if (!form.querySelector('input[name="antispam"]')) {
+      const antispam = document.createElement('input')
+      antispam.type = 'hidden'
+      antispam.name = 'antispam'
+      antispam.value = '1'
+      form.append(antispam)
+    }
+  })
 
-	$('.select-page-item').on('click', function() {
-      var $this = $(this);
-		  $this.siblings().filter('.remove-page-item').removeClass('hide');
-      $this.siblings().filter(".movable").removeClass('hide');
-		  $this.addClass('hide');
-		  var listitem = $this.parent();
-		  listitem.fadeOut("fast", function() {
-			  listitem.appendTo("#publication-selection-container").fadeIn("fast");
-      });
-
-      return false;
-	});
-
-  $('.remove-page-item').on('click', function() {
-      var $this = $(this);
-      $this.siblings().filter('.select-page-item').removeClass('hide');
-      $this.siblings().filter(".movable").addClass('hide');
-      $this.addClass('hide');
-      var listitem = $this.parent();
-      listitem.fadeOut("fast", function() {
-        listitem.prependTo(".list-entries-to-export.group-"+$this.data('group')).fadeIn("fast");
-      });
-
-      return false;
-  });
-
-  var listpages = $(".export-table-container .list-group-item");
-  var filter = $("#filter");
-  var filtercount = $("#filter-count");
-
-	filter.keyup(function(){
-        // Retrieve the input field text and reset the count to zero
-        var count = 0;
-
-        // Loop through the comment list
-        listpages.each(function(){
-            // If the list item does not contain the text phrase fade it out
-            if ($(this).text().search(new RegExp(filter.val(), "i")) < 0) {
-                $(this).hide();
-
-            // Show the list item if the phrase matches and increase the count by 1
-            } else {
-                $(this).show();
-                count++;
-            }
-        });
-
-        // Update the count
-        filtercount.text(`Nombre de pages : ${count}`);
-    });
-
-    /* Display ebook publication options (book, fanzine) */
-    $('[name="publication-mode"]').on('change', function (event) {
-      var mode = event.target.value
-      var $options = $('details.publication-options')
-
-      $options.not(`.options-${mode}`).attr('hidden', true)
-      $options.filter(`.options-${mode}`).removeAttr('hidden')
+  form.querySelectorAll('[name="publication-mode"]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      form.querySelectorAll('details.publication-options').forEach((details) => {
+        details.hidden = !details.classList.contains(`options-${radio.value}`)
+      })
     })
-
-    var mode = $('[name="publication-mode"][checked]').val()
-    $('details.publication-options').filter(`.options-${mode}`).removeAttr('hidden')
-});
+  })
+})

@@ -1,59 +1,55 @@
-{{ include_javascript('javascripts/vendor/vue/vue.js') }}
-{{ include_javascript('tools/publication/javascripts/handler-pdf.js',false,true) }}
-{{ include_css('tools/publication/styles/handler-pdf.css',) }}
+{{ include_javascript('extensions/publication/javascripts/handler-pdf.js') }}
+{{ include_css('extensions/publication/styles/handler-pdf.css') }}
 
-<div class="pdf-handler-container" 
-        data-is-admin="{{ (isAdmin == true)|json_encode }}" 
-        data-is-iframe="{{ (isIframe == true)|json_encode }}" 
-        data-urls="{{ urls|json_encode }}" 
-        data-source-url="{{ sourceUrl }}" 
-        data-hash="{{ hash }}" 
-        data-page-tag="{{ pageTag }}"
-        data-refresh="{{ refresh|json_encode }}"
-        data-translations="{{ {
-            'creatingpdf': _t('PUBLICATION_CREATING_PDF'),
-            'errorforadmin': _t('PUBLICATION_ERROR_FOR_ADMIN'),
-            'errorforexternaleurlcheck': _t('PUBLICATION_ERROR_FOR_EXTERNAL_URL_DOMAIN_CHECK'),
-            'errorforexternaleurldomainnotauthorized': _t('PUBLICATION_ERROR_FOR_EXTERNAL_DOMAIN_NOT_AUTHORIZED'),
-            'errorforexternaleurlhtmlformat': _t('PUBLICATION_ERROR_FOR_EXTERNAL_HTML_FORMAT'),
-            'errorforexternaleurlnotconfigured': _t('PUBLICATION_ERROR_FOR_EXTERNAL_NOT_CONFIGURED'),
-            'errorforexternalwhilecreatingpdf': _t('PUBLICATION_ERROR_WHILE_GENERATING_PDF'),
-            'errorforexternalwithoutchromium': _t('PUBLICATION_ERROR_FOR_EXTERNAL_WITHOUT_CHROMIUM'),
-            'errorforurls': _t('PUBLICATION_ERROR_FOR_URLS'),
-            'errorforuser': _t('PUBLICATION_ERROR_FOR_USER'),
-            'errorreloading': _t('PUBLICATION_ERROR_RELOADING'),
-            'opendefaultlink': _t('PUBLICATION_OPEN_DEFAULT_LINK'),
-            'popuptovalidate': _t('PUBLICATION_POPUP_TO_VALIDATE'),
-            'preview': _t('PUBLICATION_PREVIEW'),
-            'printviapreview': _t('PUBLICATION_PRINT_VIA_PREVIEW')
-        }|json_encode }}"
-    >
-    <h2>{{ _t('PUBLICATION_PDF_CREATION',{pageTag:pageTag|length < 12 ? pageTag : pageTag|slice(0,11)~'…'}) }}</h2>
-    <div>
-      {% if isAdmin == true %}
-        <step :name="'getPdfServiceUrl'" :value="urlOfPdfServiceGet" :text="{{ _t('PUBLICATION_GET_PDF_SERVICE_URL')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
-        <step :name="'checkUrls'" :value="urlsChecked" :text="{{ _t('PUBLICATION_CHECK_URLS')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
+<div class="pdf-handler-container"
+     data-is-admin="{{ isAdmin ? 'true' : 'false' }}"
+     data-urls="{{ urls|json_encode }}"
+     data-source-url="{{ sourceUrl }}"
+     data-hash="{{ hash }}"
+     data-page-tag="{{ pageTag }}"
+     data-help-url="{{ url({ tag: 'doc' }) }}"
+     data-refresh="{{ refresh ? 'true' : 'false' }}"
+     data-translations="{{ {
+       'creatingpdf': _t('PUBLICATION_CREATING_PDF'),
+       'errorforadmin': _t('PUBLICATION_ERROR_FOR_ADMIN'),
+       'errorforexternaleurlcheck': _t('PUBLICATION_ERROR_FOR_EXTERNAL_URL_DOMAIN_CHECK'),
+       'errorforexternaleurldomainnotauthorized': _t('PUBLICATION_ERROR_FOR_EXTERNAL_DOMAIN_NOT_AUTHORIZED'),
+       'errorforexternaleurlnotconfigured': _t('PUBLICATION_ERROR_FOR_EXTERNAL_NOT_CONFIGURED'),
+       'errorforexternalwhilecreatingpdf': _t('PUBLICATION_ERROR_WHILE_GENERATING_PDF'),
+       'errorforexternalwithoutchromium': _t('PUBLICATION_ERROR_FOR_EXTERNAL_WITHOUT_CHROMIUM'),
+       'errorforurls': _t('PUBLICATION_ERROR_FOR_URLS'),
+       'errorforuser': _t('PUBLICATION_ERROR_FOR_USER'),
+       'errorreloading': _t('PUBLICATION_ERROR_RELOADING'),
+       'opendefaultlink': _t('PUBLICATION_OPEN_DEFAULT_LINK'),
+       'popuptovalidate': _t('PUBLICATION_POPUP_TO_VALIDATE'),
+       'preview': _t('PUBLICATION_PREVIEW'),
+       'printviapreview': _t('PUBLICATION_PRINT_VIA_PREVIEW')
+     }|json_encode }}">
+  <h2>{{ _t('PUBLICATION_PDF_CREATION', {pageTag: pageTag|length < 30 ? pageTag : pageTag|slice(0, 29) ~ '…'}) }}</h2>
+
+  <ol class="pdf-steps">
+    {% for step, label in {
+      'getPdfServiceUrl': 'PUBLICATION_GET_PDF_SERVICE_URL',
+      'checkUrls': 'PUBLICATION_CHECK_URLS',
+      'contactService': 'PUBLICATION_CONTACT_SERVICE',
+      'browserLoaded': 'PUBLICATION_LOADING_BROWSER',
+      'pageLoadedByBrowser': 'PUBLICATION_LOADING_PAGE',
+      'creatingPdf': 'PUBLICATION_CREATING_PDF',
+      'getPdf': 'PUBLICATION_DOWNLOAD_PDF_STEP'
+    } %}
+      {% if isAdmin or step in ['contactService', 'getPdf'] %}
+        <li class="pdf-step" data-step="{{ step }}" data-state="0">{{ _t(label) }}</li>
       {% endif %}
-        <step :name="'contactService'" :value="pdfServiceContacted" :text="{{ _t('PUBLICATION_CONTACT_SERVICE')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
-      {% if isAdmin == true %}
-        <step :name="'browserLoaded'" :value="browserLoaded" :text="{{ _t('PUBLICATION_LOADING_BROWSER')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
-        <step :name="'pageLoadedByBrowser'" :value="pageLoadedByBrowser" :text="{{ _t('PUBLICATION_LOADING_PAGE')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
-        <step :name="'creatingPdf'" :value="creatingPdf" :text="{{ _t('PUBLICATION_CREATING_PDF')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
-      {% endif %}
-        <step :name="'getPdf'" :value="pdfDownloaded" :text="{{ _t('PUBLICATION_DOWNLOAD_PDF_STEP')|json_encode }}" :is-admin="{{ isAdmin|json_encode }}"></step>
-    </div>
-    <div v-if="message.length > 0" :class="{alert:true,[`alert-${messageType}`]:true}" v-html="message">
-    </div>
-    <button v-if="buttonTitle.length > 0" v-html="buttonTitle" :class="{btn:true,[`btn-${buttonType}`]:true}" @click.prevent.stop="manageButton"></button>
-    <a 
-        v-if="downloadLink.length > 0" 
-        :download="downloadFileName"
-        class="btn btn-primary"
-        title="{{ _t('PUBLICATION_SAVE_FILE') }}"
-        :href="downloadLink"
-        ref="downLoadButton"
-        >
-      {{ _t('PUBLICATION_SAVE_FILE') }}
+    {% endfor %}
+  </ol>
+
+  <div class="pdf-message yw-alert" role="status" hidden></div>
+
+  <div class="pdf-actions">
+    <button type="button" class="yw-btn yw-btn--info pdf-action" hidden></button>
+    <a class="yw-btn yw-btn--primary pdf-download" hidden title="{{ _t('PUBLICATION_SAVE_FILE') }}">
+      {{ icon('download') }} <span>{{ _t('PUBLICATION_SAVE_FILE') }}</span>
     </a>
-    <button class="btn btn-default" @click.prevent.stop="returnToPage">{{ _t('PUBLICATION_RETURN_TO_PAGE') }}</button>
+    <a class="yw-btn" href="{{ pageUrl }}">{{ icon('arrow-back-up') }} <span>{{ _t('PUBLICATION_RETURN_TO_PAGE') }}</span></a>
+  </div>
 </div>

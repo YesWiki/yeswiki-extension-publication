@@ -1,10 +1,11 @@
+/* Fanzine layout: pages imposed on one sheet to fold. */
 @page {
   size: landscape;
   margin: 0;
   bleed: 0;
 }
 
-html.html-publication {
+html:has(> body.publication--fanzine) {
   font-size: 55% !important;
 }
 
@@ -12,8 +13,6 @@ body.publication--fanzine {
   font-size: 1rem !important
 }
 
-/** SINGLE FILE */
-/* fanzine wrapper */
 .fanzine-single-page .fanzine {
   width: 100vw;
   height: calc(100vh - 2px);
@@ -25,7 +24,6 @@ body.publication--fanzine {
     "page-6 page-7 page-8 page-1";
 }
 
-  /* page */
   .fanzine-single-page .fanzine > * {
     background: white !important;
     overflow: hidden;
@@ -63,7 +61,6 @@ body.publication--fanzine {
     transform: rotate(180deg) translateX(-0.25px);
   }
 
-/** */
 .fanzine-recto-folio .fanzine {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -79,5 +76,3 @@ body.publication--fanzine {
   .fanzine-recto-folio .fanzine > :nth-child(2n) {
     page-break-after: always;
   }
-
-

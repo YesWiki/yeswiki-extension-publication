@@ -1,15 +1,5 @@
 <?php
 
-/**
-* Fichier de traduction en francais de l'extension wkhtmltopdf
-*
-* @license		GNU GPL 2
-* @package 		publication
-* @author       Florian Schmitt <florian@outils-reseaux.org>
-* @copyright 	Outils-R�seaux
-*
-*/
-
 return [
     'PUBLICATION_ADD_ALL' => 'Ajouter tout',
     'PUBLICATION_AVAILABLE_PAGES' => 'Pages disponibles',
@@ -90,21 +80,19 @@ return [
     'PUBLICATION_NO_GENERATED_PDF_FILE_FOUND' => 'Le fichier pdf g&eacute;n&eacute;r&eacute; n\'a pas &eacute;t&eacute; trouv&eacute;.<br />V&eacute;rifier les permissions en &eacute;criture sur le dossier "cache" ou les permissions en droit d\'&eacute;x&eacute;cution du programme chromium.',
     'PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH' => 'Pas de fichier exécutable trouvé pour',
     'PUBLICATION_DID_YOU_INSTALL_CHROMIUM_OR_SET_UP_PATH' => 'Avez vous installé Chromium sur votre serveur, ou configuré le chemin vers le programme ou le service (paramètres "htmltopdf_path" ou "htmltopdf_service_url" dans le fichier de configuration) ?',
-
-    // actions builber
     'AB_publication_label' => 'Publication',
     'AB_publication_blanckpage_label' => 'Insérer une page vide',
     'AB_publication_blanckpage_hint' => 'À insérer dans une page de contenu, pour insérer une page vide lors de la génération de la publication.',
     'AB_publication_pagebreak_label' => 'Insérer un saut de page',
     'AB_publication_pagebreak_hint' => 'À insérer dans une page de contenu, pour forcer le passage à la page suivante.',
-    'AB_publication_bazar2publication_label' => 'Impression de résultats Bazar',
-    'AB_publication_bazar2publication_hint' => 'Bouton à positionner à côté d\'une action {{bazarliste}}.',
-    'AB_publication_bazar2publication_title_label' => 'Titre',
-    'AB_publication_bazar2publication_icon_label' => 'Icône',
-    'AB_publication_bazar2publication_class_label' => 'Classe',
-    'AB_publication_bazar2publication_templatepage_label' => 'Page modèle',
-    'AB_publication_bazar2publication_exludedfields_label' => 'Champs à ne pas imprimer',
-    'AB_publication_bazar2publication_exludedfields_hint' => 'séparés par des virgules. ex : bf_ville,bf_tel (mettre ,, pour supprimer les labelhtml)',
+    'AB_publication_entries2publication_label' => 'Impression de résultats Bazar',
+    'AB_publication_entries2publication_hint' => 'Bouton à positionner à côté d\'une action {{entrylist}}.',
+    'AB_publication_entries2publication_title_label' => 'Titre',
+    'AB_publication_entries2publication_icon_label' => 'Icône',
+    'AB_publication_entries2publication_class_label' => 'Classe',
+    'AB_publication_entries2publication_templatepage_label' => 'Page modèle',
+    'AB_publication_entries2publication_exludedfields_label' => 'Champs à ne pas imprimer',
+    'AB_publication_entries2publication_exludedfields_hint' => 'séparés par des virgules. ex : bf_ville,bf_tel (mettre ,, pour supprimer les labelhtml)',
     'AB_publication_publication_template_label' => 'Définir une page comme modèle de page',
     'AB_publication_publication_template_hint' => 'A ajouter dans une page modèle',
     'AB_publication_publicationgenerator_label' => 'Générateur de publication',
@@ -139,16 +127,12 @@ return [
     'AB_publication_publicationgenerator_template_hint' => 'ex: exportpages_table.tpl.html',
     'AB_publication_publicationlist_label' => 'Liste des publications',
     'AB_publication_publicationlist_pagenameprefix_label' => 'préfixe de page',
-
-    // edit config
     'EDIT_CONFIG_HINT_HTMLTOPDF_OPTIONS[USERAGENT]' => 'UserAgent utilisée par le navigateur',
     'EDIT_CONFIG_HINT_HTMLTOPDF_OPTIONS[WINDOWSIZE]' => 'Taille de la fenêtre utilisée par le navigateur ([\'1440\',\'780\'])',
     'EDIT_CONFIG_HINT_HTMLTOPDF_PATH' => 'Chemin d\'accès serveur personnalisé à un Chrome/Chromium.',
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_URL' => 'Si Chrome/Chromium ne peut être installé sur votre machine, adresse d\'un YesWiki à qui déléguer le rendu PDF (exemple: https://example.org/yeswiki/?PagePrincipale/pdf)',
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_AUTHORIZED_DOMAINS' => 'Liste des domaines autorisés ([\'example.com\',\'yeswiki.net\'])',
     'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication',
-
-    // handlers/PdfHandler.pdf
     'PUBLICATION_CHECK_URLS' => 'Vérification des adresses',
     'PUBLICATION_CONTACT_SERVICE' => 'Contact du serveur pdf',
     'PUBLICATION_CREATING_PDF' => 'Pdf en cours de création',
@@ -172,4 +156,14 @@ return [
     'PUBLICATION_PRINT_VIA_PREVIEW' => 'Imprimer par le navigateur',
     'PUBLICATION_RETURN_TO_PAGE' => 'Retour à la page',
     'PUBLICATION_SAVE_FILE' => 'Enregistrer le pdf',
+    'PUBLICATION_CONFIGURATION' => 'Configuration',
+    'PUBLICATION_DOMAIN_NOT_AUTORIZED' => 'Ce domaine n\'est pas autorisé à générer des PDF ici',
+    'PUBLICATION_ENTRIES' => 'Fiches',
+    'PUBLICATION_WIKI_PAGES' => 'Pages wiki',
+    'PUBLICATION_NEWSLETTER_NOT_CREATED' => 'La newsletter n\'a pas pu être enregistrée.',
+    'PUBLICATION_NOTHING_TO_ADD' => 'Aucun contenu disponible',
+    'PUBLICATION_PAGE_COUNT' => 'Nombre de pages',
+    'PUBLICATION_PDF_GENERATION_LANCHED' => 'Veuillez patienter : le pdf est en train d\'être créé.',
+    'PUBLICATION_SELECTION_EMPTY' => 'Ajoutez ici des pages et des fiches avec le bouton +',
+    'PUBLICATION_UNKNOWN_MODE' => 'Mode de publication inconnu',
 ];

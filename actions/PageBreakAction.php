@@ -1,13 +1,35 @@
 <?php
 
-namespace YesWiki\Publication;
+namespace YesWiki\Publication\Action;
 
 use YesWiki\Core\YesWikiAction;
+use YesWiki\Kernel\Component\Category;
+use YesWiki\Kernel\Component\Component;
+use YesWiki\Kernel\Component\ProvidesComponents;
+use YesWiki\Kernel\Performable\RegisteredAction;
 
-class PageBreakAction extends YesWikiAction
+/** `{{pagebreak}}`: what follows starts on a new page once printed. */
+class PageBreakAction extends YesWikiAction implements RegisteredAction, ProvidesComponents
 {
-    public function run()
+    public static function performableName(): string
     {
-        return "\n<hr class=\"pagebreak\" aria-hidden>\n";
+        return 'pagebreak';
+    }
+
+    public function components(): array
+    {
+        return [
+            Component::for('pagebreak')
+                ->category(Category::Writing)
+                ->label(_t('AB_publication_pagebreak_label'))
+                ->hint(_t('AB_publication_pagebreak_hint'))
+                ->icon('separator-horizontal')
+                ->adminOnly(),
+        ];
+    }
+
+    public function run(): string
+    {
+        return "\n<hr class=\"pagebreak\" aria-hidden=\"true\">\n";
     }
 }

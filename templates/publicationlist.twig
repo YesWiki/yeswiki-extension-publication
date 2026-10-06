@@ -1,14 +1,12 @@
-{{ include_css('tools/publication/styles/publication.css') }}
-{% if pages|length == 0 %}
-<div class="alert alert-info">
-  {{ _t('PUBLICATION_NO_EBOOK_FOUND') }}
-</div>
+{{ include_css('extensions/publication/styles/publication.css') }}
+{% if publications is empty %}
+  <div class="yw-alert yw-alert--info">{{ _t('PUBLICATION_NO_EBOOK_FOUND') }}</div>
+{% else %}
+  <ul class="yw-list-unstyled publication-list">
+    {% for publication in publications %}
+      <li>
+        {% include '@publication/includes/publication.twig' with publication only %}
+      </li>
+    {% endfor %}
+  </ul>
 {% endif %}
-
-<ul class="media-list">
-{% for page in pages %}
-  <li class="media">
-    {% include '@publication/includes/publication.twig' with { 'metas': page._metas, 'tag': page.resource } %}
-  </li>
-{% endfor %}
-</ul>

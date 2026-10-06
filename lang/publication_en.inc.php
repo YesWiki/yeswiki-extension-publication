@@ -1,15 +1,5 @@
 <?php
 
-/**
-* Fichier de traduction en francais de l'extension wkhtmltopdf
-*
-* @license		GNU GPL 2
-* @package 		publication
-* @author       Florian Schmitt <florian@outils-reseaux.org>
-* @copyright 	Outils-R�seaux
-*
-*/
-
 return [
     'PUBLICATION_ADD_ALL' => 'Add all',
     'PUBLICATION_AVAILABLE_PAGES' => 'Available pages',
@@ -90,21 +80,19 @@ return [
     'PUBLICATION_NO_GENERATED_PDF_FILE_FOUND' => 'No pdf file was found.<br />Please check access rights on the "cache" folder.',
     'PUBLICATION_NO_EXECUTABLE_FILE_FOUND_ON_PATH' => 'No executable file found on path',
     'PUBLICATION_DID_YOU_INSTALL_CHROMIUM_OR_SET_UP_PATH' => 'Did you install Chromium on this server, or setup path to the program or url service (parameters "htmltopdf_path" or "htmltopdf_service_url" in the configuration file) ?',
-
-    // actions builber
     'AB_publication_label' => 'Publication',
     'AB_publication_blanckpage_label' => 'Insert an empty page',
     'AB_publication_blanckpage_hint' => 'To insert in content of a page, to insert empty page when generating a publication.',
     'AB_publication_pagebreak_label' => 'Insert a break page',
     'AB_publication_pagebreak_hint' => 'To insert in content of a page, to forece break page.',
-    'AB_publication_bazar2publication_label' => 'Print Bazar results',
-    'AB_publication_bazar2publication_hint' => 'Button to put near action {{bazarliste}}.',
-    'AB_publication_bazar2publication_title_label' => 'Title',
-    'AB_publication_bazar2publication_icon_label' => 'Icon',
-    'AB_publication_bazar2publication_class_label' => 'Class',
-    'AB_publication_bazar2publication_templatepage_label' => 'Template page',
-    'AB_publication_bazar2publication_exludedfields_label' => 'Fields not to print',
-    'AB_publication_bazar2publication_exludedfields_hint' => 'separated by coma. ex : bf_town,bf_tel (put ,, to delete labelhtml)',
+    'AB_publication_entries2publication_label' => 'Print Bazar results',
+    'AB_publication_entries2publication_hint' => 'Button to put near action {{entrylist}}.',
+    'AB_publication_entries2publication_title_label' => 'Title',
+    'AB_publication_entries2publication_icon_label' => 'Icon',
+    'AB_publication_entries2publication_class_label' => 'Class',
+    'AB_publication_entries2publication_templatepage_label' => 'Template page',
+    'AB_publication_entries2publication_exludedfields_label' => 'Fields not to print',
+    'AB_publication_entries2publication_exludedfields_hint' => 'separated by coma. ex : bf_town,bf_tel (put ,, to delete labelhtml)',
     'AB_publication_publication_template_label' => 'Define a page as template page',
     'AB_publication_publication_template_hint' => 'To add in a template page',
     'AB_publication_publicationgenerator_label' => 'Publication generator',
@@ -139,16 +127,12 @@ return [
     'AB_publication_publicationgenerator_template_hint' => 'ex: exportpages_table.tpl.html',
     'AB_publication_publicationlist_label' => 'Publications\' list',
     'AB_publication_publicationlist_pagenameprefix_label' => 'page prefix',
-
-    // edit config
     'EDIT_CONFIG_HINT_HTMLTOPDF_OPTIONS[USERAGENT]' => 'UserAgent used by the browser',
     'EDIT_CONFIG_HINT_HTMLTOPDF_OPTIONS[WINDOWSIZE]' => 'Window size used by the browser ([\'1440\',\'780\'])',
     'EDIT_CONFIG_HINT_HTMLTOPDF_PATH' => 'Server custom filepath to Chrome/Chromium.',
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_URL' => 'If you are unable to install Chrome/Chromium on your server, YesWiki URL to delegate the PDF rendering (eg: https://example.org/yeswiki/?MainPage/pdf)',
     'EDIT_CONFIG_HINT_HTMLTOPDF_SERVICE_AUTHORIZED_DOMAINS' => 'Authorized domain list ([\'example.com\',\'yeswiki.net\'])',
     'EDIT_CONFIG_GROUP_PUBLICATION' => 'Publication',
-
-    // handlers/PdfHandler.pdf
     'PUBLICATION_CHECK_URLS' => 'Checking addresses',
     'PUBLICATION_CONTACT_SERVICE' => 'Contact pdf server',
     'PUBLICATION_DOWNLOAD_PDF_STEP' => 'Pdf download',
@@ -172,4 +156,14 @@ return [
     'PUBLICATION_PRINT_VIA_PREVIEW' => 'Print via browser',
     'PUBLICATION_RETURN_TO_PAGE' => 'Back to page',
     'PUBLICATION_SAVE_FILE' => 'Save pdf',
+    'PUBLICATION_CONFIGURATION' => 'Configuration',
+    'PUBLICATION_DOMAIN_NOT_AUTORIZED' => 'This domain is not allowed to make PDFs here',
+    'PUBLICATION_ENTRIES' => 'Entries',
+    'PUBLICATION_WIKI_PAGES' => 'Wiki pages',
+    'PUBLICATION_NEWSLETTER_NOT_CREATED' => 'The newsletter could not be saved.',
+    'PUBLICATION_NOTHING_TO_ADD' => 'Nothing to add',
+    'PUBLICATION_PAGE_COUNT' => 'Number of pages',
+    'PUBLICATION_PDF_GENERATION_LANCHED' => 'Please wait: the PDF is being made.',
+    'PUBLICATION_SELECTION_EMPTY' => 'Add pages and entries here with the + button',
+    'PUBLICATION_UNKNOWN_MODE' => 'Unknown publication mode',
 ];

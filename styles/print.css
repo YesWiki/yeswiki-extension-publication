@@ -1,3 +1,4 @@
+/* Typography of every printed publication. */
 body {
   font-variant-numeric: oldstyle-nums;
 }
@@ -139,7 +140,7 @@ span.dropcap-rw {
 }
 .FrontSales-rw p {
   text-indent: 0;
-} /* NAVIGATION */
+}
 a {
   color: black !important;
 }

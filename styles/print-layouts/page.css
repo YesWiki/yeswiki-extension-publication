@@ -1,17 +1,6 @@
-/**
- * A wiki page or a bazar entry printed on its own, outside any publication.
- * It deliberately does not reuse book.css: no binding margins, no running
- * title, no forced recto starts, and the bootstrap grid is left alone.
- */
-
+/* One page or entry printed on its own. */
 :root {
-  /**
-   * Width a page offers to the content, A4 minus the margins below. print.js
-   * lays the content out at this width before paginating, so that the widgets
-   * that measure themselves (Leaflet maps) frame what the page will show and
-   * not the browser window. Book and fanzine do not declare it and keep
-   * laying out against the window.
-   */
+
   --publication-measure: 190mm;
 }
 
@@ -31,9 +20,6 @@ body {
   line-height: 1.4;
 }
 
-/**
- * Writing helpers
- */
 .yeswiki-publication .hide-print,
 .yeswiki-publication .hide-from-print,
 .yeswiki-publication .no-print,
@@ -64,15 +50,10 @@ hr.page-break {
   break-after: page;
 }
 
-/**
- * Browser Print setup
- * @see http://www.richardnichols.net/2012/08/getting-chrome-to-print-with-background-colors-enabled/
- */
 .yeswiki-publication {
   -webkit-print-color-adjust: exact;
 }
 
-/* Screen chrome that carries nothing on paper */
 .yeswiki-publication .BAZ_fiche_info,
 .yeswiki-publication .bazar-search,
 .yeswiki-publication .filters-col,
@@ -80,7 +61,6 @@ hr.page-break {
   display: none;
 }
 
-/* Unfold panels and other collapsed content */
 .yeswiki-publication .collapse {
   display: block;
   height: 100% !important;
@@ -90,7 +70,6 @@ hr.page-break {
   display: none;
 }
 
-/* Blocks that read badly when a page break falls inside them */
 .yeswiki-publication .well,
 .yeswiki-publication .panel-heading,
 .yeswiki-publication h1,
@@ -109,7 +88,6 @@ hr.page-break {
   margin-top: 1em;
 }
 
-/* We clear Bazar image setting for pictures */
 .yeswiki-publication .BAZ_cadre_fiche [data-id="bf_image"] img {
   width: auto;
 }
@@ -119,18 +97,10 @@ hr.page-break {
   height: auto;
 }
 
-/* OPTION We remove link URLs from the print */
 .yeswiki-publication.hide-links-url a[href]::after {
   content: "";
 }
 
-/**
- * print.css dresses every layout as a book: justified text with a first line
- * indent, headings centred in spaced capitals, old style figures. A wiki page
- * reads better as itself, so these go back to plain values here.
- *
- * Black links are kept on purpose, a printed page has nothing to click on.
- */
 .publication--page {
   font-variant-numeric: normal;
 }
@@ -141,7 +111,6 @@ hr.page-break {
   margin-bottom: 0.7em;
 }
 
-/* print.css lowercases the whole first line of an opening paragraph */
 .publication--page header + p:first-line {
   text-transform: none !important;
   font-variant: normal;
@@ -167,32 +136,19 @@ hr.page-break {
   font-size: 1.4rem;
 }
 
-/* max-height crushes a tall image inside the page box */
 .publication--page img {
   max-height: none;
 }
 
-/**
- * Paged.js copies the map into the page, but Leaflet only adds
- * `leaflet-tile-loaded` to the tiles it created itself, and its stylesheet
- * hides every other one. The copies would show nothing but the grey background
- * of the container.
- */
 .publication--page .leaflet-tile {
   visibility: inherit;
 }
 
-/**
- * Leaflet fades a tile in by animating an inline opacity, and the copy freezes
- * at whatever the fade had reached, often close to zero. Only !important gets
- * past an inline style, and a printed page has no animation to respect.
- */
 .publication--page .leaflet-tile,
 .publication--page .leaflet-tile-container {
   opacity: 1 !important;
 }
 
-/* a printed map has nothing to click on, the attribution stays, it is the licence */
 .publication--page .leaflet-control-container .leaflet-control:not(.leaflet-control-attribution) {
   display: none;
 }

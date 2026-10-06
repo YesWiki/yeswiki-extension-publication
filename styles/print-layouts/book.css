@@ -1,3 +1,4 @@
+/* Book layout: recto/verso pages, running titles, cover and end pages. */
 body {
   font-size: 1rem;
   line-height: 1.33;
@@ -5,7 +6,7 @@ body {
 
 @page {
   size: A4 portrait;
-  margin: 20mm 25mm; /* marks: crop; */
+  margin: 20mm 25mm;
 
   @footnote {
     margin: 0.6rem 0 0 0;
@@ -61,9 +62,6 @@ section:nth-child(1) h1 {
   string-set: booktitle content(text);
 }
 
-/**
- * Writing helpers
- */
 .yeswiki-publication .hide-print,
 .yeswiki-publication .hide-from-print,
 .yeswiki-publication .no-print,
@@ -77,51 +75,44 @@ section:nth-child(1) h1 {
   visibility: unset;
 }
 
-/* .yeswiki-publication  */.pagebreak,
-/* .yeswiki-publication  */.page-break {
+.pagebreak,
+.page-break {
   break-after: page;
 }
-/* .yeswiki-publication  */hr.pagebreak,
-/* .yeswiki-publication  */hr.page-break {
+hr.pagebreak,
+hr.page-break {
   border: none;
   height: 0;
   margin: 0;
   padding: 0;
 }
 
-/**
- * Browser Print setup
- * @see http://www.richardnichols.net/2012/08/getting-chrome-to-print-with-background-colors-enabled/
- */
 .yeswiki-publication {
   -webkit-print-color-adjust: exact;
 }
 
-/**
- * Page section definition
- */
-/* .yeswiki-publication  */.publication-cover {
+.publication-cover {
   page: publication-cover;
 }
-/* .yeswiki-publication  */.publication-start {
+.publication-start {
   page: publication-cover;
 }
 
-/* .yeswiki-publication  */.publication-end {
+.publication-end {
   page: publication-end;
 }
 
-/* .yeswiki-publication  */div[class="include"],
+div[class="include"],
 .BAZ_cadre_fiche {
   break-before: always;
   page: publication-section;
 }
-  /* .yeswiki-publication  */div[class="include"] .include {
+  div[class="include"] .include {
     break-before: auto;
     page: unset;
   }
 
-/* .yeswiki-publication  */.blank-page {
+.blank-page {
   break-before: always;
   page: blank-page;
 }
@@ -132,15 +123,8 @@ section:nth-child(1) h1 {
 
 .yeswiki-publication .publication-cover,
 .yeswiki-publication .publication-start {
-  /* display: flex;
-  height: 100%;
-  flex-direction: column;
-  justify-content: center; */
-}
 
-/**
- * Page formats definition
- */
+}
 
 @page {
   margin: 20mm 20mm;
@@ -160,7 +144,7 @@ section:nth-child(1) h1 {
 
   @top-center {
     content: string(booktitle);
-    color: var(--neutral-soft-color);
+    color: var(--yw-text-muted);
     font-size: .8em;
     letter-spacing: 0.8;
     text-transform: uppercase;
@@ -175,16 +159,13 @@ section:nth-child(1) h1 {
 
   @top-center {
     content: string(sectiontitle);
-    color: var(--neutral-soft-color);
+    color: var(--yw-text-muted);
     font-size: .8em;
     letter-spacing: 0.8;
     text-transform: uppercase;
   }
 }
 
-/**
- * Book fold
- */
 .yeswiki-publication.book-fold .pagedjs_left_page {
   --pagedjs-padding-right: 10mm;
 }
@@ -192,9 +173,6 @@ section:nth-child(1) h1 {
   --pagedjs-padding-left: 10mm;
 }
 
-/**
- * Page number position
- */
 .page-number-position--none .pagedjs_margin-bottom-center {
   visibility: hidden;
 }
@@ -214,9 +192,6 @@ section:nth-child(1) h1 {
   text-align: right;
 }
 
-/**
- * Publication Cover
- */
 @page publication-cover {
   break-after: right;
 
@@ -242,7 +217,7 @@ section:nth-child(1) h1 {
 }
 
   .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page {
-    background-color: var(--header-title-color) !important;
+    background-color: var(--yw-primary) !important;
     background-size: cover;
   }
     .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page .pagedjs_page_content > div {
@@ -255,7 +230,6 @@ section:nth-child(1) h1 {
       justify-content: center;
     }
 
-
   .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page h1,
   .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page h2,
   .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page h3,
@@ -263,14 +237,14 @@ section:nth-child(1) h1 {
   .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page h5,
   .yeswiki-publication .pagedjs_named_page.pagedjs_publication-cover_first_page p {
     color: currentColor;
-    color: var(--header-bg-color);
+    color: var(--yw-on-primary);
   }
 
   .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image h1,
   .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image .publication-title,
   .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image .publication-description,
   .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image .publication-author {
-    background-color: var(--header-title-color);
+    background-color: var(--yw-primary);
     padding: .5em 20px;
     align-self: flex-start;
   }
@@ -279,7 +253,6 @@ section:nth-child(1) h1 {
     margin-top: auto;
   }
 
-  /* empty element are hidden */
   .yeswiki-publication .pagedjs_publication-cover_first_page.has-background-image *:empty {
     display: none;
   }
@@ -289,11 +262,8 @@ section:nth-child(1) h1 {
     string-set: booktitle content(text);
   }
 
-/**
- * Publication end
- */
 @page publication-end {
-  background-color: var(--header-title-color) !important;
+  background-color: var(--yw-primary) !important;
   background-size: cover;
   break-before: right;
 
@@ -317,9 +287,6 @@ section:nth-child(1) h1 {
   }
 }
 
-/**
- * Publication Section
- */
 @page publication-section {
 }
 
@@ -327,14 +294,11 @@ section:nth-child(1) h1 {
     string-set: sectiontitle content(text);
   }
 
-
-/* We hide a .well if it closes a page */
 .yeswiki-publication .BAZ_fiche_info,
 .yeswiki-publication .include .well:last-child {
   display: none;
 }
 
-/* We hide bazarliste elements */
 .yeswiki-publication .bazar-search,
 .yeswiki-publication .filters-col {
   display: none;
@@ -345,13 +309,11 @@ section:nth-child(1) h1 {
   margin: 0;
 }
 
-/* Unfold panels and other collapsed content */
 .yeswiki-publication .collapse {
   display: block;
   height:100%!important;
 }
 
-/* Wells content is partially lost if a page break happens inside it */
 .yeswiki-publication .well,
 .yeswiki-publication .panel-heading,
 .yeswiki-publication h1,
@@ -377,31 +339,27 @@ section:nth-child(1) h1 {
   display: none;
 }
 
-/* We cancel bootstrap column system on portrait print */
-.yeswiki-publication/*.page-orientation--portrait*/ [class*="col-"],
-.yeswiki-publication/*.page-orientation--portrait*/ .left,
-.yeswiki-publication/*.page-orientation--portrait*/ .right {
+.yeswiki-publication [class*="col-"],
+.yeswiki-publication .left,
+.yeswiki-publication .right {
   float: none;
 }
-.yeswiki-publication/*.page-orientation--portrait*/ .clearfix {
+.yeswiki-publication .clearfix {
   display: none;
 }
 
-.yeswiki-publication/*.page-orientation--portrait*/ [class*="col-"] {
+.yeswiki-publication [class*="col-"] {
   width: auto !important;
 }
 
-/* We clear Bazar image setting for pictures */
 .yeswiki-publication .BAZ_cadre_fiche [data-id="bf_image"] img {
   width: auto;
 }
 
-/* OPTION We remove link URLs from the print */
 .yeswiki-publication.hide-links-url a[href]::after{
   content: "";
 }
 
-/* */
 section {
   break-before: right;
   break-after: always;

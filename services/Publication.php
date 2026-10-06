@@ -2,208 +2,182 @@
 
 namespace YesWiki\Publication\Service;
 
-define('PUBLICATION_LAYOUT_BOOK', 'book');
-define('PUBLICATION_LAYOUT_FANZINE', 'fanzine');
-define('PUBLICATION_LAYOUT_PAGE', 'page');
-
+/** A publication's options: what the generator saves in a page's Metadata, merged over the defaults. */
 class Publication
 {
-    private $modes = [
-      PUBLICATION_LAYOUT_BOOK,
-      PUBLICATION_LAYOUT_FANZINE,
-      // a wiki page or a bazar entry printed on its own, outside any publication
-      PUBLICATION_LAYOUT_PAGE
+    public const LAYOUT_BOOK = 'book';
+    public const LAYOUT_FANZINE = 'fanzine';
+    public const LAYOUT_PAGE = 'page';
+
+    private const MODES = [self::LAYOUT_BOOK, self::LAYOUT_FANZINE, self::LAYOUT_PAGE];
+
+    private const PAGED_LAYOUTS = [self::LAYOUT_BOOK, self::LAYOUT_PAGE];
+
+    public const FANZINE_LAYOUTS = ['single-page', 'recto-folio'];
+
+    private const NESTED = ['publication', 'publication-book', 'publication-fanzine'];
+
+    private const DEFAULTS = [
+        'publication' => [
+            'title' => '',
+            'description' => '',
+            'authors' => '',
+        ],
+        'publication-hide-links-url' => '1',
+        'publication-cover-image' => '',
+        'publication-cover-page' => '0',
+        'publication-mode' => self::LAYOUT_BOOK,
+        'publication-book' => [
+            'print-fold' => '0',
+            'print-marks' => '0',
+            'pagination' => 'bottom-center',
+            'page-format' => 'A4',
+            'page-orientation' => 'portrait',
+        ],
+        'publication-fanzine' => [
+            'layout' => 'single-page',
+        ],
     ];
 
-    // Publication modes that require to load Paged.js to assemble the paged content
-    private $pagedLayouts = [
-      PUBLICATION_LAYOUT_BOOK,
-      PUBLICATION_LAYOUT_PAGE
+    private const LEGACY_KEYS = [
+        'publication-title' => ['publication', 'title'],
+        'publication-description' => ['publication', 'description'],
+        'publication-author' => ['publication', 'authors'],
+        'publication-page-orientation' => ['publication-book', 'page-orientation'],
+        'publication-page-format' => ['publication-book', 'page-format'],
+        'publication-book-fold' => ['publication-book', 'print-fold'],
+        'publication-print-marks' => ['publication-book', 'print-marks'],
+        'publication-pagination' => ['publication-book', 'pagination'],
     ];
 
-    private $fanzineLayouts = [
-      // one page, folded in 4 (8 pages per sheet)
-      // see https://en.wikibooks.org/wiki/Zine_Making/Putting_pages_together#Single-page_options
-      'single-page',
-      // many pages, folded in 2 (2 pages per sheet)
-      // see https://support.epson.net/fun/articles/86
-      'recto-folio',
-      // many pages, folded in 2, recto-verso (4 pages per sheet)
-      // see https://en.wikibooks.org/wiki/Zine_Making/Putting_pages_together#Folio_(folding_in_half)
-      // 'recto-verso-folio',
-      // many pages, folded in 4, recto-verso (8 pages per sheet)
-      // see https://en.wikibooks.org/wiki/Zine_Making/Putting_pages_together#Quarto_(folding_in_quarter)
-      // 'recto-verso-quarto',
-      // many pages, folded in 6, recto verso (12 pages per sheet)
-      // see https://en.wikibooks.org/wiki/Zine_Making/Putting_pages_together#Folding_into_six
-      // 'recto-verso-sexto'
-    ];
-
-    private $defaultOptions = [
-      // Publication options
-      "publication" => [
-        "title" => '',
-        "description" => '',
-        "authors" => ''
-      ],
-      "publication-hide-links-url" => '1',
-      "publication-cover-image" => '',
-      "publication-cover-page" => '0',
-      "publication-mode" => 'book',
-      // Book options
-      "publication-book" => [
-        "print-fold" => '0',
-        "print-marks" => '0',
-        "pagination" => 'bottom-center',
-        "page-format" => 'A4',
-        "page-orientation" => 'portrait',
-      ],
-      // Fanzine options
-      "publication-fanzine" => [
-        "layout" => 'single-page'
-      ],
-    ];
-
-    public function isMode($mode)
+    public function isMode(mixed $mode): bool
     {
-        return in_array($mode, $this->modes);
+        return in_array($mode, self::MODES, true);
     }
 
     /**
-     * a page carries a publication when the generator saved its options on it
-     * @param array $metadatas
-     * @return bool
+     * Whether a page's Metadata holds a publication the generator saved.
+     *
+     * @param array<string, mixed> $metadata
      */
-    public function isPublication(array $metadatas): bool
+    public function isPublication(array $metadata): bool
     {
-        foreach (array_keys($this->defaultOptions) as $key) {
-            if (isset($metadatas[$key])) {
-                return true;
+        if (isset($metadata['publication-title'])) {
+            return true;
+        }
+
+        return is_array($metadata['publication'] ?? null) && trim((string)($metadata['publication']['title'] ?? '')) !== '';
+    }
+
+    public function isPaged(string $layout): bool
+    {
+        return in_array($layout, self::PAGED_LAYOUTS, true);
+    }
+
+    /** The `{{include}}` call a selected item stands for: `PageTag` or `PageTag?type=publication-end`. */
+    public function getIncludeActionFromPageTag(string $tag): string
+    {
+        [$page, $queryString] = array_pad(explode('?', $tag, 2), 2, '');
+        parse_str($queryString, $params);
+        $params = array_filter($params, 'is_string');
+
+        return sprintf(
+            '{{include page="%s" class="%s"%s}}' . "\n",
+            str_replace('"', '', trim($page)),
+            str_replace('"', '', trim(implode(' ', $params))),
+            isset($params['type']) ? ' type="' . str_replace('"', '', $params['type']) . '"' : ''
+        );
+    }
+
+    /**
+     * The defaults, overridden by each array given in turn, with options saved in the old flat format moved to their place.
+     *
+     * @return array<string, mixed>
+     */
+    public function getOptions(mixed ...$sources): array
+    {
+        $options = self::DEFAULTS;
+        foreach ($sources as $source) {
+            if (is_array($source)) {
+                $options = array_replace_recursive($options, array_intersect_key($this->fromLegacyKeys($source), self::DEFAULTS));
             }
         }
-
-        // options saved before the current format
-        return isset($metadatas['publication-title']);
-    }
-
-    public function isPaged($layout)
-    {
-        return in_array($layout, $this->pagedLayouts);
-    }
-
-    private function convertToNewOptionsFormat($options)
-    {
-        // Publication Options
-        if (isset($options['publication-title'])) {
-            $options['publication']['title'] = $options['publication-title'];
-            unset($options['publication-title']);
+        foreach (self::NESTED as $key) {
+            if (!is_array($options[$key] ?? null)) {
+                $options[$key] = self::DEFAULTS[$key];
+            }
+            $options[$key] = array_map(static fn ($value) => is_scalar($value) ? (string)$value : '', $options[$key]);
         }
-
-        if (isset($options['publication-description'])) {
-            $options['publication']['description'] = $options['publication-description'];
-            unset($options['publication-description']);
-        }
-
-        if (isset($options['publication-author'])) {
-            $options['publication']['authors'] = $options['publication-author'];
-            unset($options['publication-author']);
-        }
-
-        // Book Options
-        if (isset($options['publication-page-orientation'])) {
-            $options['publication-book']['page-orientation'] = $options['publication-page-orientation'];
-            unset($options['publication-page-orientation']);
-        }
-
-        if (isset($options['publication-page-format'])) {
-            $options['publication-book']['page-format'] = $options['publication-page-format'];
-            unset($options['publication-page-format']);
-        }
-
-        if (isset($options['publication-book-fold'])) {
-            $options['publication-book']['print-fold'] = $options['publication-book-fold'];
-            unset($options['publication-book-fold']);
-        }
-
-        if (isset($options['publication-print-marks'])) {
-            $options['publication-book']['print-marks'] = $options['publication-print-marks'];
-            unset($options['publication-print-marks']);
-        }
-
-        if (isset($options['publication-pagination'])) {
-            $options['publication-book']['pagination'] = $options['publication-pagination'];
-            unset($options['publication-pagination']);
+        foreach ($options as $key => $value) {
+            if (!in_array($key, self::NESTED, true)) {
+                $options[$key] = is_scalar($value) ? (string)$value : '';
+            }
         }
 
         return $options;
     }
 
     /**
-     * @example PageTag?type=publication-end
+     * The options kept in a page's Metadata, and nothing else a form post carried.
+     *
+     * @param array<string, mixed> $post
+     *
+     * @return array<string, mixed>
      */
-    public function getIncludeActionFromPageTag($tag)
+    public function storable(array $post): array
     {
-        [$page, $qs] = array_pad(explode('?', $tag), 2, '');
-        parse_str($qs, $params);
-
-        return sprintf(
-            '{{include page="%s" class="%s"%s}}' . "\n",
-            $page,
-            trim(implode(' ', $params)),
-            isset($params['type']) ? ' type="'.$params['type'].'"' : ''
-        );
+        return $this->getOptions($post);
     }
 
-    public function getOptions(...$args)
+    /**
+     * The classes the print layout's body takes from the options.
+     *
+     * @param array<string, mixed> $options as getOptions() returns them
+     *
+     * @return list<string>
+     */
+    public function getStyles(array $options, bool $debug = false): array
     {
-        // a page can hold metadatas that are not arrays, array_replace_recursive would fail on those
-        $args = array_values(array_filter($args, 'is_array'));
-        $options = array_replace_recursive($this->defaultOptions, ...$args);
+        $mode = (string)$options['publication-mode'];
+        $book = $options['publication-book'];
+        $classes = [
+            'yeswiki-publication',
+            'publication--' . $mode,
+            $debug ? 'debug' : '',
+            $options['publication-cover-page'] === '1' ? 'publication--has-cover' : '',
+            $options['publication-hide-links-url'] === '1' ? 'hide-links-url' : '',
+        ];
+        if ($mode === self::LAYOUT_BOOK) {
+            $classes[] = 'page-format--' . $book['page-format'];
+            $classes[] = 'page-orientation--' . $book['page-orientation'];
+            $classes[] = $book['print-fold'] === '1' ? 'book-fold' : '';
+            $classes[] = $book['print-marks'] === '1' ? 'show-print-marks' : '';
+            $classes[] = 'page-number-position--' . $book['pagination'];
+        }
+        if ($mode === self::LAYOUT_FANZINE) {
+            $classes[] = 'fanzine-' . $options['publication-fanzine']['layout'];
+        }
 
-        // a scalar posted over one of these would break every nested read that follows
-        foreach (['publication', 'publication-book', 'publication-fanzine'] as $key) {
-            if (!is_array($options[$key] ?? null)) {
-                $options[$key] = $this->defaultOptions[$key];
+        return array_values(array_filter($classes, static fn (string $class): bool => $class !== ''));
+    }
+
+    /**
+     * @param array<mixed> $options
+     *
+     * @return array<mixed>
+     */
+    private function fromLegacyKeys(array $options): array
+    {
+        foreach (self::LEGACY_KEYS as $legacy => [$group, $key]) {
+            if (array_key_exists($legacy, $options)) {
+                if (!is_array($options[$group] ?? null)) {
+                    $options[$group] = [];
+                }
+                $options[$group][$key] = $options[$legacy];
+                unset($options[$legacy]);
             }
         }
 
-        return $this->convertToNewOptionsFormat($options);
-    }
-
-    public function getStyles($metadatas, $options = [])
-    {
-        $isDebug = ($options['debug'] ?? '') === 'yes';
-        $mode = $metadatas['publication-mode'];
-
-        return array_merge(
-            // Common styles
-            [
-              "yeswiki-publication",
-              "publication--" . $metadatas['publication-mode'],
-              $isDebug ? 'debug' : '',
-              // OPTION book-cover
-              $metadatas['publication-cover-page'] === '1' ? "publication--has-cover" : '',
-              // OPTION hide-links-from-print
-              $metadatas['publication-hide-links-url'] === '1' ? "hide-links-url" : '',
-            ],
-            /* BOOK Styles */
-            $mode === 'book' ? [
-              // could be chosen, when creating an eBook
-              "page-format--" . $metadatas['publication-book']['page-format'],
-              // could be chosen when creating an eBook
-              "page-orientation--" . $metadatas['publication-book']['page-orientation'],
-              // OPTION book-fold
-              $metadatas['publication-book']['print-fold'] === '1' ? "book-fold" : '',
-              // OPTION show-print-marks
-              $metadatas['publication-book']['print-marks'] === '1' ? "show-print-marks" : '',
-              // OPTION show-print-marks
-              "page-number-position--" . $metadatas['publication-book']['pagination'],
-
-            ] : [],
-            /* FANZINE Styles */
-            $mode === 'fanzine' ? [
-              "fanzine-" . $metadatas['publication-fanzine']['layout']
-            ] : [],
-        );
+        return $options;
     }
 }

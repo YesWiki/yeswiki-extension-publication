@@ -9,7 +9,7 @@ Une extension [YesWiki] pour créer des documents imprimables (format PDF) à pa
 
 ----
 
-> **Cette page est une documentation technique**. Une documentation sur son usage est détaillée sur [cette page](https://yeswiki.net/?doc#/tools/publication/docs/fr/README.md) sur le site de YesWiki ou directement dans [votre YesWiki](/tools/publication/docs/fr/README.md) s'il est à jour.
+> **Cette page est une documentation technique**. L'aide à l'usage est sur la page `/doc` de votre wiki une fois l'extension activée, et ici : https://github.com/YesWiki/yeswiki-extension-publication/blob/ectoplasme/docs/fr/README.md
 
 
 ## Introduction 
@@ -42,7 +42,7 @@ Les publications générées sont de type [livres/livrets](#pour-générer-des-l
   </tr>
   <tr>
     <th scope="col">Une page "publication", avec actions de téléchargement et prévisualisation (auteur·ices et admin)</th>
-    <th scope="col">Bouton d'export à ajouter (<a href="#action-bazar2publication">action <code>{{bazar2publication}}</code></a>)</th>
+    <th scope="col">Bouton d'export à ajouter (<a href="#action-entries2publication">action <code>{{entries2publication}}</code></a>)</th>
   </tr>
   <tr>
     <td>
@@ -57,10 +57,16 @@ Les publications générées sont de type [livres/livrets](#pour-générer-des-l
   </tr>
 </table>
 
+## Installation
+
+Sur l'écran `/admin/updates` de votre wiki, installez l'extension `publication` : l'installer l'active. En ligne de commande : `./yeswicli extension:enable publication`. La version `5.x` est pour YesWiki Ectoplasme, la `4.x` pour Doryphore.
+
+À la mise à jour depuis Doryphore, deux migrations de l'extension réécrivent `{{entries2publication` en `{{entries2publication` dans la version courante des pages, et recopient dans les métadonnées des pages les options de publication que Doryphore gardait ailleurs.
+
 ## Pré-requis technique
 
 Avoir installé [Chromium](https://www.chromium.org/Home) **sur
-le serveur**. Éventuellement, connaître le chemin d'accès vers l'exécutable s'il est différent de `/usr/bin/chromium`.
+le serveur**. L'extension utilise le programme indiqué par `htmltopdf_path` (`/usr/bin/chromium` par défaut) ; s'il n'y est pas, elle cherche `chromium`, `chromium-browser`, `google-chrome` ou `chrome` dans le `PATH` du serveur.
 
 Pour installer Chrome sous Ubuntu/Debian :
 
@@ -79,13 +85,13 @@ La génération d'une publication se fait en plusieurs étapes.
 
 L'action `{{publicationgenerator}}` prend en charge les étapes 1, 2 et 3.
 
-Le handler `/pdf` prend en charge l'étape 4.
+Le handler `/pdf` prend en charge l'étape 4. Le PDF d'une personne non connectée est gardé dans `cache/publication/` pour la suivante ; celui d'une personne connectée n'est jamais gardé.
 
 ### Pour générer des livrets téléchargeables
 
 Utiliser l'action `{{publicationgenerator}}`. Aucun paramètre n'est obligatoire.
 
-Chaque publication est générée sous forme d'une page wiki. Le nom de cette page sera constitué de la valeur du paramètre `pagenameprefix` suivie du titre de l'ebook (par défaut `Ebook`).
+Chaque publication est générée sous forme d'une page wiki. Le nom de cette page est fait du paramètre `pagenameprefix` (par défaut `Ebook`) suivi du titre, en minuscules et séparés par des tirets : `ebook-mon-livre`.
 
 On pourra utilement consulter la section [Action `{{publicationgenerator}}`](#action-publicationgenerator) ci-après.
 
@@ -113,18 +119,19 @@ On pourra utilement consulter la section [Action `{{publicationgenerator}}`](#ac
 
 ## Actions YesWiki
 
-L'extension publication ajoute deux actions à votre wiki.
+L'extension publication ajoute ces actions à votre wiki.
 
 | Action                    | Utilité                                       |
 | ---                       | ---                                           |
 | `{{publicationgenerator}}`| Interface de sélection du contenu de la publication et de création du document imprimable (cf. [Action `{{publicationgenerator}}`](#action-publicationgenerator)) |
 | `{{publicationlist}}`           | Liste des ebooks générés et imprimables (cf. [Action `{{publicationlist}}`](#action-publicationlist)) |
-| `{{bazar2publication}}`   | Exporte les résultats d'une sélection de fiches Bazar en PDF (cf. [Action `{{bazar2publication}}`](#action-bazar2publication)) |
+| `{{entries2publication}}` | Exporte en PDF les fiches de la liste de la page (anciennement `{{bazar2publication}}`, qui fonctionne toujours) (cf. [Action `{{entries2publication}}`](#action-entries2publication)) |
 | `{{blankpage}}`           | Insère une page vide à l'impression. |
 | `{{pagebreak}}`           | Crée un saut de page à l'impression. |
-| `{{publication-template}}`| Combiné avec `{{bazar2publication templatepage="…"}}`, signale l'emplacement réservé à l'injection de contenus. |
+| `{{listcontrib field="bf_nom"}}` | Liste les noms portés par ce champ dans les fiches qu'une publication inclut. |
+| `{{publication-template}}`| Combiné avec `{{entries2publication templatepage="…"}}`, signale l'emplacement réservé à l'injection de contenus. |
 
-Ces actions s'ajoutent, comme toute action YesWiki, dans un contenu de page.
+Ces actions s'ajoutent, comme toute action YesWiki, dans un contenu de page, ou depuis la palette de composants de l'éditeur (pour les admins).
 
 ### Action `{{publicationgenerator}}`
 
@@ -257,23 +264,9 @@ S'il n'est pas précisé, ce paramètre vaut "Ebook".
 Exemple – pour générer un ebook avec le préfixe "MesEDoc", il faut donc écrire :
 
 ```
-{{publicationgenerator outputformat="ebook" ebookpagenameprefix="MesEDoc"}}
+{{publicationgenerator outputformat="ebook" pagenameprefix="MesEDoc"}}
 ```
 
-
-#### **addinstalledpage**
-
-Certaines pages de YesWiki ont un statut un peu particulier. Il s'agit des pages créées par défaut lor de l'installation du wiki. Parmi ces pages on trouve, les pages de menu, les entêtes, pieds de pages, mais également PagePincipale.
-
-Si ce paramètre n'est pas présent, ou s'il est vide, ou s'il est égal à 0, lors de la sélection, on ne propose pas ces pages.
-
-Toute autre valeur de ce paramètre, fera apparaître ces pages.
-
-Exemple – pour faire apparaître les pages créées lors del 'installation du wiki, il peut écrire :
-
-```
-{{publicationgenerator addinstalledpage="1"}}
-```
 
 #### **coverimage**
 
@@ -363,12 +356,12 @@ Exemple – Pour lister les ebooks dont le préfixe est "MesEDoc", il faut donc 
 {{publicationlist outputformat="ebook" pagenameprefix="MesEDoc"}}
 ```
 
-### Action `{{bazar2publication}}`
+### Action `{{entries2publication}}`
 
-Cette action exporte les résultats d'une sélection de fiches Bazar en PDF en cliquant sur un bouton. Le téléchargement débute au bout de quelques secondes.
+Cette action affiche un bouton qui imprime les fiches de la première liste (`{{entrylist}}`) de la page, en tenant compte des facettes que la lectrice a cochées. La mise en page s'ouvre et le navigateur propose l'impression une fois la page composée.
 Il n'y a pas d'étape de personnalisation.
 
-L'action est à placer à côté d'une action `{{bazar}}` ou `{{bazarliste}}`.
+L'action s'appelait `{{bazar2publication}}` : ce nom fonctionne toujours.
 
 Tous les paramètres sont facultatifs.
 
@@ -377,29 +370,27 @@ Tous les paramètres sont facultatifs.
 Personnalise le texte affiché sur le bouton.
 
 ```
-{{bazar2publication title="Imprimer ces résultats"}}
+{{entries2publication title="Imprimer ces résultats"}}
 ```
 
 #### **icon**
 
-_Par défaut_ : `fa-book`.
+_Par défaut_ : `printer`.
 
-Personnalise l'icône affichée (par défaut, `fa-book`).
-
-À choisir parmi le [catalogue Font Awesome](https://fontawesome.com/v4.7.0/icons/).
+Personnalise l'icône affichée : un nom d'icône du jeu d'icônes de YesWiki (les anciens noms Font Awesome comme `fa-book` sont convertis).
 
 ```
-{{bazar2publication icon="fa-cloud-download"}}
+{{entries2publication icon="download"}}
 ```
 
 #### **templatepage**
 
 Par défaut, chaque fiche Bazar démarre sur une nouvelle page.
 
-Cet attribut importe la configuration d'une page Ebook : thème et style de présentation, ainsi que les éléments de configuration saisis dans le formulaire de création.
+Cet attribut importe les options de publication d'une page Ebook, celles saisies dans le formulaire de création (format, orientation, couverture…).
 
 ```
-{{bazar2publication templatepage="EbookModelePourBazar"}}
+{{entries2publication templatepage="EbookModelePourBazar"}}
 ```
 
 Un Ebook modèle se crée comme tout autre publication, à partir d'une [action `{{publicationgenerator}}`](#action-publicationgenerator).
@@ -411,7 +402,7 @@ L'utilisation de l'action [`{{publication-template}}`](#action-publication-templ
 
 Cette action se place dans une page Ebook dont vous voulez vous servir comme modèle de publication.
 
-Ce modèle de publication s'utilise notamment pour personnaliser un export depuis une liste Bazar à l'aide du [bouton généré par l'action `{{bazar2publication}}`](#action-bazar2publication).
+Ce modèle de publication s'utilise notamment pour personnaliser un export depuis une liste Bazar à l'aide du [bouton généré par l'action `{{entries2publication}}`](#action-entries2publication).
 
 ```
 {{include page="EbookPageIntro" class="publication-cover"}}
@@ -422,14 +413,15 @@ Ce modèle de publication s'utilise notamment pour personnaliser un export depui
 
 ## Handlers (ou suffixes) de page
 
-L'extension publication ajoute deux handlers aux pages de votre wiki.
+L'extension publication ajoute trois handlers aux pages de votre wiki.
 
 | handler       | Utilité                        |
 | ---           | ---                            |
 | `/pdf`        | Télécharge un document en PDF  |
 | `/preview`    | Prévisualise un document |
+| `/pdfiframe`  | `/pdf` dans une iframe (à autoriser dans `allowed_methods_in_iframe`) |
 
-Ces fonctions sont accessibles depuis le sous-menu "partager" du bas de page.
+Une page publication affiche sous son contenu une carte avec les boutons de téléchargement et d'aperçu. Les autres pages affichent un bouton PDF sous leur contenu pour les personnes connectées ou ayant le droit d'écrire.
 
 ## Adapter templates et contenus
 
@@ -448,12 +440,12 @@ utilise une disposition à part, `page`, au lieu de celle des livres :
   largeur utile sur A4 au lieu de 140 mm ;
 - pas de titre courant, pas de démarrage forcé sur une belle page, pas de saut de
   page avant chaque `h1` ;
-- la grille Bootstrap est conservée, les colonnes restent côte à côte.
+- les colonnes restent côte à côte.
 
-La grille tient parce que la disposition `page` ne charge pas `book.css`, qui
-annule les colonnes volontairement pour garder une justification lisible sur la
-colonne étroite d'un livre. Les largeurs viennent des `@media (min-width: …)` de
-Bootstrap, évaluées contre la fenêtre de rendu (`windowSize` dans
+Les colonnes tiennent parce que la disposition `page` ne charge pas `book.css`, qui
+les annule volontairement pour garder une justification lisible sur la
+colonne étroite d'un livre. Les largeurs viennent des `@media (min-width: …)`,
+évaluées contre la fenêtre de rendu (`windowSize` dans
 `htmltopdf_options`, 1920 px par défaut).
 
 #### Les cartes Leaflet
@@ -492,7 +484,7 @@ thèmes utilisent. L'exception remonte jusqu'à `preview()`, aucune page n'est
 composée, et le PDF sort blanc.
 
 La 0.4 supprime aussi tous les blocs `@media` autres que `print` et `all`, ce qui
-met chaque colonne Bootstrap sur sa propre ligne. La 0.3.5 les conserve.
+met chaque colonne sur sa propre ligne. La 0.3.5 les conserve.
 
 ### Surcharger les styles d'impression par défaut
 
@@ -501,22 +493,22 @@ Il y a plusieurs mécanismes pour **personnaliser vos styles d'impression** en c
 
 | Répertoire                                                  | Noms possibles            | À quoi ça s'applique ?
 | ---                                                         | ---                       | ---
-| `custom/tools/publication/*.css`                            | Peu importe               | Toute publication, peu importe le thème
-| `custom/tools/publication/print-layouts/*.css`              | `fanzine.css`, `book.css`, `page.css` | Seulement les fanzines, les livres/livrets, ou les pages simples, peu importe le thème
-| `themes/NOM_DU_THEME/tools/publication/*.css`               | Peu importe               | Toute publication, pour un thème donné
-| `themes/NOM_DU_THEME/tools/publication/print-layouts/*.css` | `fanzine.css`, `book.css`, `page.css` | Seulement les fanzines, les livres/livrets, ou les pages simples, pour un thème donné
+| `custom/publication/*.css`                                  | Peu importe               | Toute publication
+| `custom/publication/print-layouts/*.css`                    | `fanzine.css`, `book.css`, `page.css` | Seulement les fanzines, les livres/livrets, ou les pages simples
 
-## Configuration serveur (`wakka.config.php`)
+Le gabarit de la mise en page se surcharge en copiant `templates/print-layouts/base.twig` dans `custom/templates/publication/print-layouts/base.twig`.
 
-**Remarque** : les réglages principaux sont exposés dans l'action `{{ editconfig }}`.
+## Configuration serveur (`yeswiki.config.php`)
 
-Le fichier de configuration [`wakka.config.php`][wakka-config] accepte
+**Remarque** : les réglages principaux sont exposés sur l'écran `/admin/config`.
+
+Le fichier de configuration `yeswiki.config.php` accepte
 plusieurs paramètres pour ajuster le rendu PDF à votre infrastructure informatique.
 
 | Clé de configuration                   | Valeur par défaut                  | Utilité
 | ---                                    | ---                                | ---
 | `htmltopdf_path`                       | `/usr/bin/chromium`                | Indique l'emplacement du programme chargé
-| `htmltopdf_options`                    | `['windowSize' => [1440, 780], 'noSandbox' => true]`  | Options par défaut passées au navigateur embarqué
+| `htmltopdf_options`                    | `['windowSize' => [1920, 1080], 'noSandbox' => true, …]`  | Options par défaut passées au navigateur embarqué
 | `htmltopdf_service_url`                |                                    | Adresse du serveur YesWiki qui fera le rendu à distance
 | `htmltopdf_service_authorized_domains` |                                    | Si votre serveur partage les fonction de générateur de pdf, il faut lui indique les nom de domaines autorisés
 | `htmltopdf_base_url` |                 | Si votre serveur n'a pas accès au wiki via la valeur de `base_url`
@@ -579,7 +571,7 @@ array(
 
 ⚠️ **Utilisation avancée**
 
-La génération de PDF va échouer sur un environnement technique où YesWiki _et_ Chromium sont dans un conteneur Docker — ou un reverse-proxy — qui n'a pas accès au réseau externe, c'est-à-dire au wiki via l'URL configurée dans `base_url` du `wakka.config.php`.
+La génération de PDF va échouer sur un environnement technique où YesWiki _et_ Chromium sont dans un conteneur Docker — ou un reverse-proxy — qui n'a pas accès au réseau externe, c'est-à-dire au wiki via l'URL configurée dans `base_url` du `yeswiki.config.php`.
 
 `htmltopdf_base_url` sera utilisée comme substitut pour accéder aus contenus du wiki (pages, images, vidéos, etc.).
 
@@ -600,7 +592,7 @@ A [YesWiki] extension to create printable documents (PDF format) from a selectio
 
 ----
 
-> **This page is a technical documentation**. Documentation n the usage of the extension is avaialable on [this page (fr)](https://yeswiki.net/?doc#/tools/publication/docs/fr/README.md) on the YesWiki website or directly into [your YesWiki (fr)](/tools/publication/docs/fr/README.md) if it is up-to-date.
+> **This page is a technical documentation**. Usage help is on your wiki's `/doc` page once the extension is on, and here: https://github.com/YesWiki/yeswiki-extension-publication/blob/ectoplasme/docs/en/README.md
 
 ### Introduction 
 
@@ -609,9 +601,15 @@ Pagination is done by [Paged.js](https://www.pagedjs.org/)
 
 Generated publications are of type [books/booklets](#pour-générer-des-livrets-téléchargeables '(french)'), [fanzines](#pour-générer-des-livrets-téléchargeables '(french)') or [newsletter](#pour-générer-des-newsletters '(french)').
 
-### Installation
+### Install
 
-See [dedicated documentation](docs/en/README.md)
+On your wiki's `/admin/updates` screen, install the `publication` extension: installing it switches it on. From a shell: `./yeswicli extension:enable publication`. Version `5.x` is for YesWiki Ectoplasme, `4.x` for Doryphore.
+
+Chromium has to be installed on the server: the extension runs the program `htmltopdf_path` names (`/usr/bin/chromium` by default), or else the first `chromium`, `chromium-browser`, `google-chrome` or `chrome` on the server's `PATH`.
+
+The `{{bazar2publication}}` action is now `{{entries2publication}}`; the old name keeps working, and a migration rewrites it in the current revision of every page.
+
+See the [usage documentation](docs/en/README.md).
 
 [YesWiki]: https://yeswiki.net/
 [Bazar]: https://yeswiki.net/?doc#/docs/users/fr/bazar

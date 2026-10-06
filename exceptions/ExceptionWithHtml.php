@@ -2,17 +2,12 @@
 
 namespace YesWiki\Publication\Exception;
 
-use Exception;
-use Throwable;
-
-class ExceptionWithHtml extends Exception implements Throwable
+/** A failed print, carrying the markup the browser had loaded so an admin can see what went wrong. */
+class ExceptionWithHtml extends \Exception
 {
-    protected $html;
-
-    public function __construct($message = '', $code = 0, ?Throwable $previous = null, string $html = '')
+    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null, private string $html = '')
     {
         parent::__construct($message, $code, $previous);
-        $this->html = $html;
     }
 
     public function getHtml(): string

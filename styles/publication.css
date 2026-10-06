@@ -1,101 +1,238 @@
-.btn {
-  padding: 5px 10px;
-}
-.btn-sm {
-  font-size: 14px;
-}
-.btn-xs {
-  font-size: 12px;
+/* The generator, the publication cards and the export button, on wiki pages. */
+.publication-generator {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: var(--yw-space-lg-x);
+  align-items: start;
 }
 
-.btn i:last-child:first-child {
-  margin: 0;
+@media (max-width: 900px) {
+  .publication-generator {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-.fanzine-layout.img-icon {
-  height: 2.5em;
+.publication-generator h3 {
+  margin-top: 0;
 }
 
-.yw-publication__show .img-cover {
-  object-fit: cover;
-  height: 250px;
-  width: 200px;
+.publication-generator__filter {
+  display: flex;
+  align-items: center;
+  gap: var(--yw-space-sm-x);
 }
 
-.export-table-container .page-groups {
-  margin-bottom: 1em;
+.publication-generator .page-groups {
+  margin-bottom: var(--yw-space-md-y);
+}
+
+.publication-generator .page-groups h4 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--yw-space-sm-x);
+}
+
+.publication-generator__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--yw-space-sm-x);
+  margin-bottom: var(--yw-space-sm-y);
+}
+
+.publication-generator .publication-item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--yw-space-sm-x);
+}
+
+.publication-generator .publication-item[hidden] {
+  display: none;
+}
+
+.publication-generator .publication-item .page-label {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.publication-generator .publication-item__handle {
+  cursor: move;
+  color: var(--yw-text-muted);
+}
+
+.publication-generator .publication-item.blank-page .page-label::after {
+  content: "--------------";
+  color: var(--yw-text-muted);
+  margin-left: .5em;
+}
+
+#publication-selection-container {
+  min-height: 3em;
+  margin-bottom: var(--yw-space-md-y);
+}
+
+#publication-selection-container:empty::before {
+  content: attr(data-empty);
+  display: block;
+  padding: var(--yw-space-md-y) var(--yw-space-md-x);
+  border: var(--yw-border-width) dashed var(--yw-border);
+  border-radius: var(--yw-radius-md);
+  color: var(--yw-text-muted);
+  text-align: center;
+}
+
+#publication-selection-container > .publication-item:hover,
+#publication-selection-container > .publication-item:focus-within {
+  background-color: var(--yw-surface-hover);
+}
+
+.publication-bookend .yw-list-group__item {
+  box-sizing: border-box;
+}
+
+.export-table-form .yw-input {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+}
+
+.publication-bookend {
+  margin-bottom: var(--yw-space-sm-y);
 }
 
 .export-table-form details > summary {
   cursor: pointer;
-  display: revert;  /* this is somewhat unset by Bootstrap, which we don't want in this case */
   font-weight: bold;
+  margin-bottom: var(--yw-space-sm-y);
 }
 
-.export-table-form .d-block {
+.export-table-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--yw-space-md-y);
+}
+
+.export-table-form .publication-check small {
   display: block;
 }
 
-.export-table-form .form-row {
-  margin-bottom: 1em;
+.export-table-form .publication-options__pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12em, 1fr));
+  gap: var(--yw-space-md-x);
 }
 
-.export-table-form [type="checkbox"] + span,
-.export-table-form [type="radio"] + span {
-  height: 1.4rem;
-  padding-left: 1.4rem; /* same as height to be "square" */
+.export-table-form .publication-fanzine-layouts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14em, 1fr));
+  gap: var(--yw-space-md-x);
 }
 
-.export-table-form .radio .control-label,
-.export-table-form .checkbox .control-label,
-.export-table-form .radio-inline .control-label {
-  font-weight: bold;
-}
-.export-table-form .text-muted {
-  font-weight: normal;
-}
-
-.export-table-form .radio.pill {
-  border: 1px solid currentColor;
-  border-radius: var(--btn-border-radius);
+.export-table-form .publication-pill {
+  display: block;
+  padding: var(--yw-space-sm-y) var(--yw-space-sm-x);
+  border: var(--yw-border-width) solid var(--yw-border);
+  border-radius: var(--yw-radius-md);
   cursor: pointer;
 }
-.export-table-form .radio.pill:has(:checked),
-.export-table-form .radio.pill:focus-within {
-  border-color: var(--link-color);
-  border-width: 3px;
+
+.export-table-form .publication-pill img {
+  display: block;
+  max-width: 100%;
+  margin-bottom: var(--yw-space-sm-y);
 }
 
-.export-table-form .form-group.checkbox .control-label,
-.export-table-form .form-group.checkbox .control-label + .form-text,
-.export-table-form .form-row .radio-inline {
-  padding-left: 0;
-  vertical-align: top;
+.export-table-form .publication-pill small {
+  display: block;
 }
 
-/* we reduce spacing for rows without .col-* elements inside */
-.export-table-form .form-row.clearfix .form-group {
-  margin-top: 10px;
+.export-table-form .publication-pill:has(:checked),
+.export-table-form .publication-pill:focus-within {
+  border-color: var(--yw-primary);
+  box-shadow: 0 0 0 2px var(--yw-primary);
 }
 
-.export-table-form .form-row:not(.clearfix) .form-group {
+.publication-list > li + li {
+  margin-top: var(--yw-space-md-y);
+}
+
+.yw-publication__show {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--yw-space-md-x);
+  justify-content: space-between;
+  padding: var(--yw-space-md-y) var(--yw-space-md-x);
+  border: var(--yw-border-width) solid var(--yw-border);
+  border-radius: var(--yw-radius-md);
+  background: var(--yw-surface-raised);
+}
+
+.yw-publication__summary {
+  flex: 1 1 20em;
+  min-width: 0;
+}
+
+.yw-publication__summary h3 {
   margin-top: 0;
 }
-#publication-selection-container.ui-sortable .blank-page .page-label {
-  margin-left: .75em;
-}
-#publication-selection-container.ui-sortable .blank-page .page-label:after {
-  color: #aaa;
-  content: "--------------";
-  margin-left: .5em;
-  margin-right: .5em;
+
+.yw-publication__cover {
+  float: right;
+  object-fit: cover;
+  width: 160px;
+  height: 200px;
+  margin: 0 0 var(--yw-space-sm-y) var(--yw-space-md-x);
+  border-radius: var(--yw-radius-sm);
 }
 
-#publication-selection-container.ui-sortable > * {
-    cursor: move;
+.yw-publication__authors {
+  font-style: italic;
 }
-    #publication-selection-container.ui-sortable > *:hover,
-    #publication-selection-container.ui-sortable > *:focus {
-        background-color: var(--neutral-light-color);
-        border-color: var(--primary-color);
-    }
+
+.yw-publication__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yw-space-sm-y);
+  flex: 0 0 auto;
+}
+
+.yw-publication__show .fanzine-layout {
+  height: 2.5em;
+  vertical-align: middle;
+}
+
+.publication-show {
+  margin: var(--yw-space-lg-y) 0;
+}
+
+.publication-pdf-link {
+  margin: var(--yw-space-md-y) 0 0;
+  text-align: right;
+}
+
+@media print {
+  .publication-pdf-link,
+  .publication-show,
+  .hide-from-print {
+    display: none;
+  }
+}
+
+.publication-generator [hidden] {
+  display: none !important;
+}
+
+.export-table-form {
+  padding: var(--yw-space-md-y) var(--yw-space-md-x);
+  background: var(--yw-surface-sunken);
+  border: var(--yw-border-width) solid var(--yw-border);
+  border-radius: var(--yw-radius-md);
+}
+
+.entries2publication-action {
+  margin-bottom: var(--yw-space-md-y);
+}

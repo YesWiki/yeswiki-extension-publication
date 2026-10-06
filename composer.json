@@ -1,23 +1,28 @@
 {
     "name": "yeswiki/extension-publication",
     "type": "yeswiki-extension",
-    "description": "Crée un pdf à partir d'une sélection de pages YesWiki.",
+    "description": "Prints wiki pages and entries as PDF books, fanzines and newsletters, laid out by Paged.js and captured by a headless Chromium",
     "license": "GPL-3.0",
-    "minimum-stability": "stable",
-    "scripts": {
-        "test": "exit 0",
-        "update-force-silent": "@composer update --ignore-platform-req=ext-sockets"
-    },
     "require": {
-        "php": "^8.2",
+        "php": ">=8.3",
         "ext-sockets": "*",
         "chrome-php/chrome": "^1"
     },
     "config": {
         "optimize-autoloader": true,
-        "platform": {
-            "php": "8.2.0"
-        },
         "sort-packages": true
+    },
+    "extra": {
+        "yeswiki": {
+            "label": {
+                "fr": "Publication",
+                "en": "Publication"
+            },
+            "description": {
+                "fr": "Génère des livres, livrets, fanzines et newsletters au format PDF à partir d'une sélection de pages et de fiches.",
+                "en": "Builds PDF books, booklets, fanzines and newsletters from a selection of pages and entries."
+            },
+            "requires-extensions": []
+        }
     }
 }

@@ -1,56 +1,48 @@
-<div class="row yw-publication__show">
-  <div class="col-sm-8">
-    <div class="thumbnail">
-      <div class="caption">
-        {% if metas['publication-cover-image'] %}
-          <img class="pull-right img-cover img-thumbnail" alt="" src="{{ metas['publication-cover-image'] | raw }}">
+<article class="yw-publication__show">
+  <div class="yw-publication__summary">
+    {% if metas['publication-cover-image'] %}
+      <img class="yw-publication__cover" alt="" src="{{ metas['publication-cover-image'] }}">
+    {% endif %}
+
+    <h3><a href="{{ url({ tag: tag }) }}">{{ metas.publication.title }}</a></h3>
+
+    {% if metas.publication.description %}
+      <p>{{ metas.publication.description }}</p>
+    {% endif %}
+    {% if metas.publication.authors %}
+      <p class="yw-publication__authors">{{ metas.publication.authors }}</p>
+    {% endif %}
+
+    <p class="yw-text-muted">
+      <small>
+        {{ _t('PUBLICATION_MODE_' ~ metas['publication-mode']|upper) }},
+        {% if metas['publication-mode'] == 'fanzine' %}
+          {{ _t('PUBLICATION_FANZINE_LAYOUT_' ~ metas['publication-fanzine']['layout']|replace({'-': '_'})|upper) }}
+          <img src="extensions/publication/styles/fanzine-layouts/{{ metas['publication-fanzine']['layout'] }}.svg" alt="" class="fanzine-layout">
+        {% else %}
+          {{ metas['publication-book']['page-format'] }}
+          {{ _t('PUBLICATION_EBOOK_ORIENTATION_' ~ metas['publication-book']['page-orientation']|upper) }}
         {% endif %}
-
-        <h3>{{ metas.publication.title }}</h3>
-
-        <p class="clearfix">{{ metas.publication.description }}</p>
-
-        <p class="text-muted">
-          <small>
-          {{ _t('PUBLICATION_MODE_%s' | format(metas['publication-mode'] | upper)) }},
-          {% if metas['publication-mode'] == 'book' %}
-            {{ metas['publication-book']['page-format'] }}
-            {{ _t('PUBLICATION_EBOOK_ORIENTATION_%s' | format(metas['publication-book']['page-orientation']| upper)) }}
-          {% elseif metas['publication-mode'] == 'fanzine' %}
-            {{ _t('PUBLICATION_FANZINE_LAYOUT_%s' | format(metas['publication-fanzine']['layout'] | replace({'-': '_'}) | upper)) }}
-            <img src="tools/publication/styles/fanzine-layouts/{{ metas['publication-fanzine']['layout'] }}.svg" alt="" class="fanzine-layout img-icon">
-          {% endif %}
-          </small>
-        </p>
-      </div>
-    </div>
+      </small>
+    </p>
   </div>
 
-  <div class="col-sm-4">
-    <div class="btn-group-vertical" role="group" aria-label="">
-      <a href="{{ url({ handler: 'pdf', tag: tag }) }}"  class="btn btn-primary">
-        <i class="fas fa-book"></i>
-        {{ _t('PUBLICATION_VIEW_PDF') }}
+  <div class="yw-publication__actions">
+    <a href="{{ url({ handler: 'pdf', tag: tag }) }}" class="yw-btn yw-btn--primary">
+      {{ icon('file-type-pdf') }} <span>{{ _t('PUBLICATION_VIEW_PDF') }}</span>
+    </a>
+    {% if hasWriteAccess %}
+      <a href="{{ url({ handler: 'preview', tag: tag }) }}" class="yw-btn">
+        {{ icon('eye') }} <span>{{ _t('PUBLICATION_PREVIEW') }}</span>
       </a>
-
-      {% if hasWriteAccess %}
-      <a href="{{ url({ handler: 'preview', tag: tag }) }}" class="btn btn-info btn-secondary">
-        <i class="fas fa-book-reader"></i>
-        {{ _t('PUBLICATION_PREVIEW') }}
+    {% endif %}
+    <a href="{{ url({ handler: 'share', tag: tag }) }}" class="yw-btn modalbox">
+      {{ icon('share') }} <span>{{ _t('TEMPLATE_SHARE') }}</span>
+    </a>
+    {% if hasDeleteAccess %}
+      <a href="{{ url({ handler: 'deletepage', tag: tag }) }}" class="yw-btn yw-btn--danger link-deletepage modalbox">
+        {{ icon('trash') }} <span>{{ _t('TEMPLATE_DELETE') }}</span>
       </a>
-      {% endif %}
-
-      <a href="{{ url({ handler: 'share', tag: tag }) }}" class="btn btn-info btn-secondary modalbox">
-        <i class="fas fa-share-alt"></i>
-        {{ _t('TEMPLATE_SHARE') }}
-      </a>
-
-      {% if hasDeleteAccess %}
-      <a href="{{ url({ handler: 'deletepage', tag: tag }) }}" class="btn btn-danger link-deletepage modalbox">
-        <i class="fas fa-trash"></i>
-        {{ _t('TEMPLATE_DELETE') }}
-      </a>
-      {% endif %}
-    </div>
+    {% endif %}
   </div>
-</div>
+</article>

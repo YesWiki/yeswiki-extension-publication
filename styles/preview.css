@@ -1,3 +1,4 @@
+/* How Paged.js pages look on screen, in the preview. */
 :root {
   --color-mbox: rgba(0, 0, 0, 0.2);
   --margin: 4px;
@@ -44,17 +45,17 @@ body {
   .pagedjs_blank-page_page {
     position: relative;
   }
-  
-    /* .yeswiki-publication  */.pagebreak:after,
-    /* .yeswiki-publication  */.page-break:after {
+
+    .pagebreak:after,
+    .page-break:after {
       content: "⤵️⤵️⤵️⤵️";
       display: block;
       margin-top: 1em;
     }
 
     .pagedjs_blank-page_page .pagedjs_page_content,
-    /* .yeswiki-publication  */.pagebreak:after,
-    /* .yeswiki-publication  */.page-break:after  {
+    .pagebreak:after,
+    .page-break:after  {
       border: 4px dotted currentColor;
       opacity: 0.5;
     }

@@ -1,55 +1,41 @@
 <?php
 
-namespace YesWiki\Publication;
+namespace YesWiki\Publication\Handler;
 
-use YesWiki\Core\YesWikiHandler;
-use YesWiki\Publication\Controller\PdfController;
+use YesWiki\Identity\Service\AclService;
+use YesWiki\Kernel\Service\AssetRegistry;
+use YesWiki\Kernel\Service\RuntimeConfig;
+use YesWiki\Kernel\Service\UrlFormatter;
+use YesWiki\Render\Service\TemplateEngine;
 
-class PdfIframeHandler extends YesWikiHandler
+/** `/PageName/pdfiframe`: the PDF page, inside an iframe embedding the wiki. */
+class PdfIframeHandler extends PdfHandler
 {
-    public function run()
+    public static function performableName(): string
     {
-        if ($this->wiki->UserIsAdmin() &&
-            !in_array(
-                'pdfiframe',
-                is_array($this->params->get('allowed_methods_in_iframe')) ? $this->params->get('allowed_methods_in_iframe') : []
-            )
-        ) {
-            // allow local ('self') and everyone (*) to allow display error message
-            if (!$this->wiki->isCli() && !headers_sent()) {
-                header("Content-Security-Policy: frame-ancestors 'self' *;");
-            }
-
-            return $this->displayInIframe($this->render('@templates/alert-message.twig', [
-                'type' => 'danger',
-                'message' => _t('PUBLICATION_IFRAME_NOT_SET', [
-                    'gererConfigLink' => "<a href=\"{$this->wiki->href('iframe', 'GererConfig')}\">GererConfig</a>"
-                ])
-            ]));
-        }
-        return $this->displayInIframe($this->getService(PdfController::class)->run(true));
+        return 'pdfiframe';
     }
 
-    protected function displayInIframe(string $content)
+    public function run(): string
     {
-        $output = <<<HTML
-        <body class="yeswiki-iframe-body login-body">
-            <div class="container">
-                <div class="yeswiki-page-widget page-widget page" {$this->wiki->Format('{{doubleclic iframe="1"}}')}>
-                    $content
-                </div><!-- end .page-widget -->
-            </div><!-- end .container -->
-        HTML;
-        // common footer for all iframe page
+        $this->denyAccessUnlessGranted('read');
+        $allowed = $this->getService(RuntimeConfig::class)->getValue('allowed_methods_in_iframe', []);
+        if ($this->getService(AclService::class)->isAdmin() && is_array($allowed) && !in_array('pdfiframe', $allowed, true)) {
+            if (\PHP_SAPI !== 'cli' && !headers_sent()) {
+                header("Content-Security-Policy: frame-ancestors 'self' *;");
+            }
+            $content = $this->render('@core/alert-message.twig', [
+                'type' => 'danger',
+                'message' => _t('PUBLICATION_IFRAME_NOT_SET', [
+                    'gererConfigLink' => '<a href="' . $this->getService(UrlFormatter::class)->href('', 'admin/config') . '">' . _t('PUBLICATION_CONFIGURATION') . '</a>',
+                ]),
+            ]);
+        } else {
+            $content = $this->render('@publication/handler-pdf.twig', $this->pdfPage(true));
+        }
+        $this->getService(AssetRegistry::class)->addJsFile('javascripts/vendor/iframe-resizer/iframeResizer.contentWindow.min.js');
 
-        $this->wiki->AddJavascriptFile('tools/templates/libs/vendor/iframeResizer.contentWindow.min.js');
-
-        // on recupere les entetes html mais pas ce qu'il y a dans le body
-        $header = explode('<body', $this->wiki->Header());
-        $output = $header[0].$output;
-        // on recupere juste les javascripts et la fin des balises body et html
-        $output .= preg_replace('/^.+<script/Us', '<script', $this->wiki->Footer());
-
-        return $output;
+        return $this->getService(TemplateEngine::class)->renderHead()
+            . "<body class=\"yeswiki-iframe-body\">\n<div class=\"yw-container\">\n" . $content . "\n</div>\n</body>\n</html>";
     }
 }

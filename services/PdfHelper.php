@@ -2,22 +2,22 @@
 
 namespace YesWiki\Publication\Service;
 
-use Exception;
 use HeadlessChromium\BrowserFactory;
 use HeadlessChromium\Cookies\Cookie;
+use HeadlessChromium\Cookies\CookiesCollection;
 use HeadlessChromium\Exception\OperationTimedOut;
 use HeadlessChromium\Page;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Throwable;
-use YesWiki\Bazar\Service\EntryManager;
-use YesWiki\Core\YesWikiController;
-use YesWiki\Core\Service\DbService;
-use YesWiki\Core\Service\PageManager;
-use YesWiki\Core\Service\TemplateEngine;
+use YesWiki\Content\Entity\PageBody;
+use YesWiki\Content\Service\EntryManager;
+use YesWiki\Content\Service\PageManager;
+use YesWiki\Files\Service\Storage;
+use YesWiki\Identity\Service\AuthenticationService;
+use YesWiki\Kernel\Service\PageContext;
+use YesWiki\Kernel\Service\UrlFormatter;
 use YesWiki\Publication\Exception\ExceptionWithHtml;
-use YesWiki\Publication\Service\SessionManager;
-use YesWiki\Wiki;
 
+/** Where a page's PDF comes from: the preview address, the cache, and the headless browser that prints it. */
 class PdfHelper
 {
     public const SESSION_KEY = 'pdf';
@@ -28,319 +28,220 @@ class PdfHelper
     public const SESSION_PAGE_STATUS = 4;
     public const SESSION_PDF_CREATED = 5;
 
-    private const PATH_LIST = [
-        'custom/templates/bazar/',
-        'custom/templates/bazar/templates/',
-        'themes/tools/bazar/presentation/templates/',
-        'themes/tools/bazar/templates/',
-        'tools/bazar/presentation/templates/',
-    ];
+    public const CACHE_DIR = 'cache/publication/';
 
-    protected $dbService;
-    protected $entryManager;
-    protected $templateEngine;
-    protected $pageManager;
-    protected $params;
-    protected $sessionManager;
-    protected $wiki;
+    private const BROWSERS = ['chromium', 'chromium-browser', 'google-chrome', 'google-chrome-stable', 'chrome'];
+
+    private const LIST_ACTIONS = 'entrylist|entrymap|calendar|bazarliste|bazarcarto|calendrier|map|gogomap';
 
     public function __construct(
-        DbService $dbService,
-        EntryManager $entryManager,
-        TemplateEngine $templateEngine,
-        PageManager $pageManager,
-        ParameterBagInterface $params,
-        SessionManager $sessionManager,
-        Wiki $wiki
+        private EntryManager $entryManager,
+        private PageManager $pageManager,
+        private PageContext $pageContext,
+        private UrlFormatter $urlFormatter,
+        private AuthenticationService $authenticationService,
+        private ParameterBagInterface $params,
+        private SessionManager $sessionManager,
+        private Storage $storage
     ) {
-        $this->dbService = $dbService;
-        $this->entryManager = $entryManager;
-        $this->templateEngine = $templateEngine;
-        $this->pageManager = $pageManager;
-        $this->params = $params;
-        $this->sessionManager = $sessionManager;
-        $this->wiki = $wiki;
     }
 
-    /**
-     * Check if the current page to export to pdf is :
-     *  - an entry
-     *  - a page called with $_GET['bazarliste']
-     *
-     * If an entry, get content from eventually associated template fiche-x.tpl.html
-     * If called by 'bazarliste', get content from eventually associated templates fiche-x.tpl.html
-     *  and date of the last modified entry.
-     *
-     * Return an array containing these data to gives that to sha1 function to obtain an hash depnding
-     * of templates content or date of latest entry.
-     *
-     * Aim : force generation of a new pdf file if the associated entry template or an entry of the forms were modified.
-     *
-     * @param string $pageTag
-     * @param null|string $get
-     * @return array
-     */
-    public function getPageEntriesContent(string $pageTag, ?string $via = null): array
+    /** The browser to print with: the configured one, or the first one found on the PATH; '' when there is none. */
+    public function chromiumPath(): string
     {
-        $return = [];
-        if ($this->entryManager->isEntry($pageTag)) {
-            // getOne applies the acls, so it returns null on an entry the user cannot read
-            $entry = $this->entryManager->getOne($pageTag);
-            $formId = (!empty($entry['id_typeannonce']) && is_scalar($entry['id_typeannonce']))
-                ? strval($entry['id_typeannonce'])
-                : '';
-            $templatePath = empty($formId) ? null : $this->getTemplatePathFromFormId($formId);
-            if (!empty($templatePath)) {
-                $return['template content'] = file_get_contents($templatePath);
-            }
-        } elseif ($via === 'bazarliste') {
-            $page = $this->pageManager->getOne($pageTag);
-            if ($page && preg_match('/({{(bazarliste|bazarcarto|calendrier|map|gogomap)\s[^}]*}})/i', $page['body'], $matches)) {
-                if (preg_match_all('/([a-zA-Z0-9_]*)=\"(.*)\"/U', $matches[1], $matchesLevel2)) {
-                    $params = [];
-                    $matches = [];
-                    foreach ($matchesLevel2[0] as $id => $match) {
-                        $params[$matchesLevel2[1][$id]] = $matchesLevel2[2][$id];
-                    }
-                    $ids = explode(',', strval($params['id'] ?? ''));
-                    if (!empty($ids)) {
-                        $ids = array_map(function ($id) {
-                            return trim($id);
-                        }, $ids);
-                        $ids = array_filter($ids, function ($id) {
-                            return ((substr($id, 0, 4) != 'http') && (strval(intval($id)) == strval($id)));
-                        });
-                    }
-                    if (!empty($ids)) {
-                        $latestEntry = $this->getMostRecentEntry($ids);
-                        $return['entries last-date'] = $latestEntry['time'] ??  '';
-                        foreach ($ids as $id) {
-                            $templatePath = $this->getTemplatePathFromFormId($id);
-                            if (!empty($templatePath)) {
-                                $return['template fiche-' . $id] = file_get_contents($templatePath);
-                            }
-                        }
-                    }
+        $configured = $this->stringParam('htmltopdf_path');
+        if ($configured !== '' && is_file($configured) && is_executable($configured)) {
+            return $configured;
+        }
+        foreach (explode(PATH_SEPARATOR, (string)getenv('PATH')) as $directory) {
+            foreach (self::BROWSERS as $name) {
+                $candidate = rtrim($directory, '/') . '/' . $name;
+                if ($directory !== '' && is_file($candidate) && is_executable($candidate)) {
+                    return $candidate;
                 }
             }
         }
-        return $return;
+
+        return '';
     }
 
-    /**
-     * rerieve fiche-X.tpl.html path and filename form formId
-     * TODO : update TemplateEngine with a new function that allow to extract that instead of the current function
-     * @param string $formId
-     * @return string|null $path
-     */
-    private function getTemplatePathFromFormId(string $formId): ?string
+    public function canExecChromium(): bool
     {
-        $templateFileName = 'fiche-' . trim($formId);
-        if ($this->templateEngine->hasTemplate('@bazar/' . $templateFileName . '.tpl.html')) {
-            $templateFileName .= '.tpl.html';
-        } elseif ($this->templateEngine->hasTemplate('@bazar/' . $templateFileName . '.twig')) {
-            $templateFileName .= '.twig';
-        } else {
-            $templateFileName = '';
-        }
-
-        if (!empty($templateFileName)) {
-            foreach (self::PATH_LIST as $path) {
-                if (file_exists($path . $templateFileName)) {
-                    return $path . $templateFileName;
-                }
-            }
-        }
-        return null;
+        return $this->chromiumPath() !== '';
     }
 
-    /**
-     * find date of last entry of the forms
-     * @param array $formsIds
-     * @return ?array $entry
-     */
-    private function getMostRecentEntry(array $formsIds): ?array
+    /** Whether the page asked for belongs to this wiki, or to a domain it prints for. */
+    public function checkDomain(string $sourceUrl): bool
     {
-        $EntriesRequest =
-            'SELECT DISTINCT resource FROM ' . $this->dbService->prefixTable('triples') .
-            'WHERE value = "fiche_bazar" AND property = "http://outils-reseaux.org/_vocabulary/type" ' .
-            'ORDER BY resource ASC';
-        $FormIdRequest = join(
-            ' OR ',
-            array_map(function ($id) {
-                return 'body LIKE \'%"id_typeannonce":"' . trim($id) . '"%\'';
-            }, $formsIds)
-        );
-
-        if (empty($FormIdRequest)) {
-            throw new \Exception("No form id request ! \$formsIds = " . json_encode($formsIds));
+        $currentDomain = parse_url($this->stringParam('base_url'), PHP_URL_HOST);
+        $sourceDomain = parse_url($sourceUrl, PHP_URL_HOST);
+        if (!is_string($sourceDomain) || $sourceDomain === '') {
+            return false;
         }
+        $authorized = $this->params->has('htmltopdf_service_authorized_domains') ? $this->params->get('htmltopdf_service_authorized_domains') : [];
+        $authorized = is_array($authorized) ? array_filter(array_map('trim', array_filter($authorized, 'is_string'))) : [];
 
-        $SQLRequest =
-            'SELECT DISTINCT time FROM ' . $this->dbService->prefixTable('pages') . ' ' .
-            'WHERE latest="Y" AND comment_on = \'\' ' .
-            'AND (' . $FormIdRequest . ') ' .
-            'AND tag IN (' . $EntriesRequest . ') ' .
-            'ORDER BY time DESC ' .
-            'LIMIT 1';
-
-        return $results = $this->dbService->loadSingle($SQLRequest);
+        return $sourceDomain === $currentDomain || in_array($sourceDomain, $authorized, true);
     }
 
     /**
-     * getData to prepare export PDF
-     * @param array $get
-     * @param array $server
-     * @return array compact(['pageTag','sourceUrl','hash','dlFilename','fullFilename'])
-     */
-    public function getFullFileName(array $get, array $server): array
-    {
-        list('pageTag' => $pageTag, 'sourceUrl' => $sourceUrl, 'hash' => $hash) =
-            $this->getSourceUrl($get, $server);
-
-        $dlFilename = sprintf(
-            '%s-%s.pdf',
-            $pageTag,
-            $hash
-        );
-        $sanitizeWebsiteName = preg_replace(
-            "/-+$/",
-            "",
-            preg_replace(
-                "/[^A-Za-z0-9]/",
-                "-",
-                preg_replace(
-                    "/^https?:\/\//",
-                    "",
-                    $this->params->get('base_url')
-                )
-            )
-        );
-        $dirname = sys_get_temp_dir() . "/yeswiki-$sanitizeWebsiteName/";
-        // two concurrent exports can reach this at the same time, so no test then create
-        if (!is_dir($dirname) && !@mkdir($dirname, 0777, true) && !is_dir($dirname)) {
-            throw new Exception("Not possible to create the directory '$dirname'", 3);
-        }
-        $fullFilename = "$dirname$pageTag-publication-$hash.pdf";
-        return compact(['pageTag', 'sourceUrl', 'hash', 'dlFilename', 'fullFilename']);
-    }
-
-    /**
-     * @param array $get
-     * @param array $server
-     * @return array compact(['pageTag','sourceUrl','hash',])
+     * The page to print, its preview address and the hash that names its PDF.
+     *
+     * @param array<string, mixed> $get
+     * @param array<string, mixed> $server
+     *
+     * @return array{pageTag: string, sourceUrl: string, hash: string}
      */
     public function getSourceUrl(array $get, array $server): array
     {
-        $data = [];
-        foreach (array_merge(
+        $assetsHash = $this->assetsHash();
+        if (!empty($get['url']) && is_string($get['url'])) {
+            $queryString = (string)preg_replace('/(^|&)(uuid|refresh)=[A-Za-z0-9\-]*/', '', (string)($server['QUERY_STRING'] ?? ''));
+
+            return [
+                'pageTag' => (isset($get['urlPageTag']) && is_string($get['urlPageTag'])) ? $get['urlPageTag'] : 'publication',
+                'sourceUrl' => $get['url'],
+                'hash' => substr(sha1($assetsHash . $this->getLoggedUserName() . strtolower($queryString)), 0, 10),
+            ];
+        }
+
+        $pageTag = $this->pageContext->getTag();
+        $query = array_diff_key($this->urlFormatter->currentQuery(), ['refresh' => true, 'uuid' => true]);
+        $queryString = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        $sourceUrl = $this->urlFormatter->href('preview', $pageTag, $queryString, false);
+        $via = isset($get['via']) && is_string($get['via']) ? $get['via'] : null;
+        $hash = substr(sha1($assetsHash . json_encode(
             [
-                'tools/publication/javascripts/browser/print.js',
-                'tools/publication/javascripts/vendor/pagedjs/paged.esm.js',
-                'custom/templates/publication/print-layouts/base.twig',
-                'tools/publication/infos.json',
+                'page' => $this->pageContext->getPage() ?? [],
+                'user' => $this->getLoggedUserName(),
+                'query_string' => strtolower($queryString),
+                'entries' => $this->getPageEntriesContent($pageTag, $via),
             ],
-            glob('custom/tools/publication/*.css') ?: [],
-            glob('custom/tools/publication/print-layouts/*.css') ?: [],
-        ) as $path) {
-            if (file_exists($path)) {
-                $data[] = file_get_contents($path);
-            }
-        }
-        $pagedjs_hash = sha1(json_encode(array_merge($data)));
+            JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
+        )), 0, 10);
 
-        return $this->getData($get, $server, $pagedjs_hash);
+        $proxyBaseUrl = $this->stringParam('htmltopdf_base_url');
+        if ($proxyBaseUrl !== '') {
+            $sourceUrl = str_replace($this->stringParam('base_url'), $proxyBaseUrl, $sourceUrl);
+        }
+
+        return ['pageTag' => $pageTag, 'sourceUrl' => $sourceUrl, 'hash' => $hash];
     }
 
     /**
-     * getData to prepare export PDF
-     * @param array $get
-     * @param array $server
-     * @param string $pagedjs_hash
-     * @return array compact(['pageTag','sourceUrl','hash'])
+     * getSourceUrl(), plus the name the PDF is downloaded under and where it is cached.
+     *
+     * @param array<string, mixed> $get
+     * @param array<string, mixed> $server
+     *
+     * @return array{pageTag: string, sourceUrl: string, hash: string, dlFilename: string, cachePath: string}
      */
-    protected function getData(array $get, array $server, string $pagedjs_hash): array
+    public function getFullFileName(array $get, array $server): array
     {
-        $pageTag = '';
-        $sourceUrl = '';
-        $hash = '';
-        if (!empty($get['url'])) {
-            $pageTag = (isset($get['urlPageTag']) && is_string($get['urlPageTag'])) ? $get['urlPageTag'] : 'publication';
-            $sourceUrl = strval($get['url']);
-            $queryString = preg_replace('/&uuid=[A-Za-z0-9\-]+(&|$)/', '$1', $server['QUERY_STRING'] ?? '');
-            $queryString = preg_replace('/(?|&)refresh=[A-Za-z0-9\-]+(&|$)/', '$1', $queryString);
-            $hash = substr(sha1($pagedjs_hash . $this->getLoggedUserName() . strtolower($queryString)), 0, 10);
-        } else {
-            $pageTag = $this->wiki->GetPageTag();
-            $pdfTag = $this->wiki->MiniHref('pdf' . testUrlInIframe(), $pageTag);
-            $queryString = preg_replace('#^' . $pdfTag . '&?#', '', $server['QUERY_STRING'] ?? '');
-            $queryString = preg_replace('/refresh=[A-Za-z0-9\-]+(&|$)/', '', $queryString);
-            $sourceUrl = $this->wiki->href('preview', $pageTag, $queryString, false);
+        $source = $this->getSourceUrl($get, $server);
+        $safeTag = (string)preg_replace('/[^A-Za-z0-9_-]+/', '-', $source['pageTag']);
 
-            // an entry body holding invalid utf-8 would make json_encode return false,
-            // and the hash would then stop changing when the entry is edited
-            $hash = substr(sha1($pagedjs_hash . json_encode(
-                array_merge(
-                    $this->wiki->page,
-                    [
-                        'user' => $this->getLoggedUserName(),
-                        'query_string' => strtolower($queryString),
-                        $this->getPageEntriesContent(
-                            $pageTag,
-                            $get['via'] ?? null
-                        ) ?? []
-                    ]
-                ),
-                JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
-            )), 0, 10);
-
-            // In case we are behind a proxy (like a Docker container)
-            // It allows us to properly load the document from within the container itself
-            if (!empty($this->params->get('htmltopdf_base_url'))) {
-                $sourceUrl = str_replace($this->params->get('base_url'), $this->params->get('htmltopdf_base_url'), $sourceUrl);
-            }
-        }
-        return compact(['pageTag', 'sourceUrl', 'hash']);
+        return $source + [
+            'dlFilename' => "{$safeTag}-{$source['hash']}.pdf",
+            'cachePath' => self::CACHE_DIR . "{$safeTag}-publication-{$source['hash']}.pdf",
+        ];
     }
 
     /**
-     * name of the logged user, empty string when anonymous
-     * @return string
+     * What a PDF's content depends on besides the page itself: the form templates of the entries it shows, and when they last changed.
+     *
+     * @return array<string, string>
      */
+    public function getPageEntriesContent(string $pageTag, ?string $via = null): array
+    {
+        $content = [];
+        if ($this->entryManager->isEntry($pageTag)) {
+            $entry = $this->entryManager->getOne($pageTag);
+            $formId = is_scalar($entry['form_id'] ?? null) ? (string)$entry['form_id'] : '';
+            if ($formId !== '') {
+                $content['template content'] = $this->formTemplate($formId);
+            }
+
+            return array_filter($content);
+        }
+        if (!in_array($via, ['entrylist', 'bazarliste'], true)) {
+            return [];
+        }
+        $page = $this->pageManager->getOne($pageTag);
+        $formIds = $this->listedFormIds(PageBody::content(is_array($page['body'] ?? null) ? $page['body'] : []));
+        if ($formIds === []) {
+            return [];
+        }
+        $dates = array_map(
+            static fn (array $entry): string => (string)($entry['updated_at'] ?? ''),
+            $this->entryManager->search(['formsIds' => $formIds])
+        );
+        $content['entries last-date'] = $dates === [] ? '' : max($dates);
+        foreach ($formIds as $formId) {
+            $content['template fiche-' . $formId] = $this->formTemplate($formId);
+        }
+
+        return array_filter($content);
+    }
+
+    /**
+     * The local form ids of the first list on a page.
+     *
+     * @return list<string>
+     */
+    public function listedFormIds(string $content): array
+    {
+        $arguments = $this->firstListArguments($content);
+        $ids = array_map('trim', explode(',', (string)($arguments['id'] ?? '')));
+
+        return array_values(array_filter($ids, static fn (string $id): bool => $id !== '' && ctype_digit($id)));
+    }
+
+    /**
+     * The parameters of the first list action written on a page.
+     *
+     * @return array<string, string>
+     */
+    public function firstListArguments(string $content): array
+    {
+        if (!preg_match('/\{\{\s*(?:' . self::LIST_ACTIONS . ')(\s[^}]*)?\}\}/i', $content, $match)) {
+            return [];
+        }
+        $arguments = [];
+        if (preg_match_all('/([a-zA-Z0-9_]+)="(.*)"/U', $match[1] ?? '', $pairs, PREG_SET_ORDER)) {
+            foreach ($pairs as $pair) {
+                $arguments[$pair[1]] = $pair[2];
+            }
+        }
+
+        return $arguments;
+    }
+
+    /** The signed-in user's name, '' for an anonymous visitor. */
     public function getLoggedUserName(): string
     {
-        try {
-            $user = $this->wiki->GetUser();
-        } catch (Throwable $th) {
-            return '';
-        }
-        return (!empty($user) && !empty($user['name']) && is_string($user['name'])) ? $user['name'] : '';
+        $user = $this->authenticationService->getLoggedUser();
+
+        return is_array($user) && is_string($user['name'] ?? null) ? $user['name'] : '';
     }
 
     /**
-     * cookies to give to the browser so that it renders the page as the logged user
-     * @param string $sourceUrl
-     * @return array
+     * The login cookies of this visitor, for the browser to print what they see; none for an anonymous visitor, whose PDF stays cacheable.
+     *
+     * @return list<array{name: string, value: string, domain: string, path: string, secure: bool, samesite: string}>
      */
     public function getAuthenticationCookies(string $sourceUrl): array
     {
-        if (method_exists($this->wiki, 'isCli') && $this->wiki->isCli()) {
-            return [];
-        }
-        // anonymous renders stay anonymous, and stay cacheable
-        if (empty($this->getLoggedUserName())) {
+        if (\PHP_SAPI === 'cli' || $this->getLoggedUserName() === '') {
             return [];
         }
         $domain = parse_url($sourceUrl, PHP_URL_HOST);
-        if (empty($domain) || !is_string($domain)) {
+        if (!is_string($domain) || $domain === '') {
             return [];
         }
-        $isSecure = (parse_url($sourceUrl, PHP_URL_SCHEME) === 'https');
-
         $cookies = [];
-        // the php session cookie carries the login, 'name' and 'token' are the 'remember me' fallback
-        foreach (array_unique([session_name(), 'name', 'token']) as $name) {
-            if (!is_string($name) || empty($_COOKIE[$name]) || !is_string($_COOKIE[$name])) {
+        foreach (array_unique(array_filter([session_name(), 'name', 'token'])) as $name) {
+            if (empty($_COOKIE[$name]) || !is_string($_COOKIE[$name])) {
                 continue;
             }
             $cookies[] = [
@@ -348,123 +249,99 @@ class PdfHelper
                 'value' => $_COOKIE[$name],
                 'domain' => $domain,
                 'path' => '/',
-                'secure' => $isSecure,
-                // the browser only makes same-site requests, 'None' would need 'secure'
+                'secure' => parse_url($sourceUrl, PHP_URL_SCHEME) === 'https',
                 'samesite' => 'Lax',
             ];
         }
+
         return $cookies;
     }
 
+    /** The PDF cached for an anonymous visitor, or null. */
+    public function cached(string $cachePath): ?string
+    {
+        return $this->storage->fileExists($cachePath) ? $this->storage->read($cachePath) : null;
+    }
+
+    /** Keep an anonymous visitor's PDF for the next one; failing to is no error, it is printed again. */
+    public function cache(string $cachePath, string $pdf): bool
+    {
+        return $this->storage->storeDerived($cachePath, $pdf);
+    }
+
     /**
-     * generate the pdf file from content
-     * @param string $sourceUrl
-     * @param string $fullFilename
-     * @param string $uuid
-     * @param array $cookies
-     * @throws ExceptionWithHtml
-     * @throws Exception with code = 2
+     * The page at $sourceUrl, printed by the headless browser once its layout says it is ready.
+     *
+     * @param list<array<string, mixed>> $cookies
+     *
+     * @throws ExceptionWithHtml when the browser fails, with what it had loaded
+     * @throws \RuntimeException when there is no browser to print with
      */
-    public function useBrowserToCreatePdfFromPage(
-        string $sourceUrl,
-        string $fullFilename,
-        string $uuid = '',
-        array $cookies = []
-    ) {
-        $this->assertCanExecChromium();
+    public function printToPdf(string $sourceUrl, string $uuid = '', array $cookies = []): string
+    {
+        $chromium = $this->chromiumPath();
+        if ($chromium === '') {
+            throw new \RuntimeException("Path '{$this->configuredPath()}' is not executable", 2);
+        }
+
+        return $this->storage->withTemporaryFile('pdf', function (string $file) use ($chromium, $sourceUrl, $uuid, $cookies): string {
+            $this->printWith($chromium, $sourceUrl, $file, $uuid, $cookies);
+
+            return (string)file_get_contents($file);
+        });
+    }
+
+    /**
+     * @param list<array<string, mixed>> $cookies
+     */
+    private function printWith(string $chromium, string $sourceUrl, string $file, string $uuid, array $cookies): void
+    {
+        $options = $this->params->has('htmltopdf_options') ? $this->params->get('htmltopdf_options') : [];
+        $options = is_array($options) ? $options : [];
+        $page = null;
+        $browser = null;
         try {
-            $browserFactory = new BrowserFactory($this->params->get('htmltopdf_path'));
-            $options = $this->params->get('htmltopdf_options');
-            $browser = $browserFactory->createBrowser($options);
-            $this->setValueInSession($uuid, PdfHelper::SESSION_BROWSER_READY, 1);
-
-            $timeout = (
-                empty($options['sendSyncDefaultTimeout']) ||
-                !is_scalar($options['sendSyncDefaultTimeout']) ||
-                intval($options['sendSyncDefaultTimeout']) < 10000 // in ms
-            ) ? 20 // in sec
-                : ceil(intval($options['sendSyncDefaultTimeout']) * 2 / 1000); // in s
-            // (twice to be sure that Browser manages timeout and not php)
-            set_time_limit($timeout);
-
-
+            $browser = (new BrowserFactory($chromium))->createBrowser($options);
+            $this->setValueInSession($uuid, self::SESSION_BROWSER_READY, 1);
             $page = $browser->createPage();
-            $this->setValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 1);
+            $this->setValueInSession($uuid, self::SESSION_PAGE_STATUS, 1);
 
-            if (!empty($cookies)) {
-                $formattedCookies = [];
-                foreach ($cookies as $cookie) {
-                    if (!is_array($cookie)) {
-                        continue;
-                    }
-                    foreach (['name', 'value', 'domain', 'path'] as $key) {
-                        if (empty($cookie[$key]) || !is_string($cookie[$key])) {
-                            continue 2;
-                        }
-                    }
-                    $formattedCookies[] = new Cookie([
-                        'name' => $cookie['name'],
-                        'value' => $cookie['value'],
-                        'domain' => $cookie['domain'],
-                        'path' => $cookie['path'],
-                        // Page::setCookies only forwards these keys in camelCase
-                        'httpOnly' => true,
-                        'secure' => !empty($cookie['secure']),
-                        'sameSite' => (!empty($cookie['samesite']) && is_string($cookie['samesite']))
-                            ? $cookie['samesite']
-                            : 'Lax',
-                        'expires' => time() + 600 // expires in 10 minutes
-                    ]);
-                }
-                if (!empty($formattedCookies)) {
-                    $page->setCookies($formattedCookies)->await();
-                }
+            $browserCookies = $this->browserCookies($cookies);
+            if ($browserCookies !== []) {
+                $page->setCookies(new CookiesCollection($browserCookies))->await();
             }
 
-
-            // one budget for the whole browser job, so it can be kept under the gateway
-            // timeout of the web server, which answers a 504 whatever php is still doing
-            $budget = max(30000, intval($this->params->get('page_load_timeout'))); // in ms
+            $budget = max(30000, (int)$this->stringParam('page_load_timeout'));
             $deadline = microtime(true) + $budget / 1000;
-            set_time_limit(intval(ceil($budget / 1000)) + 30);
+            set_time_limit((int)ceil($budget / 1000) + 30);
 
-            // NETWORK_IDLE never settles on a page holding a map or any polling script,
-            // and print.js only starts on 'load' anyway
             $page->navigate($sourceUrl)->waitForNavigation(Page::LOAD, $budget);
-            $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 2);
+            $this->addValueInSession($uuid, self::SESSION_PAGE_STATUS, 2);
 
-            $remaining = max(5000, intval(($deadline - microtime(true)) * 1000));
-            $page->evaluate('__is_yw_publication_ready()')->getReturnValue($remaining);
-            $this->addValueInSession($uuid, PdfHelper::SESSION_PAGE_STATUS, 4);
+            $page->evaluate('__is_yw_publication_ready()')->getReturnValue(max(5000, (int)(($deadline - microtime(true)) * 1000)));
+            $this->addValueInSession($uuid, self::SESSION_PAGE_STATUS, 4);
 
-            // reset timer for time limit and give 30 sec more to render pdf
             set_time_limit(30);
-
-            // now generate PDF
-            $page->pdf(array(
+            $page->pdf([
                 'printBackground' => true,
                 'displayHeaderFooter' => true,
-                'preferCSSPageSize' => true
-            ))->saveToFile($fullFilename);
-            $this->setValueInSession($uuid, PdfHelper::SESSION_PDF_CREATED, 1);
-
+                'preferCSSPageSize' => true,
+            ])->saveToFile($file);
+            $this->setValueInSession($uuid, self::SESSION_PDF_CREATED, 1);
             $browser->close();
-        } catch (Throwable $e) {
-            // what the browser really got, so that an admin can read the error in the console
+        } catch (\Throwable $e) {
             $html = '';
-            if (isset($page) && !($e instanceof OperationTimedOut)) {
+            if ($page !== null && !$e instanceof OperationTimedOut) {
                 try {
-                    $html = strval($page->evaluate('document.documentElement.innerHTML')->getReturnValue(5000));
-                } catch (Throwable $th) {
+                    $html = (string)$page->evaluate('document.documentElement.innerHTML')->getReturnValue(5000);
+                } catch (\Throwable) {
                     $html = '';
                 }
             }
-            // without this the chromium process survives the failed export
-            if (isset($browser)) {
+            if ($browser !== null) {
                 try {
                     $browser->close();
-                } catch (Throwable $th) {
-                    // the browser is already gone
+                } catch (\Throwable) {
                 }
             }
 
@@ -473,126 +350,131 @@ class PdfHelper
     }
 
     /**
-     * check if chromium can be executed
-     * @throws Exception with code = 2
+     * @param list<array<string, mixed>> $cookies
+     *
+     * @return list<Cookie>
      */
-    public function assertCanExecChromium()
+    private function browserCookies(array $cookies): array
     {
-        if (!$this->canExecChromium()) {
-            throw new Exception("Path '{$this->params->get('htmltopdf_path')}' is not executable", 2);
-        }
-    }
-    /**
-     * check if chromium can be executed
-     * @return bool
-     */
-    public function canExecChromium(): bool
-    {
-        return is_executable($this->params->get('htmltopdf_path'));
-    }
-
-    /**
-     * check id Domain is authorized
-     * @param string $sourceUrl
-     * @return bool
-     */
-    public function checkDomain(string $sourceUrl): bool
-    {
-        try {
-            $currentDomain = parse_url($this->params->get('base_url'), PHP_URL_HOST);
-            $sourceDomain = parse_url($sourceUrl, PHP_URL_HOST);
-            $authorizedDomains = $this->params->get('htmltopdf_service_authorized_domains');
-            $authorizedDomains = is_array($authorizedDomains)
-                ? array_filter(array_map('trim', array_filter($authorizedDomains, 'is_string')))
-                : [];
-            return (
-                $sourceDomain === $currentDomain ||
-                (!empty($authorizedDomains) && in_array($sourceDomain, $authorizedDomains, true))
-            );
-        } catch (Throwable $th) {
-            return false;
-        }
-    }
-
-    /**
-     * prepare session to store things
-     * @param string $newUuid
-     */
-    public function prepareSession(string $newUuid)
-    {
-        $this->sessionManager->reactivateSession();
-        if (isset($_SESSION) && !empty($newUuid)) {
-            if (!isset($_SESSION[self::SESSION_KEY]) || !is_array($_SESSION[self::SESSION_KEY])) {
-                $_SESSION[self::SESSION_KEY] = [];
-            }
-            $limitTime = time() + 3600 * 2;
-            foreach ($_SESSION[self::SESSION_KEY] as $uuid => $data) {
-                if (empty($data[self::SESSION_TIME_KEY]) && $data[self::SESSION_TIME_KEY] < $limitTime) {
-                    unset($_SESSION[self::SESSION_KEY][$uuid]);
+        $formatted = [];
+        foreach ($cookies as $cookie) {
+            foreach (['name', 'value', 'domain', 'path'] as $key) {
+                if (empty($cookie[$key]) || !is_string($cookie[$key])) {
+                    continue 2;
                 }
             }
-            if (!empty($newUuid)) {
-                $_SESSION[self::SESSION_KEY][$newUuid] = [];
-                $_SESSION[self::SESSION_KEY][$newUuid][self::SESSION_TIME_KEY] = time();
+            $formatted[] = new Cookie([
+                'name' => $cookie['name'],
+                'value' => $cookie['value'],
+                'domain' => $cookie['domain'],
+                'path' => $cookie['path'],
+                'httpOnly' => true,
+                'secure' => !empty($cookie['secure']),
+                'sameSite' => is_string($cookie['samesite'] ?? null) ? $cookie['samesite'] : 'Lax',
+                'expires' => time() + 600,
+            ]);
+        }
+
+        return $formatted;
+    }
+
+    /** The other wiki this one asks for PDFs when it cannot print them itself, '' when there is none. */
+    public function externalServiceUrl(): string
+    {
+        return $this->stringParam('htmltopdf_service_url');
+    }
+
+    public function configuredPath(): string
+    {
+        return $this->stringParam('htmltopdf_path');
+    }
+
+    private function stringParam(string $name): string
+    {
+        $value = $this->params->has($name) ? $this->params->get($name) : '';
+
+        return is_scalar($value) ? (string)$value : '';
+    }
+
+    /** The custom fiche template of a form, where the form designer writes it. */
+    private function formTemplate(string $formId): string
+    {
+        $path = 'custom/templates/core/fiche-' . $formId . '.twig';
+
+        return $this->storage->fileExists($path) ? $this->storage->read($path) : '';
+    }
+
+    /** What the printed layout is made of, so that a PDF printed before it changed is not served after. */
+    private function assetsHash(): string
+    {
+        $extension = dirname(__DIR__);
+        $parts = [];
+        foreach (['javascripts/browser/print.js', 'javascripts/vendor/pagedjs/paged.esm.js', 'composer.json'] as $file) {
+            if (is_file("$extension/$file")) {
+                $parts[] = (string)file_get_contents("$extension/$file");
             }
         }
-        $this->sessionManager->safeCloseSession();
+        foreach (array_merge(['custom/templates/publication/print-layouts/base.twig'], $this->storage->glob('custom/publication/*.css'), $this->storage->glob('custom/publication/print-layouts/*.css')) as $path) {
+            if ($this->storage->fileExists($path)) {
+                $parts[] = $this->storage->read($path);
+            }
+        }
+
+        return sha1((string)json_encode($parts, JSON_INVALID_UTF8_SUBSTITUTE));
     }
 
-    /**
-     * set session value
-     * @param string $uuid
-     * @param $key
-     * @param $value
-     */
-    public function setValueInSession(string $newUuid, $key, $value)
+    /** Start following a print job, forgetting the ones over two hours old. */
+    public function prepareSession(string $uuid): void
     {
+        if ($uuid === '') {
+            return;
+        }
         $this->sessionManager->reactivateSession();
-        if (isset($_SESSION) && !empty($newUuid) && !empty($_SESSION[self::SESSION_KEY][$newUuid])) {
-            $_SESSION[self::SESSION_KEY][$newUuid][$key] = $value;
+        if (isset($_SESSION)) {
+            $jobs = is_array($_SESSION[self::SESSION_KEY] ?? null) ? $_SESSION[self::SESSION_KEY] : [];
+            $limit = time() - 7200;
+            $jobs = array_filter($jobs, static fn ($job): bool => is_array($job) && (int)($job[self::SESSION_TIME_KEY] ?? 0) >= $limit);
+            $jobs[$uuid] = [self::SESSION_TIME_KEY => time()];
+            $_SESSION[self::SESSION_KEY] = $jobs;
         }
         $this->sessionManager->safeCloseSession();
     }
 
-
-    /**
-     * set session value
-     * @param string $uuid
-     * @return mixed
-     */
-    public function getValueInSession(string $uuid, $key)
+    public function setValueInSession(string $uuid, int $key, int $value): void
     {
+        if ($uuid === '') {
+            return;
+        }
         $this->sessionManager->reactivateSession();
-        $val = $_SESSION[self::SESSION_KEY][$uuid][$key] ?? null;
-        $this->sessionManager->safeCloseSession(false);
-        return $val;
+        if (isset($_SESSION[self::SESSION_KEY][$uuid]) && is_array($_SESSION[self::SESSION_KEY][$uuid])) {
+            $_SESSION[self::SESSION_KEY][$uuid][$key] = $value;
+        }
+        $this->sessionManager->safeCloseSession();
+    }
+
+    public function addValueInSession(string $uuid, int $key, int $value): void
+    {
+        if ($uuid === '') {
+            return;
+        }
+        $this->sessionManager->reactivateSession();
+        if (isset($_SESSION[self::SESSION_KEY][$uuid][$key])) {
+            $_SESSION[self::SESSION_KEY][$uuid][$key] = (int)$_SESSION[self::SESSION_KEY][$uuid][$key] + $value;
+        }
+        $this->sessionManager->safeCloseSession();
     }
 
     /**
-     * set session values
-     * @param string $uuid
-     * @return array
+     * Where a print job is at, for the status the PDF page polls.
+     *
+     * @return array<int, int>
      */
-    public function getValuesInSession(string $uuid)
+    public function getValuesInSession(string $uuid): array
     {
         $this->sessionManager->reactivateSession();
         $values = $_SESSION[self::SESSION_KEY][$uuid] ?? [];
         $this->sessionManager->safeCloseSession(false);
-        return $values;
-    }
 
-    /**
-     * set session values
-     * @param string $uuid
-     * @param $key
-     * @param int $value
-     */
-    public function addValueInSession(string $uuid, $key, int $value)
-    {
-        $this->sessionManager->reactivateSession();
-        if (isset($_SESSION[self::SESSION_KEY][$uuid][$key])) {
-            $_SESSION[self::SESSION_KEY][$uuid][$key] = intval($_SESSION[self::SESSION_KEY][$uuid][$key]) + $value;
-        }
-        $this->sessionManager->safeCloseSession();
+        return is_array($values) ? array_map('intval', $values) : [];
     }
 }

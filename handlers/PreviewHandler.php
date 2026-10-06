@@ -1,351 +1,216 @@
 <?php
 
-namespace YesWiki\Publication;
+namespace YesWiki\Publication\Handler;
 
-use YesWiki\Bazar\Controller\EntryController;
-use YesWiki\Bazar\Service\EntryManager;
-use YesWiki\Core\Service\AclService;
-use YesWiki\Core\Service\AssetsManager;
-use YesWiki\Core\Service\PageManager;
-use YesWiki\Core\Service\TemplateEngine;
+use YesWiki\Content\Controller\EntryController;
+use YesWiki\Content\Entity\PageBody;
+use YesWiki\Content\Service\BazarListService;
+use YesWiki\Content\Service\EntryManager;
+use YesWiki\Content\Service\PageManager;
 use YesWiki\Core\YesWikiHandler;
+use YesWiki\Files\Service\Storage;
+use YesWiki\Kernel\Performable\RegisteredHandler;
+use YesWiki\Kernel\Service\AssetRegistry;
+use YesWiki\Kernel\Service\PageContext;
+use YesWiki\Kernel\Service\RuntimeConfig;
+use YesWiki\Publication\Action\PublicationTemplateAction;
+use YesWiki\Publication\Service\PdfHelper;
 use YesWiki\Publication\Service\Publication;
+use YesWiki\Render\Service\ActionRunner;
+use YesWiki\Render\Service\MarkdownFormatterService;
+use YesWiki\Render\Service\TemplateEngine;
 
-class PreviewHandler extends YesWikiHandler
+/** `/PageName/preview`: the page, or the entries of its list, laid out for print by Paged.js -- what the PDF is a capture of. */
+class PreviewHandler extends YesWikiHandler implements RegisteredHandler
 {
-    protected $aclService;
-    protected $assetsManager;
-    protected $entryController;
-    protected $entryManager;
-    protected $pageManager;
-    protected $publicationService;
-    protected $templateEngine;
+    private const EXTENSION_DIR = 'extensions/publication/';
 
-    public function run()
+    public static function performableName(): string
     {
-        // get Services
-        $this->aclService = $this->getService(AclService::class);
-        $this->assetsManager = $this->getService(AssetsManager::class);
-        $this->entryController = $this->getService(EntryController::class);
-        $this->entryManager = $this->getService(EntryManager::class);
-        $this->pageManager = $this->getService(PageManager::class);
-        $this->publicationService = $this->getService(Publication::class);
-        $this->templateEngine = $this->getService(TemplateEngine::class);
-
-        if (!$this->aclService->hasAccess('read')) {
-            return $this->renderInSquelette('@templates/alert-message.twig', [
-                'type' => 'danger',
-                'message' => _t('ERROR_NO_ACCESS'),
-            ]);
-        }
-
-        $publication = $this->getContentAndPublication($_GET ?? []);
-
-        /*
-         * We remove things which are troublesome for the layout
-         *
-         * 1. bazar fiche info footer (contains only edit/admin links)
-         */
-        $publication['content'] = preg_replace(
-            '#<div class="clearfix"></div><div class="BAZ_fiche_info.+<!-- /.BAZ_fiche_info -->#sU',
-            '',
-            $publication['content'],
-        );
-
-        /**
-         * We now generate the content.
-         */
-        // user  options
-        $pageMetadatas = $publication['metadatas'] ?? [];
-        $metadatas = $this->publicationService->getOptions(
-            // a page printed on its own is not a book, it gets its own layout
-            $this->publicationService->isPublication($pageMetadatas)
-                ? []
-                : ['publication-mode' => PUBLICATION_LAYOUT_PAGE],
-            $pageMetadatas,
-            isset($_GET['layout'])
-                ? ['publication-fanzine' => ['layout' => $_GET['layout']]]
-                : [],
-        );
-
-        if (
-            !$this->publicationService->isMode($metadatas['publication-mode'])
-        ) {
-            return $this->renderInSquelette('@templates/alert-message.twig', [
-                'type' => 'danger',
-                'message' => 'Mode inconnu',
-            ]);
-        }
-
-        $this->addCssFiles($metadatas);
-        $blankpage = $this->wiki->Format('{{blankpage}}');
-
-        // build the preview/printing page
-        $output = $this->render(
-            '@publication/print-layouts/' .
-                $metadatas['publication-mode'] .
-                '.twig',
-            [
-                'baseUrl' => $this->wiki->getBaseUrl(),
-                'blankpage' => $blankpage,
-                'content' => $publication['content'],
-                'coverImage' => $this->getCoverImage($metadatas),
-                'siteTitle' => $this->params->get('wakka_name'),
-                'metadatas' => $metadatas,
-                'styles' => $this->wiki->Format(
-                    '{{linkstyle}}{{linkjavascript}}',
-                ),
-
-                // isPaged returns a bool, twig used to print it as '1'
-                'initialPublicationState' => $this->publicationService->isPaged(
-                    $metadatas['publication-mode'],
-                ) ? 'awaiting-layout' : 'ready',
-                'stylesModifiers' => $this->publicationService->getStyles(
-                    $metadatas,
-                    ['debug' => $this->wiki->config['debug']],
-                ),
-                'browserPrintAfterRendered' => filter_input(
-                    INPUT_GET,
-                    'browserPrintAfterRendered',
-                    FILTER_VALIDATE_BOOLEAN,
-                ) === true,
-            ],
-        );
-
-        // Insert a blank page after a cover page
-        $output = preg_replace(
-            '#(<section class="publication-cover">.+</section>)(<div class="include)#siU',
-            '$1' . $blankpage . '$2',
-            $output,
-        );
-        $output = preg_replace(
-            '#(<div class="include publication-start">.+)(<div class="include)#siU',
-            '$1' . $blankpage . '$2',
-            $output,
-        );
-
-        $this->sanitizeUrlForProxy($output);
-
-        return $output;
+        return 'preview';
     }
 
-    protected function getContentAndPublication(array $get): array
+    public function run(): string
     {
-        $content = '';
-        $publication = ['metadatas' => [], 'content' => ''];
-        /*
-         * Print from {{ bazar2publication }} (dynamic results)
-         */
-        if (
-            isset($get['via'])
-            && $get['via'] === 'bazarliste'
-        ) {
-            // we assemble bazar pages
-            $content = '';
-            $query = $get['query'] ?? '';
-            $results = $this->entryManager->search([
-                'queries' => $query,
-            ]);
+        $this->denyAccessUnlessGranted('read');
+        $publication = $this->getService(Publication::class);
+        $query = $this->getRequest()->query->all();
 
-            $content = array_reduce(
-                $results,
-                function ($html, $fiche) {
-                    return $html . $this->entryController->view($fiche);
-                },
-                '',
-            );
+        $printed = in_array($query['via'] ?? null, ['entrylist', 'bazarliste'], true)
+            ? $this->entriesOfTheList($query)
+            : $this->thisPage();
 
-            // we gather a few things from
-            if (!empty($get['template-page'])) {
-                if (!is_string($get['template-page'])) {
-                    throw new \Exception("'template-page' should be a string");
-                }
-                $templatePage = $this->pageManager->getOne(
-                    $get['template-page'],
-                );
-
-                if ($templatePage) {
-                    // we inherit from template page user-defined styles
-                    if (isset($templatePage['metadatas']['theme'])) {
-                        $this->wiki->config['favorite_theme'] =
-                            $templatePage['metadatas']['theme'];
-                    }
-                    if (isset($templatePage['metadatas']['style'])) {
-                        $this->wiki->config['favorite_style'] =
-                            $templatePage['metadatas']['style'];
-                    }
-
-                    // {{bazar2publication templatepage="MyPage"}} + {{publication-template}} in MyPage
-                    if (
-                        preg_match(
-                            "#{{\s*publication-template\s*}}#siU",
-                            $templatePage['body'],
-                        )
-                    ) {
-                        $content = preg_replace(
-                            '#<!--publication-template-placeholder-->#siU',
-                            $content,
-                            $this->wiki->Format($templatePage['body']),
-                        );
-                    }
-                }
-            }
-
-            $publication = [
-                'metadatas' => $templatePage['metadatas'] ?? [],
-                'content' => $content,
-            ];
-        } /*
-         * We print a Wiki page which has been created as an ebook
-         */ else {
-            // if page is a bazar entry format the json into html
-            if ($this->entryManager->isEntry($this->wiki->GetPageTag())) {
-                $content = $this->entryController->view(
-                    $this->wiki->GetPageTag(),
-                    0,
-                );
-            } else {
-                // we remove the pager from the display
-                $content = preg_replace(
-                    '#(<br />\n)?<ul class="pager">.+</ul>#sU',
-                    '',
-                    $this->wiki->Format($this->wiki->page['body']),
-                );
-            }
-
-            $content = preg_replace('#(<br />\n){2,}#sU', "\n$1", $content);
-            $content = preg_replace('#<br />\n(<h\d)#sU', "\n$1", $content);
-
-            $publication = [
-                'metadatas' => $this->wiki->page['metadatas'] ?? [],
-                'content' => $content,
-            ];
-        }
-
-        return $publication;
-    }
-
-    protected function addCssFiles(array $metadatas)
-    {
-        $mode = $metadatas['publication-mode'];
-        $theme = $this->wiki->config['favorite_theme'] ?? '';
-
-        // Load the cascade of publication styles
-        $cssFiles = array_merge(
-            ...array_map(function ($pattern) {
-                // glob returns false when the directory cannot be read
-                return glob($pattern) ?: [];
-            }, [
-                "tools/publication/styles/print-layouts/$mode.css",
-                'tools/publication/styles/*.css',
-                "themes/$theme/tools/publication/*.css",
-                "themes/$theme/tools/publication/print-layouts/$mode.css",
-                'custom/tools/publication/*.css',
-                "custom/tools/publication/print-layouts/$mode.css",
-            ])
+        $layout = is_string($query['layout'] ?? null) && in_array($query['layout'], Publication::FANZINE_LAYOUTS, true)
+            ? ['publication-fanzine' => ['layout' => $query['layout']]]
+            : [];
+        $options = $publication->getOptions(
+            $publication->isPublication($printed['metadata']) ? [] : ['publication-mode' => Publication::LAYOUT_PAGE],
+            $printed['metadata'],
+            $layout
         );
-
-        array_map(function ($file) {
-            $this->assetsManager->AddCSSFile($file);
-        }, $cssFiles);
-    }
-
-    protected function getCoverImage(array $metadatas): string
-    {
-        // cover image
-        $coverImage = '';
-
-        if ($metadatas['publication-cover-image']) {
-            // use an external image
-            if (
-                preg_match(
-                    '#^(https?://|//|/)#iU',
-                    $metadatas['publication-cover-image'],
-                )
-            ) {
-                $coverImage =
-                    '<figure class="attached_file attached_file--external cover"><img src="' .
-                    $metadatas['publication-cover-image'] .
-                    '" alt="" class="img-responsive"></figure>';
-            }
-            // use a wiki attachment
-            else {
-                $coverImage = $this->wiki->Format(
-                    '{{ attach file="' .
-                        $metadatas['publication-cover-image'] .
-                        '" desc=" " size="original" class="cover"}}',
-                );
-            }
+        $mode = (string)$options['publication-mode'];
+        if (!$publication->isMode($mode)) {
+            return $this->renderFullPage('@core/alert-message.twig', ['type' => 'danger', 'message' => _t('PUBLICATION_UNKNOWN_MODE')]);
         }
 
-        return $coverImage;
-    }
+        $blankPage = $this->getService(ActionRunner::class)->action('blankpage');
+        $paged = $publication->isPaged($mode);
+        $this->declareAssets($mode, $options, $paged, ($query['browserPrintAfterRendered'] ?? '') === '1');
 
-    protected function sanitizeUrlForProxy(string &$output)
-    {
-        $proxyBaseUrl = $this->params->get('htmltopdf_base_url');
-        if (empty($proxyBaseUrl)) {
-            return;
-        }
+        $body = $this->render('@publication/print-layouts/' . $mode . '.twig', [
+            'blankpage' => $blankPage,
+            'content' => $printed['content'],
+            'coverImage' => $this->coverImage((string)$options['publication-cover-image']),
+            'metadatas' => $options,
+            'initialPublicationState' => $paged ? 'awaiting-layout' : 'ready',
+            'stylesModifiers' => $publication->getStyles($options, (bool)$this->getService(RuntimeConfig::class)->getValue('debug')),
+        ]);
+        $body = (string)preg_replace('#(<div class="include publication-cover">.+</div>)(\s*<div class="include)#siU', '$1' . $blankPage . '$2', $body);
+        $body = (string)preg_replace('#(<div class="include publication-start[^"]*">.+)(\s*<div class="include)#siU', '$1' . $blankPage . '$2', $body);
 
-        $base_url = $this->getOrigin($this->params->get('base_url'));
-        $new_base_url = $this->getOrigin($proxyBaseUrl);
-
-        // Replaces https://example.com/?Accueil by http://localhost:8000/?Accueil
-        // Replaces https://example.com/favicon.ico by http://localhost:8000/favicon.ico
-        if (strpos($this->getCurrentUrl(), $new_base_url) === 0) {
-            $output = str_replace(
-                [$this->params->get('base_url'), $base_url],
-                [$proxyBaseUrl, $new_base_url],
-                $output,
-            );
-        }
+        return $this->throughProxy($this->getService(TemplateEngine::class)->renderHead() . $body);
     }
 
     /**
-     * scheme, host and non default port of an url, with a trailing slash
+     * The page itself, or the entry it is, as HTML.
+     *
+     * @return array{content: string, metadata: array<string, mixed>}
      */
-    protected function getOrigin(string $url): string
+    private function thisPage(): array
+    {
+        $pageContext = $this->getService(PageContext::class);
+        $tag = $pageContext->getTag();
+        if ($this->getService(EntryManager::class)->isEntry($tag)) {
+            $content = (string)$this->getService(EntryController::class)->view($tag, '', false);
+        } else {
+            $content = $this->getService(MarkdownFormatterService::class)->format(PageBody::content(($pageContext->getPage() ?? [])['body'] ?? []));
+            $content = (string)preg_replace('#(<br />\n)?<ul class="(?:yw-)?pager">.+</ul>#sU', '', $content);
+        }
+        $content = (string)preg_replace('#(<br />\n){2,}#sU', "\n$1", $content);
+        $content = (string)preg_replace('#<br />\n(<h\d)#sU', "\n$1", $content);
+
+        return ['content' => $content, 'metadata' => $pageContext->getMetadata()];
+    }
+
+    /**
+     * The entries the page's first list shows with the facets in the address, each drawn in full; inside a template page when one is named.
+     *
+     * @param array<string, mixed> $query
+     *
+     * @return array{content: string, metadata: array<string, mixed>}
+     */
+    private function entriesOfTheList(array $query): array
+    {
+        $pageContext = $this->getService(PageContext::class);
+        $listArguments = $this->getService(PdfHelper::class)->firstListArguments(PageBody::content(($pageContext->getPage() ?? [])['body'] ?? []));
+        if (is_string($query['query'] ?? null) && $query['query'] !== '') {
+            $listArguments['query'] = $query['query'];
+        }
+        $listService = $this->getService(BazarListService::class);
+        $entries = $listService->filterEntriesOnFacets($listService->getEntries($listArguments + ['id' => '']));
+
+        $entryController = $this->getService(EntryController::class);
+        $content = implode('', array_map(static fn (array $entry): string => (string)$entryController->view($entry, '', false), $entries));
+
+        $metadata = [];
+        $templateTag = is_string($query['template-page'] ?? null) ? trim($query['template-page']) : '';
+        $templatePage = $templateTag === '' ? null : $this->getService(PageManager::class)->getOne($templateTag);
+        if ($templatePage !== null) {
+            $metadata = is_array($templatePage['metadatas'] ?? null) ? $templatePage['metadatas'] : [];
+            $templateContent = PageBody::content(is_array($templatePage['body'] ?? null) ? $templatePage['body'] : []);
+            if (preg_match('/\{\{\s*publication-template\s*\}\}/i', $templateContent) === 1) {
+                $content = str_replace(
+                    PublicationTemplateAction::PLACEHOLDER,
+                    $content,
+                    $this->getService(MarkdownFormatterService::class)->format($templateContent)
+                );
+            }
+        }
+
+        return ['content' => $content, 'metadata' => $metadata];
+    }
+
+    /**
+     * The print layout's stylesheets and scripts, declared for the head to carry them.
+     *
+     * @param array<string, mixed> $options
+     */
+    private function declareAssets(string $mode, array $options, bool $paged, bool $printWhenReady): void
+    {
+        $assets = $this->getService(AssetRegistry::class);
+        $storage = $this->getService(Storage::class);
+        foreach ([self::EXTENSION_DIR . "styles/print-layouts/$mode.css", self::EXTENSION_DIR . 'styles/print.css', self::EXTENSION_DIR . 'styles/preview.css'] as $file) {
+            $assets->addCssFile($file);
+        }
+        foreach (array_merge($storage->glob('custom/publication/*.css'), $storage->glob("custom/publication/print-layouts/$mode.css")) as $file) {
+            $assets->addCssFile($file);
+        }
+        if ($mode !== Publication::LAYOUT_FANZINE) {
+            $book = $options['publication-book'];
+            $marks = $book['print-marks'] === '1' ? ' bleed: 6mm; marks: crop cross;' : '';
+            $size = preg_replace('/[^A-Za-z0-9 ]/', '', $book['page-format'] . ' ' . $book['page-orientation']);
+            $assets->addCss("@media print { @page { size: {$size};{$marks} } }");
+        }
+        $assets->addJs('var browserPrintAfterRendered = ' . ($printWhenReady ? 'true' : 'false') . ';');
+        $assets->addJsFile(self::EXTENSION_DIR . 'javascripts/browser/is-pdf-ready.js');
+        if ($paged) {
+            $assets->addJsFile(self::EXTENSION_DIR . 'javascripts/browser/print.js', false, true);
+        } elseif ($printWhenReady) {
+            $assets->addJs('window.addEventListener("load", () => window.print());');
+        }
+    }
+
+    /** The cover: an image from elsewhere, or a file attached to the wiki. */
+    private function coverImage(string $image): string
+    {
+        if ($image === '') {
+            return '';
+        }
+        if (preg_match('#^(https?://|//|/)#i', $image) === 1) {
+            return '<figure class="attached_file attached_file--external cover"><img src="' . htmlspecialchars($image) . '" alt=""></figure>';
+        }
+
+        return $this->getService(ActionRunner::class)->action('attach', [
+            'file' => $image,
+            'desc' => ' ',
+            'size' => 'original',
+            'class' => 'cover',
+        ]);
+    }
+
+    /** The page as the headless browser fetches it, when it reaches the wiki through another address than readers do. */
+    private function throughProxy(string $output): string
+    {
+        $proxyBaseUrl = $this->stringParam('htmltopdf_base_url');
+        if ($proxyBaseUrl === '') {
+            return $output;
+        }
+        $baseUrl = $this->stringParam('base_url');
+        $origin = $this->origin($baseUrl);
+        $proxyOrigin = $this->origin($proxyBaseUrl);
+        $request = $this->getRequest();
+        if (!str_starts_with($request->getSchemeAndHttpHost() . '/', $proxyOrigin)) {
+            return $output;
+        }
+
+        return str_replace([$baseUrl, $origin], [$proxyBaseUrl, $proxyOrigin], $output);
+    }
+
+    /** Scheme, host and any port that is not the scheme's, with a trailing slash. */
+    private function origin(string $url): string
     {
         $parts = parse_url($url) ?: [];
         $scheme = $parts['scheme'] ?? 'http';
+        $port = (string)($parts['port'] ?? '');
+        $port = ($port === '' || $port === ($scheme === 'https' ? '443' : '80')) ? '' : ':' . $port;
 
-        return $scheme
-            . '://'
-            . ($parts['host'] ?? '')
-            . $this->formatPort($scheme, strval($parts['port'] ?? ''))
-            . '/';
+        return $scheme . '://' . ($parts['host'] ?? '') . $port . '/';
     }
 
-    /**
-     * url the current request came in on
-     */
-    protected function getCurrentUrl(): string
+    private function stringParam(string $name): string
     {
-        $scheme = $_SERVER['REQUEST_SCHEME']
-            ?? ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http');
-        // HTTP_HOST already carries the port, appending SERVER_PORT would double it
-        $host = strval($_SERVER['HTTP_HOST'] ?? '');
-        $port = '';
-        if (preg_match('/^(.*):(\d+)$/', $host, $matches)) {
-            $host = $matches[1];
-            $port = $matches[2];
-        }
+        $value = $this->params->has($name) ? $this->params->get($name) : '';
 
-        return $scheme
-            . '://'
-            . $host
-            . $this->formatPort($scheme, $port)
-            . strval($_SERVER['REQUEST_URI'] ?? '');
-    }
-
-    /**
-     * ':1234', or an empty string when the port is the default one of the scheme
-     */
-    protected function formatPort(string $scheme, string $port): string
-    {
-        $defaultPort = ($scheme === 'https') ? '443' : '80';
-
-        return (empty($port) || $port === $defaultPort) ? '' : ':' . $port;
+        return is_scalar($value) ? (string)$value : '';
     }
 }

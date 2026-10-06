@@ -1,41 +1,10 @@
-<!DOCTYPE html>
-<html class="html-publication">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width">
-		<title>{{ metadatas.publication.title | default('Publication') }} • {{ siteTitle }}</title>
-		{{ styles | raw }}
+<body class="{{ stylesModifiers|join(' ') }}" data-publication="{{ initialPublicationState|default('awaiting-layout') }}">
+  {% block publication %}
+    {% if metadatas['publication-cover-page'] == '1' %}
+      {% include "@publication/includes/image-cover.twig" %}
+    {% endif %}
 
-    {% block css %}
-    <style type="text/css">
-			@media print {
-				@page {
-					size: {{ metadatas['publication-book']['page-format'] }} {{ metadatas['publication-book']['page-orientation'] }};
-					{% if metadatas['publication-book']['print-marks'] == '1' %}
-						bleed: 6mm;
-						marks: crop cross;
-					{% endif %}
-				}
-			}
-    </style>
-    {% endblock %}
-
-    {% block js %}
-		<!-- Paged.js handles the printing layout -->
-		<script type="module" src="{{ baseUrl }}/tools/publication/javascripts/browser/print.js"></script>
-    {% endblock %}
-    <script src="{{ baseUrl }}/tools/publication/javascripts/browser/is-pdf-ready.js"></script>
-    <script>var browserPrintAfterRendered = {{ (browserPrintAfterRendered == true)|json_encode }};</script>
-  </head>
-
-	<body class="{{ stylesModifiers | join(' ') }}" data-publication="{{ initialPublicationState | default('awaiting-layout') }}">
-    {% block publication %}
-      {% if metadatas['publication-cover-page'] == '1' %}
-        {% include "@publication/includes/image-cover.twig" %}
-      {% endif %}
-
-      {{ content | raw }}
-    {% endblock %}
-	</body>
+    {{ content|raw }}
+  {% endblock %}
+</body>
 </html>
-

@@ -1,58 +1,73 @@
 <?php
 
-namespace YesWiki\Publication;
+namespace YesWiki\Publication\Action;
 
-use YesWiki\Core\Service\DbService;
-use YesWiki\Core\Service\PageManager;
+use YesWiki\Content\Entity\PageType;
+use YesWiki\Content\Service\PageManager;
 use YesWiki\Core\YesWikiAction;
+use YesWiki\Identity\Service\AclService;
+use YesWiki\Kernel\Component\Category;
+use YesWiki\Kernel\Component\Component;
+use YesWiki\Kernel\Component\ProvidesComponents;
+use YesWiki\Kernel\Component\Setting;
+use YesWiki\Kernel\Performable\RegisteredAction;
 use YesWiki\Publication\Service\Publication;
 
-class PublicationListAction extends YesWikiAction
+/** `{{publicationlist}}`: the publications made with `{{publicationgenerator}}`, found by the prefix of their pages. */
+class PublicationListAction extends YesWikiAction implements RegisteredAction, ProvidesComponents
 {
-    protected $dbService;
-    protected $pageManager;
-    protected $publicationService;
+    public static function performableName(): string
+    {
+        return 'publicationlist';
+    }
 
-    public function formatArguments($args)
+    public function components(): array
     {
         return [
-            'pagenameprefix' => (empty($args['pagenameprefix']) || !is_string($args['pagenameprefix'])) ? 'Ebook' : $args['pagenameprefix'],
+            Component::for('publicationlist')
+                ->category(Category::Lists)
+                ->label(_t('AB_publication_publicationlist_label'))
+                ->icon('book')
+                ->adminOnly()
+                ->settings(
+                    Setting::text('pagenameprefix')
+                        ->label(_t('AB_publication_publicationlist_pagenameprefix_label'))
+                        ->default('Ebook'),
+                ),
         ];
     }
 
-    public function run()
+    public function formatArguments($arg): array
     {
-        // get Service
-        $this->dbService = $this->getService(DbService::class);
-        $this->pageManager = $this->getService(PageManager::class);
-        $this->publicationService = $this->getService(Publication::class);
+        return [
+            'pagenameprefix' => (empty($arg['pagenameprefix']) || !is_string($arg['pagenameprefix'])) ? 'Ebook' : $arg['pagenameprefix'],
+        ];
+    }
 
-        $textInJson = 'publication\\":{\\"title\\":';
-        $sql = <<<SQL
-        SELECT DISTINCT resource FROM {$this->dbService->prefixTable('triples')}
-          WHERE property="http://outils-reseaux.org/_vocabulary/metadata"
-            AND (
-                value LIKE "%publication-title%" OR value LIKE "%$textInJson%"
-                )
-            AND resource LIKE "{$this->arguments['pagenameprefix']}%"
-          ORDER BY resource ASC
-        SQL;
-        $results = $this->dbService->LoadAll($sql);
+    public function run(): string
+    {
+        $pageManager = $this->getService(PageManager::class);
+        $aclService = $this->getService(AclService::class);
+        $publication = $this->getService(Publication::class);
+        $prefix = mb_strtolower($this->arguments['pagenameprefix']);
 
-        if (!empty($results)) {
-            $pages = array_map(function ($page) {
-                $metas = $this->pageManager->getMetadata($page['resource']);
-                $page['_metas'] = $this->publicationService->getOptions($metas);
-                return $page;
-            }, $results);
-        } else {
-            $pages = [];
+        $publications = [];
+        foreach ($pageManager->tagsOfType(PageType::PAGE) as $tag) {
+            if (!str_starts_with(mb_strtolower($tag), $prefix) || !$aclService->hasAccess('read', $tag)) {
+                continue;
+            }
+            $metadata = $pageManager->getMetadata($tag) ?? [];
+            if (!$publication->isPublication($metadata)) {
+                continue;
+            }
+            $publications[] = [
+                'tag' => $tag,
+                'metas' => $publication->getOptions($metadata),
+                'hasWriteAccess' => $aclService->hasAccess('write', $tag),
+                'hasDeleteAccess' => $aclService->isAdmin() || $aclService->isOwner($tag),
+            ];
         }
 
-        return $this->render('@publication/publicationlist.twig', [
-            'hasWriteAccess' => $this->wiki->HasAccess('write'),
-            'hasDeleteAccess' => $this->wiki->UserIsAdmin() || $this->wiki->UserIsOwner(),
-            'pages' => $pages,
-        ]);
+        return $this->render('@publication/publicationlist.twig', ['publications' => $publications]);
     }
 }

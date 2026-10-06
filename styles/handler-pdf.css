@@ -1,5 +1,51 @@
-.pdf-handler-container .loading-cursor ,
-.pdf-handler-container .loading-cursor input[type="checkbox"][disabled],
-.pdf-handler-container .loading-cursor input[type="checkbox"] + span:not(.lever) {
-    cursor: wait;
+/* The page that waits for a PDF: its steps, its message and its buttons. */
+.pdf-handler-container .pdf-steps {
+  list-style: none;
+  padding: 0;
+  margin: var(--yw-space-md-y) 0;
+}
+
+.pdf-handler-container .pdf-step {
+  display: flex;
+  align-items: center;
+  gap: var(--yw-space-sm-x);
+  padding: var(--yw-space-sm-y) 0;
+  color: var(--yw-text-muted);
+}
+
+.pdf-handler-container .pdf-step::before {
+  content: "○";
+  display: inline-block;
+  width: 1.5em;
+  text-align: center;
+}
+
+.pdf-handler-container .pdf-step[data-state="1"] {
+  color: var(--yw-text);
+  cursor: wait;
+}
+
+.pdf-handler-container .pdf-step[data-state="1"]::before {
+  content: "⏳";
+}
+
+.pdf-handler-container .pdf-step[data-state="2"] {
+  color: var(--yw-text);
+}
+
+.pdf-handler-container .pdf-step[data-state="2"]::before {
+  content: "✔";
+  color: var(--yw-success);
+}
+
+.pdf-handler-container .pdf-step[data-state="3"]::before {
+  content: "✖";
+  color: var(--yw-danger);
+}
+
+.pdf-handler-container .pdf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--yw-space-sm-x);
+  margin-top: var(--yw-space-md-y);
 }
